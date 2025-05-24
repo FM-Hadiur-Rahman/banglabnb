@@ -1,0 +1,107 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import axios from "axios";
+
+const LoginForm = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("❌ Passwords do not match.");
+      return;
+    }
+    setIsLoading(true);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      // Save token & user
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id: res.data._id,
+          name: res.data.name,
+          email: res.data.email,
+          role: res.data.role,
+        })
+      );
+
+      setMessage("✅ Logged in successfully!");
+      setFormData({ email: "", password: "" });
+      navigate("/host/dashboard"); // or "/"
+
+      // Optional: redirect to dashboard or home
+    } catch (err) {
+      console.error(err);
+      setMessage(err.response?.data?.message || "❌ Login failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="w-full px-4 py-2 border rounded"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full px-4 py-2 border rounded"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          className="w-full px-4 py-2 border rounded"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          required
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded disabled:opacity-50"
+          disabled={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+      {message && <p className="mt-4 text-center text-red-500">{message}</p>}
+    </div>
+  );
+};
+
+export default LoginForm;
