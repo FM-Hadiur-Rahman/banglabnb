@@ -12,9 +12,12 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       try {
         const query = Object.fromEntries([...searchParams.entries()]);
-        const res = await axios.get("http://localhost:3000/api/listings", {
-          params: query,
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/listings`,
+          {
+            params: query,
+          }
+        );
         setListings(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch listings:", err);

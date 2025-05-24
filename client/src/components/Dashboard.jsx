@@ -11,7 +11,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user?.role === "host") {
       axios
-        .get(`http://localhost:3000/api/listings/host/${user._id}`)
+        .get(`${import.meta.env.VITE_API_URL}/api/listings/host/${user._id}`)
         .then((res) => setListings(res.data))
         .catch((err) => console.error("❌ Error fetching listings:", err));
     }

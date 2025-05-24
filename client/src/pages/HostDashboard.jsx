@@ -12,7 +12,7 @@ const HostDashboard = () => {
     if (!hostId) return;
 
     axios
-      .get(`http://localhost:3000/api/listings/host/${hostId}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/listings/host/${hostId}`)
       .then((res) => setListings(res.data))
       .catch((err) => console.error("❌ Error loading listings:", err));
   }, []);
@@ -26,7 +26,7 @@ const HostDashboard = () => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.delete(`http://localhost:3000/api/listings/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/listings/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

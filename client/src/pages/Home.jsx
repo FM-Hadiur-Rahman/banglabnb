@@ -9,7 +9,7 @@ const Home = () => {
   const [filtered, setFiltered] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/listings").then((res) => {
+    axios.get(`${import.meta.env.VITE_API_URL}/api/listings`).then((res) => {
       setListings(res.data);
       setFiltered(res.data);
     });

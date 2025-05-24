@@ -181,7 +181,7 @@ const SignupForm = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
         {
           name: formData.name,
           email: formData.email,

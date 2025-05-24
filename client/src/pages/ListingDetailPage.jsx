@@ -10,7 +10,7 @@ const ListingDetailPage = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/api/listings/${id}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/listings/${id}`)
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
   }, [id]);

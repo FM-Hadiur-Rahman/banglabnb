@@ -28,7 +28,7 @@ const CreateListingPage = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/listings/upload",
+        `${import.meta.env.VITE_API_URL}/api/listings/upload`,
         formData
       );
       setForm({ ...form, image: res.data.imageUrl });
@@ -58,12 +58,16 @@ const CreateListingPage = () => {
       hostId: user._id, // ✅ attach hostId
     };
 
-    await axios.post("http://localhost:3000/api/listings", newListing, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/listings`,
+      newListing,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     alert("Listing created!");
     navigate("/host/dashboard");

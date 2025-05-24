@@ -11,7 +11,7 @@ const MyBookingsPage = () => {
     if (!user?._id) return;
 
     axios
-      .get("http://localhost:3000/api/bookings/user", {
+      .get(`${import.meta.env.VITE_API_URL}/api/bookings/user`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -12,7 +12,7 @@ const BookingForm = ({ listingId }) => {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        "http://localhost:3000/api/bookings",
+        `${import.meta.env.VITE_API_URL}/api/bookings`,
         { listingId, dateFrom, dateTo },
         { headers: { Authorization: `Bearer ${token}` } }
       );

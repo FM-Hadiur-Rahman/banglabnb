@@ -15,7 +15,7 @@ const EditListingPage = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/api/listings/${id}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/listings/${id}`)
       .then((res) => setForm(res.data));
   }, [id]);
 
@@ -29,12 +29,16 @@ const EditListingPage = () => {
     const token = localStorage.getItem("token"); // ✅ get the token
 
     try {
-      await axios.put(`http://localhost:3000/api/listings/${id}`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ send auth token
-          "Content-Type": "application/json",
-        },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/listings/${id}`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ send auth token
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       alert("✅ Listing updated!");
       navigate("/host/dashboard");
