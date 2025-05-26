@@ -12,6 +12,9 @@ router.get("/user", protect, bookingCtrl.getBookingsByGuest);
 // Get bookings for host's listings
 router.get("/host", protect, bookingCtrl.getBookingsByHost);
 
+// accept a booking
+router.put("/:id/accept", protect, bookingCtrl.acceptBooking); // ✅ Add this line
+
 // Cancel a booking
 router.put("/:id/cancel", protect, bookingCtrl.cancelBooking);
 

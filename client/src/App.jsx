@@ -11,6 +11,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
+import HostListingBookingsPage from "./pages/HostListingBookingPage";
 
 function App() {
   return (
@@ -61,6 +62,10 @@ function App() {
                 <MyBookingsPage />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/host/listings/:id/bookings"
+            element={<HostListingBookingsPage />}
           />
         </Route>
       </Routes>
