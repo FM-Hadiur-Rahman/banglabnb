@@ -26,6 +26,7 @@ exports.registerUser = async (req, res) => {
     });
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+    console.log("📩 Verify email link:", verifyUrl);
 
     await sendEmail(
       email,
