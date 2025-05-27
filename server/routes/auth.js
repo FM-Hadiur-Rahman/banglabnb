@@ -5,6 +5,6 @@ const { registerUser, loginUser } = require("../controllers/authController");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/verify-email", authCtrl.verifyEmail);
+router.get("/verify-email", authCtrl.verifyEmail);
 
 module.exports = router;
