@@ -1,4 +1,3 @@
-// src/pages/VerifyEmail.jsx
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -11,9 +10,9 @@ const VerifyEmail = () => {
     const token = searchParams.get("token");
     if (token) {
       axios
-        .post(`${import.meta.env.VITE_API_URL}/api/auth/verify-email`, {
-          token,
-        })
+        .get(
+          `${import.meta.env.VITE_API_URL}/api/auth/verify-email?token=${token}`
+        )
         .then(() =>
           setMessage("✅ Email verified successfully. You can log in.")
         )
