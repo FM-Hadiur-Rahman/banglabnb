@@ -52,8 +52,11 @@ const LoginForm = () => {
 
       // Optional: redirect to dashboard or home
     } catch (err) {
-      console.error(err);
-      setMessage(err.response?.data?.message || "❌ Login failed.");
+      if (err.response?.data?.message === "Please verify your email first.") {
+        alert("⚠️ Please verify your email before logging in.");
+      } else {
+        alert("❌ Login failed. Please check your credentials.");
+      }
     } finally {
       setIsLoading(false);
     }

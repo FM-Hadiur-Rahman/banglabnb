@@ -10,7 +10,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Allow requests from localhost and your production domain
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://banglabnb.com", // ✅ your real domain
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 

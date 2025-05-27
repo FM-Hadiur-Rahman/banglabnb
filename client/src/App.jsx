@@ -12,6 +12,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
             path="/host/listings/:id/bookings"
             element={<HostListingBookingsPage />}
           />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Route>
       </Routes>
     </Router>
