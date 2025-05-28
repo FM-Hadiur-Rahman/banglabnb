@@ -193,21 +193,24 @@ const SignupForm = () => {
         }
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          _id: res.data._id,
-          name: res.data.name,
-          email: res.data.email,
-          role: res.data.role || "user",
-        })
+      // localStorage.setItem("token", res.data.token);
+      // localStorage.setItem(
+      //   "user",
+      //   JSON.stringify({
+      //     _id: res.data._id,
+      //     name: res.data.name,
+      //     email: res.data.email,
+      //     role: res.data.role || "user",
+      //   })
+      // );
+
+      setMessage(
+        "✅ Registered! Please check your email to verify your account before logging in."
       );
+      navigate("/verify");
 
-      setMessage("✅ Registered successfully!");
-
-      const userRole = res.data.role || "user";
-      navigate(userRole === "host" ? "/host/dashboard" : "/dashboard");
+      // const userRole = res.data.role || "user";
+      // navigate(userRole === "host" ? "/host/dashboard" : "/dashboard");
 
       setFormData({
         name: "",

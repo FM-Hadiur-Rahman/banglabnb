@@ -4,6 +4,9 @@ import { useRef, useEffect, useState } from "react";
 
 const Navbar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+  const isLoggedIn = user && token && user.isVerified;
+
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const menuRef = useRef();
@@ -24,7 +27,7 @@ const Navbar = () => {
         Home
       </Link>
 
-      {user ? (
+      {isLoggedIn ? (
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}

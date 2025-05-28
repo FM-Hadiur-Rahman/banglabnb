@@ -13,6 +13,7 @@ import ListingDetailPage from "./pages/ListingDetailPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
 import VerifyEmail from "./pages/VerifyEmail";
+import VerifyNotice from "./pages/VerifyNotice";
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
             element={<HostListingBookingsPage />}
           />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify" element={<VerifyNotice />} />
         </Route>
       </Routes>
     </Router>

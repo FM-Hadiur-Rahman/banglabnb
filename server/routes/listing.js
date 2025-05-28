@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const listingCtrl = require("../controllers/listingController");
 const protect = require("../middleware/protect");
+
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
 const upload = multer({ storage });

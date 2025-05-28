@@ -26,7 +26,6 @@ exports.registerUser = async (req, res) => {
     });
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-    console.log("📩 Verify email link:", verifyUrl);
 
     await sendEmail(
       email,
@@ -59,28 +58,37 @@ exports.verifyEmail = async (req, res) => {
 
   res.json({ message: "✅ Email verified successfully!" });
 };
-
 exports.loginUser = async (req, res) => {
-  const { email, password, role } = req.body;
+  const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
     if (!user.isVerified) {
       return res
         .status(401)
         .json({ message: "Please verify your email first." });
     }
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    // ✅ Add isVerified to response
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      token: generateToken(user._id),
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
