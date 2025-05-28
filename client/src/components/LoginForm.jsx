@@ -18,10 +18,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("❌ Passwords do not match.");
-      return;
-    }
+
     setIsLoading(true);
 
     try {
