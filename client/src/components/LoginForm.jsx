@@ -7,7 +7,6 @@ const LoginForm = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -81,15 +80,6 @@ const LoginForm = () => {
           placeholder="Password"
           className="w-full px-4 py-2 border rounded"
           value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          className="w-full px-4 py-2 border rounded"
-          value={formData.confirmPassword}
           onChange={handleChange}
           required
         />
