@@ -14,11 +14,11 @@ const LoginForm = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setMessage(""); // Clear old message
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsLoading(true);
 
     try {
@@ -30,7 +30,13 @@ const LoginForm = () => {
         }
       );
 
-      // Save token & user
+      if (!res.data.isVerified) {
+        alert("⚠️ Please verify your email before logging in.");
+        setIsLoading(false);
+        return;
+      }
+
+      // ✅ Save token & user only if verified
       localStorage.setItem("token", res.data.token);
       localStorage.setItem(
         "user",
@@ -44,15 +50,13 @@ const LoginForm = () => {
 
       setMessage("✅ Logged in successfully!");
       setFormData({ email: "", password: "" });
-      navigate("/host/dashboard"); // or "/"
 
-      // Optional: redirect to dashboard or home
+      // ✅ Redirect based on role
+      const userRole = res.data.role || "user";
+      navigate(userRole === "host" ? "/host/dashboard" : "/dashboard");
     } catch (err) {
-      if (err.response?.data?.message === "Please verify your email first.") {
-        alert("⚠️ Please verify your email before logging in.");
-      } else {
-        alert("❌ Login failed. Please check your credentials.");
-      }
+      alert("❌ Login failed. Please check your credentials.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
