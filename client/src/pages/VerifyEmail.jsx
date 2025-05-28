@@ -8,10 +8,6 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Remove session info (so the navbar doesn't show logged in)
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
     const token = searchParams.get("token");
 
     if (!token) {
