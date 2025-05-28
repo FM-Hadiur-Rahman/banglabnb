@@ -1,7 +1,9 @@
+// server/app.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db.js");
+
 const authRoutes = require("./routes/auth");
 const listingRoutes = require("./routes/listing");
 const bookingRoutes = require("./routes/booking");
@@ -10,13 +12,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allow requests from localhost and your production domain
+// Allow requests from localhost and production
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://banglabnb.com", // ✅ your real domain
-    ],
+    origin: ["http://localhost:5173", "https://banglabnb.com"],
     credentials: true,
   })
 );
@@ -28,15 +27,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
 app.get("/", (req, res) => {
   res.send("BanglaBnB API is running");
 });
+
+// ✅ Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// 🧠 Connect DB first, then start server
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
@@ -44,5 +43,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error("Failed to connect to DB", err);
+    console.error("❌ DB Connection Error:", err);
   });
