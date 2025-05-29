@@ -45,6 +45,8 @@ const LoginForm = () => {
           name: res.data.name,
           email: res.data.email,
           role: res.data.role,
+          token: res.data.token,
+          isVerified: res.data.isVerified,
         })
       );
 
