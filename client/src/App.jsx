@@ -14,6 +14,8 @@ import MyBookingsPage from "./pages/MyBookingsPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
 import VerifyEmail from "./pages/VerifyEmail";
 import VerifyNotice from "./pages/VerifyNotice";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -71,6 +73,8 @@ function App() {
           />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/verify" element={<VerifyNotice />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
       </Routes>
     </Router>

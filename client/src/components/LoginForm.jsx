@@ -95,6 +95,11 @@ const LoginForm = () => {
           {isLoading ? "Logging in..." : "Login"}
         </button>
       </form>
+      <p className="text-sm mt-2">
+        <a href="/forgot-password" className="text-blue-600 hover:underline">
+          Forgot password?
+        </a>
+      </p>
       {message && <p className="mt-4 text-center text-red-500">{message}</p>}
     </div>
   );
