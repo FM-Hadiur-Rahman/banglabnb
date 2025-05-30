@@ -5,7 +5,6 @@ const upload = require("../middleware/cloudinaryUpload");
 const checkSignupStep = require("../middleware/checkSignupStep");
 
 const {
-  registerUser,
   loginUser,
   verifyEmail,
   forgotPassword,

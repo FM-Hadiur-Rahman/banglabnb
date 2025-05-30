@@ -53,7 +53,7 @@ const SignupFormStep1 = () => {
       setMessage("✅ Step 1 complete! Check your email to verify.");
 
       // Redirect to email verification page (optional)
-      navigate(`/verify-email?userId=${res.data.userId}`);
+      navigate("/verify");
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Registration failed.");

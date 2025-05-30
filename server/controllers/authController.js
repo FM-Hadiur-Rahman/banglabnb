@@ -5,31 +5,43 @@ const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
 
-exports.registerUser = async (req, res) => {
-  console.log("🔥 Register endpoint hit");
-  console.log("👉 Request body:", req.body);
-
-  const { name, email, password, role } = req.body;
-
+exports.registerStep1 = async (req, res) => {
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists)
-      return res.status(400).json({ message: "User already exists" });
+    const { name, email, password, phone, role, division, district } = req.body;
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // ✅ Generate token
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     const user = await User.create({
       name,
       email,
-      password,
+      password: hashedPassword,
+      phone,
       role,
-      isVerified: false,
-      verificationToken,
       division,
       district,
+      isVerified: false,
+      verificationToken: hashedToken, // ✅ save hashed token
+      identityVerified: false,
+      signupStep: 1,
     });
 
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`; // ✅ send raw token in URL
 
     await sendEmail({
       to: email,
@@ -41,27 +53,56 @@ exports.registerUser = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Check your email to verify your account.",
+      message: "✅ Step 1 complete. Check your email to verify your account.",
+      userId: user._id,
     });
   } catch (err) {
-    console.error("❌ Registration error:", err);
-    res.status(500).json({ message: err.message });
+    console.error("❌ Error in registerStep1:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
+exports.verifyIdentityHandler = async (req, res) => {
+  const { userId } = req.body;
+  const { idDocument, livePhoto } = req.files;
+
+  if (!userId || !idDocument || !livePhoto)
+    return res.status(400).json({ message: "Missing required files or ID." });
+
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  user.idDocumentUrl = idDocument[0].path;
+  user.livePhotoUrl = livePhoto[0].path;
+  user.signupStep = 2;
+  user.identityVerified = false;
+
+  await user.save();
+
+  res.status(200).json({ message: "Identity verification submitted" });
+};
+
 // authController.js
+
 exports.verifyEmail = async (req, res) => {
   const { token } = req.query;
-  const user = await User.findOne({ verificationToken: token });
 
-  if (!user)
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({ verificationToken: hashedToken });
+
+  if (!user) {
     return res.status(400).json({ message: "Invalid or expired token" });
+  }
 
   user.isVerified = true;
   user.verificationToken = undefined;
   await user.save();
 
-  // ✅ Return userId here
   res.json({
     message: "✅ Email verified successfully!",
     userId: user._id,
@@ -154,74 +195,4 @@ exports.resetPassword = async (req, res) => {
   await user.save();
 
   res.json({ message: "✅ Password reset successfully!" });
-};
-
-exports.registerStep1 = async (req, res) => {
-  try {
-    const { name, email, password, phone, role, division, district } = req.body;
-
-    if (!name || !email || !password || !phone) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
-      role,
-      division,
-      district,
-      isVerified: false,
-      verificationToken,
-      identityVerified: false,
-      signupStep: 1,
-    });
-
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-
-    await sendEmail({
-      to: email,
-      subject: "Verify your BanglaBnB account",
-      html: `<h2>Hi ${name},</h2>
-      <p>Thanks for signing up as a ${role}.</p>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verifyUrl}">Verify Email</a>`,
-    });
-
-    res.status(201).json({
-      message: "✅ Step 1 complete. Check your email to verify your account.",
-      userId: user._id,
-    });
-  } catch (err) {
-    console.error("❌ Error in registerStep1:", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-exports.verifyIdentityHandler = async (req, res) => {
-  const { userId } = req.body;
-  const { idDocument, livePhoto } = req.files;
-
-  if (!userId || !idDocument || !livePhoto)
-    return res.status(400).json({ message: "Missing required files or ID." });
-
-  const user = await User.findById(userId);
-  if (!user) return res.status(404).json({ message: "User not found" });
-
-  user.idDocumentUrl = idDocument[0].path;
-  user.livePhotoUrl = livePhoto[0].path;
-  user.signupStep = 2;
-  user.identityVerified = false;
-
-  await user.save();
-
-  res.status(200).json({ message: "Identity verification submitted" });
 };
