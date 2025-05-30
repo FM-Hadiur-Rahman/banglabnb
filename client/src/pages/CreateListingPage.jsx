@@ -8,7 +8,6 @@ const CreateListingPage = () => {
     title: "",
     location: "",
     price: "",
-    coordinates: [], // [lng, lat]
     maxGuests: "", // ✅ NEW
   });
   const [images, setImages] = useState([]);
@@ -101,6 +100,7 @@ const CreateListingPage = () => {
       />
 
       <input
+        name="images"
         type="file"
         accept="image/*"
         multiple
