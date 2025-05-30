@@ -18,8 +18,6 @@ exports.registerStep1 = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
     // ✅ Generate token
     const rawToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto
@@ -30,7 +28,7 @@ exports.registerStep1 = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       phone,
       role,
       division,

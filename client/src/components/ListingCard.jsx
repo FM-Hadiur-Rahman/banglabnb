@@ -13,7 +13,7 @@ const ListingCard = ({ listing }) => {
           className="w-full h-48 object-cover rounded"
         />
         <h3 className="text-lg font-bold mt-2">{listing.title}</h3>
-        <p>{listing.location}</p>
+        <p>{listing.location.address}</p>
         <p className="text-green-600 font-semibold">৳{listing.price}/night</p>
       </div>
     </Link>
