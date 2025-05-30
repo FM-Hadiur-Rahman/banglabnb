@@ -13,7 +13,8 @@ router.get("/:id", listingCtrl.getListingById);
 router.get("/host/:hostId", listingCtrl.getListingsByHost);
 
 // ✅ Protected CRUD routes
-router.post("/", protect, listingCtrl.createListing);
+router.post("/", protect, upload.array("images", 5), listingCtrl.createListing);
+
 router.put("/:id", protect, listingCtrl.updateListing);
 router.delete("/:id", protect, listingCtrl.deleteListing);
 

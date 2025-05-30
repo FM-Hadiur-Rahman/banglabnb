@@ -12,6 +12,7 @@ const CreateListingPage = () => {
     coordinates: [], // [lng, lat]
     maxGuests: "", // ✅ NEW
   });
+  const [images, setImages] = useState([]);
 
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
@@ -49,39 +50,39 @@ const CreateListingPage = () => {
       },
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user")); // ✅ get host ID
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    const newListing = {
-      title: form.title,
-      price: form.price,
-      image: form.image,
-      maxGuests: form.maxGuests,
-      location: {
-        type: "Point",
-        coordinates: form.location.coordinates, // [lng, lat]
-        address: form.location.address,
-      },
-      hostId: user._id, // ✅ keep this
-    };
+    const formData = new FormData();
+    images.forEach((img) => formData.append("images", img));
 
-    await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/listings`,
-      newListing,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    formData.append("title", form.title);
+    formData.append("price", form.price);
+    formData.append("maxGuests", form.maxGuests);
+    formData.append("division", form.division || "");
+    formData.append("district", form.district || "");
+    formData.append("location", JSON.stringify(form.location));
+    formData.append("hostId", user._id);
 
-    alert("Listing created!");
-    navigate("/host/dashboard");
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/listings`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      alert("✅ Listing created!");
+      navigate("/host/dashboard");
+    } catch (err) {
+      alert("❌ Failed to create listing.");
+      console.error(err);
+    }
   };
 
   return (
@@ -116,18 +117,21 @@ const CreateListingPage = () => {
       <input
         type="file"
         accept="image/*"
-        onChange={handleImageUpload}
-        className="w-full p-2 border mb-2"
+        multiple
+        onChange={(e) => setImages([...e.target.files])}
       />
+
       {uploading && <p>Uploading image...</p>}
 
-      {form.image && (
-        <img
-          src={form.image}
-          alt="Preview"
-          className="w-full h-48 object-cover rounded mb-2"
-        />
-      )}
+      {images.length > 0 &&
+        images.map((file, idx) => (
+          <img
+            key={idx}
+            src={URL.createObjectURL(file)}
+            className="w-20 h-20 object-cover inline-block mr-2 rounded"
+          />
+        ))}
+
       <MapboxAutocomplete onSelectLocation={handleMapSelect} />
 
       <button

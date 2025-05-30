@@ -76,11 +76,22 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    console.log("📦 Incoming listing:", req.body); // 👈 Add this
-    const newListing = await Listing.create(req.body);
+    const imageUrls = req.files.map((file) => file.path); // Cloudinary paths
+
+    const newListing = await Listing.create({
+      title: req.body.title,
+      price: req.body.price,
+      maxGuests: req.body.maxGuests,
+      division: req.body.division,
+      district: req.body.district,
+      location: JSON.parse(req.body.location), // must be stringified in frontend
+      images: imageUrls,
+      hostId: req.user._id,
+    });
+
     res.status(201).json(newListing);
   } catch (err) {
-    console.error("❌ Listing creation failed:", err); // 👈 Log full error
+    console.error("❌ Listing creation failed:", err);
     res.status(500).json({ message: "Listing creation failed" });
   }
 };
