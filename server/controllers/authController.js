@@ -23,6 +23,8 @@ exports.registerUser = async (req, res) => {
       role,
       isVerified: false,
       verificationToken,
+      division,
+      district,
     });
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;

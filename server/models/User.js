@@ -5,7 +5,16 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-
+  phone: {
+    type: String,
+    required: true,
+    unique: true,
+    match: /^\+8801[3-9]\d{8}$/, // Bangladesh number format
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false,
+  },
   role: {
     type: String,
     enum: ["user", "host", "admin"],

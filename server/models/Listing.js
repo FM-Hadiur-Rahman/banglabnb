@@ -20,6 +20,8 @@ const listingSchema = new mongoose.Schema(
         required: true,
       },
     },
+    division: { type: String },
+    district: { type: String },
 
     maxGuests: {
       type: Number,

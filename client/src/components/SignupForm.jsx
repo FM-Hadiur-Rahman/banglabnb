@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+
 import MapboxAutocomplete from "../components/MapboxAutocomplete";
+import LocationSelector from "./LocationSelector";
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -13,12 +17,17 @@ const SignupForm = () => {
     password: "",
     confirmPassword: "",
     role: "user",
+    division: "",
+    district: "",
   });
-
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const handleLocationChange = (division, district) => {
+    setFormData((prev) => ({ ...prev, division, district }));
   };
 
   const handleSubmit = async (e) => {
@@ -89,6 +98,16 @@ const SignupForm = () => {
           onChange={handleChange}
           required
         />
+        <PhoneInput
+          country={"bd"}
+          value={phone}
+          onChange={setPhone}
+          inputProps={{
+            name: "phone",
+            required: true,
+            autoFocus: true,
+          }}
+        />
 
         <input
           type="password"
@@ -119,6 +138,12 @@ const SignupForm = () => {
           <option value="user">User</option>
           <option value="host">Host</option>
         </select>
+        {/* Pass handler to update division + district */}
+        <LocationSelector
+          onChange={(division, district) =>
+            handleLocationChange(division, district)
+          }
+        />
 
         <MapboxAutocomplete onSelect={(place) => console.log(place)} />
 
