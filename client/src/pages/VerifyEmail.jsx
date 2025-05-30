@@ -20,14 +20,17 @@ const VerifyEmail = () => {
         `${import.meta.env.VITE_API_URL}/api/auth/verify-email?token=${token}`
       )
       .then((res) => {
-        const { userId } = res.data;
+        const userId = res.data.userId;
+        if (!userId) {
+          setMessage("❌ Email verified but userId missing.");
+          return;
+        }
+
         setMessage("✅ Email verified successfully. Redirecting to Step 2...");
 
-        const timeout = setTimeout(() => {
+        setTimeout(() => {
           navigate(`/register/step2?userId=${userId}`);
         }, 3000);
-
-        return () => clearTimeout(timeout);
       })
 
       .catch(() => setMessage("❌ Invalid or expired token."));
