@@ -68,7 +68,11 @@ const CreateListingPage = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-4">
+    <form
+      onSubmit={handleSubmit}
+      encType="multipart/form-data"
+      className="max-w-xl mx-auto p-4"
+    >
       <input
         name="title"
         placeholder="Title"

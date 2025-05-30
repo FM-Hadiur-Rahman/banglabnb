@@ -20,12 +20,12 @@ const ListingDetailPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
       <img
-        src={listing.image}
+        src={listing.images}
         alt={listing.title}
         className="w-full h-64 object-cover rounded mb-4"
       />
       <h1 className="text-3xl font-bold mb-2">{listing.title}</h1>
-      <p className="text-gray-600 mb-1">{listing.location}</p>
+      <p className="text-gray-600 mb-1">{listing.location?.address}</p>
       <p className="text-green-700 font-semibold text-lg mb-4">
         ৳{listing.price} / night
       </p>

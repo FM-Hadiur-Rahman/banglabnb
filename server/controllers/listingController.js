@@ -76,10 +76,12 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    // ✅ make sure files exist
+    console.log("📸 req.files:", req.files); // ADD THIS
+    console.log("📨 req.body:", req.body); // ADD THIS
+
     const imageUrls = (req.files || []).map((file) => file.path);
 
-    const location = JSON.parse(req.body.location); // frontend sends JSON string
+    const location = JSON.parse(req.body.location);
 
     const newListing = await Listing.create({
       title: req.body.title,
@@ -89,7 +91,7 @@ exports.createListing = async (req, res) => {
       district: req.body.district,
       location,
       images: imageUrls,
-      hostId: req.user._id, // comes from protect middleware
+      hostId: req.user._id,
     });
 
     res.status(201).json(newListing);
