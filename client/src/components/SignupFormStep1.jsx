@@ -7,7 +7,7 @@ import "react-phone-input-2/lib/style.css";
 import MapboxAutocomplete from "./MapboxAutocomplete";
 import LocationSelector from "./LocationSelector";
 
-const SignupFormStep1 = ({ onSuccess }) => {
+const SignupFormStep1 = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,6 +26,7 @@ const SignupFormStep1 = ({ onSuccess }) => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   const handleLocationChange = (division, district) => {
     setFormData((prev) => ({ ...prev, division, district }));
   };
@@ -41,19 +42,18 @@ const SignupFormStep1 = ({ onSuccess }) => {
     setIsLoading(true);
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/register-step1`,
+        `${import.meta.env.VITE_API_URL}/api/auth/signup/step1`,
         {
           ...formData,
-          phone: `+${phone}`, // ✅ Add plus sign before sending
+          phone: `+${phone}`,
         }
       );
 
-      setMessage(
-        "✅ Step 1 complete! Check your email to verify, then proceed to Step 2."
-      );
-
       localStorage.setItem("signupUserId", res.data.userId);
-      onSuccess(res.data.userId); // trigger step 2 in RegisterPage
+      setMessage("✅ Step 1 complete! Check your email to verify.");
+
+      // Redirect to email verification page (optional)
+      navigate(`/verify-email?userId=${res.data.userId}`);
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Registration failed.");
@@ -86,6 +86,7 @@ const SignupFormStep1 = ({ onSuccess }) => {
           onChange={handleChange}
           required
         />
+
         <PhoneInput
           country={"bd"}
           value={phone}
@@ -93,7 +94,6 @@ const SignupFormStep1 = ({ onSuccess }) => {
           inputProps={{
             name: "phone",
             required: true,
-            autoFocus: true,
           }}
         />
 
@@ -126,13 +126,8 @@ const SignupFormStep1 = ({ onSuccess }) => {
           <option value="user">User</option>
           <option value="host">Host</option>
         </select>
-        {/* Pass handler to update division + district */}
-        <LocationSelector
-          onChange={(division, district) =>
-            handleLocationChange(division, district)
-          }
-        />
 
+        <LocationSelector onChange={handleLocationChange} />
         <MapboxAutocomplete onSelect={(place) => console.log(place)} />
 
         <button

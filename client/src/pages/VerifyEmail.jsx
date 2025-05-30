@@ -22,17 +22,17 @@ const VerifyEmail = () => {
       .then((res) => {
         const userId = res.data.userId;
         if (!userId) {
-          setMessage("❌ Email verified but userId missing.");
+          setMessage("❌ Email verified but user ID missing.");
           return;
         }
 
-        setMessage("✅ Email verified successfully. Redirecting to Step 2...");
+        setMessage("✅ Email verified! Redirecting to Step 2...");
+        localStorage.setItem("signupUserId", userId);
 
         setTimeout(() => {
           navigate(`/register/step2?userId=${userId}`);
         }, 3000);
       })
-
       .catch(() => setMessage("❌ Invalid or expired token."));
   }, [searchParams, navigate]);
 

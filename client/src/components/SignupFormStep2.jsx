@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-const SignupFormStep2 = ({ userId }) => {
+const SignupFormStep2 = () => {
   const [idDocument, setIdDocument] = useState(null);
   const [livePhoto, setLivePhoto] = useState(null);
   const [message, setMessage] = useState("");
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const userId = searchParams.get("userId");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +21,7 @@ const SignupFormStep2 = ({ userId }) => {
 
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/verify-identity`,
+        `${import.meta.env.VITE_API_URL}/api/auth/signup/step2`,
         formData,
         {
           headers: {
@@ -26,10 +29,10 @@ const SignupFormStep2 = ({ userId }) => {
           },
         }
       );
-      localStorage.removeItem("signupUserId");
 
+      localStorage.removeItem("signupUserId");
       setMessage("✅ Identity verification submitted. Awaiting approval.");
-      navigate("/login"); // or home page
+      navigate("/login");
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to submit verification.");
@@ -39,7 +42,7 @@ const SignupFormStep2 = ({ userId }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 p-4 bg-white rounded shadow-md"
+      className="space-y-4 p-4 bg-white rounded shadow-md max-w-md mx-auto mt-10"
     >
       <h2 className="text-xl font-bold text-center mb-2">
         Step 2: Identity Verification

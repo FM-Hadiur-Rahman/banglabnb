@@ -20,6 +20,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminBookings from "./pages/AdminBookings";
 import AdminListings from "./pages/AdminListings";
+import RegisterStep1 from "./pages/RegisterStep1";
+import RegisterStep2 from "./pages/RegisterStep2";
 
 function App() {
   return (
@@ -75,6 +77,8 @@ function App() {
             path="/host/listings/:id/bookings"
             element={<HostListingBookingsPage />}
           />
+          <Route path="/register" element={<RegisterStep1 />} />
+          <Route path="/register/step2" element={<RegisterStep2 />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/verify" element={<VerifyNotice />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -14,17 +14,16 @@ const {
   verifyIdentityHandler,
 } = require("../controllers/authController");
 
-router.post("/register", registerUser);
+router.post("/signup/step1", registerStep1); // ✅ preferred
 
-router.post("/register-step1", registerStep1);
-
+// Step 2: Upload ID + Live Photo for verification
 router.post(
-  "/verify-identity",
+  "/signup/step2",
   upload.fields([
     { name: "idDocument", maxCount: 1 },
     { name: "livePhoto", maxCount: 1 },
   ]),
-  checkSignupStep, // ✅ run AFTER multer parses body
+  checkSignupStep,
   verifyIdentityHandler
 );
 
