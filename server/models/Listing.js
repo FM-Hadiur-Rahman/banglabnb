@@ -3,14 +3,24 @@ const mongoose = require("mongoose");
 const listingSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
-    location: { type: String, required: true },
     price: { type: Number, required: true },
     image: { type: String },
-    coordinates: {
-      type: [Number], // [lng, lat]
-      index: "2dsphere",
-      required: true,
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [lng, lat]
+        required: true,
+      },
+      address: {
+        type: String,
+        required: true,
+      },
     },
+
     maxGuests: {
       type: Number,
       required: true,

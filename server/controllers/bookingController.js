@@ -48,24 +48,24 @@ exports.createBooking = async (req, res) => {
 
     if (guest && listing) {
       // 🎉 Email to Guest
-      await sendEmail(
-        guest.email,
-        "✅ Your BanglaBnB Booking is Confirmed!",
-        `
+      await sendEmail({
+        to: guest.email,
+        subject: "✅ Your BanglaBnB Booking is Confirmed!",
+        html: `
         <h2>Hi ${guest.name},</h2>
         <p>Your booking at <strong>${listing.title}</strong> is confirmed.</p>
         <p>📍 Location: ${listing.location}</p>
         <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
         <p>Thank you for using BanglaBnB!</p>
-        `
-      );
+        `,
+      });
 
       // 📬 Email to Host
       if (listing.hostId?.email) {
-        await sendEmail(
-          listing.hostId.email,
-          "📢 New Booking Request on BanglaBnB!",
-          `
+        await sendEmail({
+          to: listing.hostId.email,
+          subject: "📢 New Booking Request on BanglaBnB!",
+          html: `
           <h2>Hello ${listing.hostId.name},</h2>
           <p>${guest.name} has booked your listing: <strong>${
             listing.title
@@ -73,8 +73,8 @@ exports.createBooking = async (req, res) => {
           <p>📍 Location: ${listing.location}</p>
           <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
           <p>Please confirm or cancel it from your dashboard.</p>
-          `
-        );
+          `,
+        });
       }
     }
 
@@ -131,6 +131,20 @@ exports.acceptBooking = async (req, res) => {
 
     booking.status = "confirmed";
     await booking.save();
+    // Fetch guest to get email
+    const guest = await User.findById(booking.guestId);
+
+    await sendEmail({
+      to: guest.email,
+      subject: "🎉 Your booking has been accepted!",
+      html: `
+    <h3>Hi ${guest.name},</h3>
+    <p>Your booking for <strong>${listing.title}</strong> has been <span style="color:green;"><b>accepted</b></span> by the host.</p>
+    <p>We look forward to hosting you!</p>
+    <p>BanglaBnB Team</p>
+  `,
+    });
+
     res.json({ message: "Booking accepted" });
   } catch (err) {
     console.error("❌ Accept failed:", err);
@@ -158,6 +172,24 @@ exports.cancelBooking = async (req, res) => {
 
     booking.status = "cancelled";
     await booking.save();
+
+    const guest = await User.findById(booking.guestId);
+    const host = await User.findById(listing.hostId);
+
+    const recipient = isHost ? guest.email : host.email;
+    const cancelerName = isHost ? host.name : guest.name;
+
+    await sendEmail({
+      to: recipient,
+      subject: "❌ Booking Cancelled",
+      html: `
+    <h3>Hello,</h3>
+    <p>The booking for <strong>${listing.title}</strong> has been <span style="color:red;"><b>cancelled</b></span> by ${cancelerName}.</p>
+    <p>If this was a mistake, please reach out to the other party directly.</p>
+    <p>BanglaBnB Team</p>
+  `,
+    });
+
     res.json({ message: "Booking cancelled" });
   } catch (err) {
     console.error("❌ Cancel failed:", err);

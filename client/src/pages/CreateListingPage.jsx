@@ -42,8 +42,11 @@ const CreateListingPage = () => {
     console.log("📍 Selected location:", coordinates, address); // ✅ DEBUG log
     setForm((prev) => ({
       ...prev,
-      coordinates, // Must be [lng, lat]
-      location: address || prev.location,
+      location: {
+        type: "Point",
+        coordinates: coordinates,
+        address: address,
+      },
     }));
   };
 
@@ -54,8 +57,16 @@ const CreateListingPage = () => {
     const user = JSON.parse(localStorage.getItem("user")); // ✅ get host ID
 
     const newListing = {
-      ...form,
-      hostId: user._id, // ✅ attach hostId
+      title: form.title,
+      price: form.price,
+      image: form.image,
+      maxGuests: form.maxGuests,
+      location: {
+        type: "Point",
+        coordinates: form.location.coordinates, // [lng, lat]
+        address: form.location.address,
+      },
+      hostId: user._id, // ✅ keep this
     };
 
     await axios.post(

@@ -16,6 +16,10 @@ import VerifyEmail from "./pages/VerifyEmail";
 import VerifyNotice from "./pages/VerifyNotice";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminBookings from "./pages/AdminBookings";
+import AdminListings from "./pages/AdminListings";
 
 function App() {
   return (
@@ -75,6 +79,38 @@ function App() {
           <Route path="/verify" element={<VerifyNotice />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/listings"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminListings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminBookings />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>

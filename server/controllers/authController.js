@@ -27,14 +27,14 @@ exports.registerUser = async (req, res) => {
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
-    await sendEmail(
-      email,
-      "Verify your BanglaBnB account",
-      `<h2>Hi ${name},</h2>
+    await sendEmail({
+      to: email,
+      subject: "Verify your BanglaBnB account",
+      html: `<h2>Hi ${name},</h2>
       <p>Thanks for signing up as a ${role}.</p>
       <p>Please verify your email by clicking the link below:</p>
-      <a href="${verifyUrl}">Verify Email</a>`
-    );
+      <a href="${verifyUrl}">Verify Email</a>`,
+    });
 
     res.status(201).json({
       message: "Check your email to verify your account.",
@@ -110,6 +110,17 @@ exports.forgotPassword = async (req, res) => {
 
   const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}&email=${email}`;
   // Send `resetUrl` to user via email (use nodemailer/sendgrid/etc)
+  // ✅ Send Email
+  await sendEmail({
+    to: user.email,
+    subject: "🔐 Reset your password",
+    html: `
+    <p>Hello ${user.name},</p>
+    <p>Click below to reset your password:</p>
+    <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+    <p>This link will expire in 15 minutes.</p>
+  `,
+  });
 
   res.json({ message: "✅ Reset link sent to your email." });
 };

@@ -7,6 +7,7 @@ const connectDB = require("./config/db.js");
 const authRoutes = require("./routes/auth");
 const listingRoutes = require("./routes/listing");
 const bookingRoutes = require("./routes/booking");
+const adminRoutes = require("./routes/admin"); // ✅ Admin routes
 
 dotenv.config();
 const app = express();
@@ -35,6 +36,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes); // 👈 mount it like other routes
 
 connectDB()
   .then(() => {

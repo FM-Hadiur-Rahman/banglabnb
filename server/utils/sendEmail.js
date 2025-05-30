@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async (to, subject, html) => {
+const sendEmail = async ({ to, subject, html }) => {
   const mailOptions = {
     from: `"BanglaBnB" <${process.env.EMAIL_USER}>`,
     to,
