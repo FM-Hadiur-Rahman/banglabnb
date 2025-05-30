@@ -17,8 +17,14 @@ const SignupFormStep2 = ({ userId }) => {
     try {
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/verify-identity`,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       setMessage("✅ Identity verification submitted. Awaiting approval.");
     } catch (err) {
       console.error(err);

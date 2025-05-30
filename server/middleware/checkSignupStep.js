@@ -2,6 +2,7 @@
 const User = require("../models/User");
 
 const checkSignupStep = async (req, res, next) => {
+  console.log("🔎 Middleware received body:", req.body); // Add this for debugging
   const { userId } = req.body;
 
   if (!userId) return res.status(400).json({ message: "User ID required." });

@@ -44,7 +44,7 @@ const SignupFormStep1 = ({ onSuccess }) => {
         `${import.meta.env.VITE_API_URL}/api/auth/register-step1`,
         {
           ...formData,
-          phone,
+          phone: `+${phone}`, // ✅ Add plus sign before sending
         }
       );
 

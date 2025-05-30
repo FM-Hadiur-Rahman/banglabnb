@@ -1,4 +1,6 @@
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");

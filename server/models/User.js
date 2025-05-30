@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: /^\+8801[3-9]\d{8}$/, // Bangladesh number format
+    match: /^\+?\d{10,15}$/, // accepts +880..., +49..., etc.
   },
   phoneVerified: {
     type: Boolean,
