@@ -67,7 +67,7 @@ const HostDashboard = () => {
                 className="w-full h-40 object-cover rounded mb-3"
               />
               <h3 className="text-lg font-bold mb-1">{listing.title}</h3>
-              <p className="text-gray-500">{listing.location}</p>
+              <p className="text-gray-500">{listing.location?.address}</p>
               <p className="text-green-600 font-semibold mb-3">
                 ৳{listing.price}/night
               </p>
