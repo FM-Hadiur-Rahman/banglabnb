@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignupFormStep2 = ({ userId }) => {
   const [idDocument, setIdDocument] = useState(null);
   const [livePhoto, setLivePhoto] = useState(null);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +26,10 @@ const SignupFormStep2 = ({ userId }) => {
           },
         }
       );
+      localStorage.removeItem("signupUserId");
 
       setMessage("✅ Identity verification submitted. Awaiting approval.");
+      navigate("/dashboard"); // or home page
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to submit verification.");

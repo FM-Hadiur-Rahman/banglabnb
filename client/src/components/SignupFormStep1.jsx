@@ -49,6 +49,7 @@ const SignupFormStep1 = ({ onSuccess }) => {
       );
 
       setMessage("✅ Step 1 complete. Proceed to ID verification.");
+      localStorage.setItem("signupUserId", res.data.userId);
       onSuccess(res.data.userId); // trigger step 2 in RegisterPage
     } catch (err) {
       console.error(err);
