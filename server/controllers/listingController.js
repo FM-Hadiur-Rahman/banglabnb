@@ -76,7 +76,10 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    const imageUrls = req.files.map((file) => file.path); // Cloudinary paths
+    // ✅ make sure files exist
+    const imageUrls = (req.files || []).map((file) => file.path);
+
+    const location = JSON.parse(req.body.location); // frontend sends JSON string
 
     const newListing = await Listing.create({
       title: req.body.title,
@@ -84,9 +87,9 @@ exports.createListing = async (req, res) => {
       maxGuests: req.body.maxGuests,
       division: req.body.division,
       district: req.body.district,
-      location: JSON.parse(req.body.location), // must be stringified in frontend
+      location,
       images: imageUrls,
-      hostId: req.user._id,
+      hostId: req.user._id, // comes from protect middleware
     });
 
     res.status(201).json(newListing);

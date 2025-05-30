@@ -8,12 +8,10 @@ const CreateListingPage = () => {
     title: "",
     location: "",
     price: "",
-    image: "",
     coordinates: [], // [lng, lat]
     maxGuests: "", // ✅ NEW
   });
   const [images, setImages] = useState([]);
-
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
@@ -21,24 +19,6 @@ const CreateListingPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("image", file);
-    setUploading(true);
-
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/listings/upload`,
-        formData
-      );
-      setForm({ ...form, image: res.data.imageUrl });
-    } catch (err) {
-      alert("Image upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
   const handleMapSelect = ({ coordinates, address }) => {
     console.log("📍 Selected location:", coordinates, address); // ✅ DEBUG log
     setForm((prev) => ({
@@ -67,6 +47,8 @@ const CreateListingPage = () => {
     formData.append("hostId", user._id);
 
     try {
+      setUploading(true); // ✅ start uploading
+
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/listings`,
         formData,
