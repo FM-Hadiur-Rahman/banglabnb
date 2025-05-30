@@ -19,17 +19,17 @@ const VerifyEmail = () => {
       .get(
         `${import.meta.env.VITE_API_URL}/api/auth/verify-email?token=${token}`
       )
-      .then(() => {
-        setMessage("✅ Email verified successfully. Redirecting to login...");
+      .then((res) => {
+        const { userId } = res.data;
+        setMessage("✅ Email verified successfully. Redirecting to Step 2...");
 
-        // ✅ Delay before navigating to login
         const timeout = setTimeout(() => {
-          navigate("/login");
+          navigate(`/register/step2?userId=${userId}`);
         }, 3000);
 
-        // Optional: cleanup timeout
         return () => clearTimeout(timeout);
       })
+
       .catch(() => setMessage("❌ Invalid or expired token."));
   }, [searchParams, navigate]);
 

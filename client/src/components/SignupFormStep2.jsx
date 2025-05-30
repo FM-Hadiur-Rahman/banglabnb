@@ -29,7 +29,7 @@ const SignupFormStep2 = ({ userId }) => {
       localStorage.removeItem("signupUserId");
 
       setMessage("✅ Identity verification submitted. Awaiting approval.");
-      navigate("/dashboard"); // or home page
+      navigate("/login"); // or home page
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to submit verification.");

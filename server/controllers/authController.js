@@ -149,31 +149,56 @@ exports.resetPassword = async (req, res) => {
 
   res.json({ message: "✅ Password reset successfully!" });
 };
+
 exports.registerStep1 = async (req, res) => {
-  const { name, email, password, phone, role, division, district } = req.body;
+  try {
+    const { name, email, password, phone, role, division, district } = req.body;
 
-  if (!name || !email || !password || !phone)
-    return res.status(400).json({ message: "Missing required fields" });
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
-  const existing = await User.findOne({ email });
-  if (existing)
-    return res.status(400).json({ message: "Email already exists" });
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
-  const hashedPassword = await bcrypt.hash(password, 12); // or your method
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const verificationToken = crypto.randomBytes(32).toString("hex");
 
-  const user = await User.create({
-    name,
-    email,
-    password: hashedPassword,
-    phone,
-    role,
-    division,
-    district,
-    identityVerified: false,
-    signupStep: 1,
-  });
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      role,
+      division,
+      district,
+      isVerified: false,
+      verificationToken,
+      identityVerified: false,
+      signupStep: 1,
+    });
 
-  res.status(201).json({ userId: user._id });
+    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Verify your BanglaBnB account",
+      html: `<h2>Hi ${name},</h2>
+      <p>Thanks for signing up as a ${role}.</p>
+      <p>Please verify your email by clicking the link below:</p>
+      <a href="${verifyUrl}">Verify Email</a>`,
+    });
+
+    res.status(201).json({
+      message: "✅ Step 1 complete. Check your email to verify your account.",
+      userId: user._id,
+    });
+  } catch (err) {
+    console.error("❌ Error in registerStep1:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 exports.verifyIdentityHandler = async (req, res) => {
   const { userId } = req.body;

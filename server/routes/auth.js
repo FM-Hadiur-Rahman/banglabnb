@@ -20,11 +20,11 @@ router.post("/register-step1", registerStep1);
 
 router.post(
   "/verify-identity",
-  checkSignupStep,
   upload.fields([
     { name: "idDocument", maxCount: 1 },
     { name: "livePhoto", maxCount: 1 },
   ]),
+  checkSignupStep, // ✅ run AFTER multer parses body
   verifyIdentityHandler
 );
 
