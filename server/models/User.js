@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  idDocumentUrl: String,
+  livePhotoUrl: String,
+  identityVerified: { type: Boolean, default: false },
+  signupStep: { type: Number, default: 1 },
+
   role: {
     type: String,
     enum: ["user", "host", "admin"],

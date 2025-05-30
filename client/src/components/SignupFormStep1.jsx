@@ -4,10 +4,10 @@ import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-import MapboxAutocomplete from "../components/MapboxAutocomplete";
+import MapboxAutocomplete from "./MapboxAutocomplete";
 import LocationSelector from "./LocationSelector";
 
-const SignupForm = () => {
+const SignupFormStep1 = ({ onSuccess }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,33 +39,17 @@ const SignupForm = () => {
     }
 
     setIsLoading(true);
-
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/register`,
+        `${import.meta.env.VITE_API_URL}/api/auth/register-step1`,
         {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
+          ...formData,
+          phone,
         }
       );
 
-      setMessage(
-        "✅ Registered! Please check your email to verify your account before logging in."
-      );
-      navigate("/verify");
-
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        role: "user",
-      });
+      setMessage("✅ Step 1 complete. Proceed to ID verification.");
+      onSuccess(res.data.userId); // trigger step 2 in RegisterPage
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Registration failed.");
@@ -161,4 +145,4 @@ const SignupForm = () => {
   );
 };
 
-export default SignupForm;
+export default SignupFormStep1;

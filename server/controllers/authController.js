@@ -147,3 +147,48 @@ exports.resetPassword = async (req, res) => {
 
   res.json({ message: "✅ Password reset successfully!" });
 };
+exports.registerStep1 = async (req, res) => {
+  const { name, email, password, phone, role, division, district } = req.body;
+
+  if (!name || !email || !password || !phone)
+    return res.status(400).json({ message: "Missing required fields" });
+
+  const existing = await User.findOne({ email });
+  if (existing)
+    return res.status(400).json({ message: "Email already exists" });
+
+  const hashedPassword = await bcrypt.hash(password, 12); // or your method
+
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    phone,
+    role,
+    division,
+    district,
+    identityVerified: false,
+    signupStep: 1,
+  });
+
+  res.status(201).json({ userId: user._id });
+};
+exports.verifyIdentityHandler = async (req, res) => {
+  const { userId } = req.body;
+  const { idDocument, livePhoto } = req.files;
+
+  if (!userId || !idDocument || !livePhoto)
+    return res.status(400).json({ message: "Missing required files or ID." });
+
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  user.idDocumentUrl = idDocument[0].path;
+  user.livePhotoUrl = livePhoto[0].path;
+  user.signupStep = 2;
+  user.identityVerified = false;
+
+  await user.save();
+
+  res.status(200).json({ message: "Identity verification submitted" });
+};

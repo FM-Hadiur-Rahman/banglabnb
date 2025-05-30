@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/cloudinaryUpload");
+
+const checkSignupStep = require("../middleware/checkSignupStep");
 
 const {
   registerUser,
@@ -7,9 +10,24 @@ const {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  registerStep1,
+  verifyIdentityHandler,
 } = require("../controllers/authController");
 
 router.post("/register", registerUser);
+
+router.post("/register-step1", registerStep1);
+
+router.post(
+  "/verify-identity",
+  checkSignupStep,
+  upload.fields([
+    { name: "idDocument", maxCount: 1 },
+    { name: "livePhoto", maxCount: 1 },
+  ]),
+  verifyIdentityHandler
+);
+
 router.post("/login", loginUser);
 router.get("/verify-email", verifyEmail);
 // routes/authRoutes.js
