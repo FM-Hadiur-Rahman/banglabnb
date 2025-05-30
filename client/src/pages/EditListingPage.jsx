@@ -58,7 +58,7 @@ const EditListingPage = () => {
       />
       <input
         name="location"
-        value={form.location}
+        value={form.location?.address}
         onChange={handleChange}
         className="w-full p-2 border mb-2"
       />
