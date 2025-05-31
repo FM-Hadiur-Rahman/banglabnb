@@ -1,60 +1,27 @@
-// // 📁 src/pages/ListingDetailPage.jsx
-// import React, { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-// import BookingForm from "../components/BookingForm";
-
-// const ListingDetailPage = () => {
-//   const { id } = useParams();
-//   const [listing, setListing] = useState(null);
-
-//   useEffect(() => {
-//     axios
-//       .get(`${import.meta.env.VITE_API_URL}/api/listings/${id}`)
-//       .then((res) => setListing(res.data))
-//       .catch((err) => console.error("Failed to load listing:", err));
-//   }, [id]);
-
-//   if (!listing) return <p className="text-center">Loading listing...</p>;
-
-//   return (
-//     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
-//       {listing.images?.map((url, idx) => (
-//         <img
-//           key={idx}
-//           src={url}
-//           alt={`Image ${idx + 1}`}
-//           className="w-full h-64 object-cover rounded mb-4"
-//         />
-//       ))}
-
-//       <h1 className="text-3xl font-bold mb-2">{listing.title}</h1>
-//       <p className="text-gray-600 mb-1">{listing.location?.address}</p>
-//       <p className="text-green-700 font-semibold text-lg mb-4">
-//         ৳{listing.price} / night
-//       </p>
-
-//       <h2 className="text-xl font-bold mb-2">Book this stay</h2>
-//       <BookingForm listingId={listing._id} />
-//     </div>
-//   );
-// };
-
 // export default ListingDetailPage;
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import BookingForm from "../components/BookingForm";
+import ReviewList from "../components/ReviewList";
 
 const ListingDetailPage = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/listings/${id}`)
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
+
+    if (id) {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/api/reviews/${id}`)
+        .then((res) => setReviews(res.data))
+        .catch((err) => console.error("Failed to load reviews:", err));
+    }
   }, [id]);
 
   if (!listing) return <p className="text-center">Loading listing...</p>;
@@ -85,6 +52,18 @@ const ListingDetailPage = () => {
           </p>
         </div>
       </div>
+      {reviews.length > 0 && (
+        <div className="lg:col-span-2 mt-8 space-y-4">
+          <div className="text-xl font-semibold">
+            ⭐{" "}
+            {(
+              reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+            ).toFixed(1)}{" "}
+            · {reviews.length} review{reviews.length > 1 && "s"}
+          </div>
+          <ReviewList reviews={reviews} />
+        </div>
+      )}
 
       {/* Right: Booking Box */}
       <div className="bg-white border rounded-lg p-6 shadow-md h-fit sticky top-20">
