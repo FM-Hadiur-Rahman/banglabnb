@@ -8,7 +8,7 @@ const ListingCard = ({ listing }) => {
     >
       <div className="border p-4 rounded shadow bg-white h-full">
         <img
-          src={listing.images}
+          src={listing.images?.[0]}
           alt={listing.title}
           className="w-full h-48 object-cover rounded"
         />
