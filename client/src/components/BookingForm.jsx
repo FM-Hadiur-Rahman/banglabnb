@@ -1,35 +1,56 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { DateRange } from "react-date-range";
+import { addDays } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
 const BookingForm = ({ listingId, price, maxGuests }) => {
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [range, setRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: addDays(new Date(), 1),
+      key: "selection",
+    },
+  ]);
   const [guests, setGuests] = useState(1);
-
+  const [nights, setNights] = useState(1);
   const [serviceFee, setServiceFee] = useState(0);
   const [tax, setTax] = useState(0);
-  const [nights, setNights] = useState(0);
   const [total, setTotal] = useState(0);
-  const todayStr = new Date().toISOString().split("T")[0];
+
+  const [bookedRanges, setBookedRanges] = useState([]);
 
   useEffect(() => {
-    if (checkIn && checkOut) {
-      const start = new Date(checkIn);
-      const end = new Date(checkOut);
-      const diff = (end - start) / (1000 * 60 * 60 * 24);
-      const validNights = diff > 0 ? diff : 0;
+    const { startDate, endDate } = range[0];
+    const diff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+    const validNights = diff > 0 ? diff : 0;
+    const subtotal = price * validNights;
+    const sFee = Math.round(subtotal * 0.15);
+    const t = Math.round(subtotal * 0.1);
 
-      const subtotal = price * validNights;
-      const dynamicServiceFee = Math.round(subtotal * 0.15);
-      const dynamicTax = Math.round(subtotal * 0.1);
-
-      setNights(validNights);
-      setServiceFee(dynamicServiceFee);
-      setTax(dynamicTax);
-      setTotal(subtotal + dynamicServiceFee + dynamicTax);
-    }
-  }, [checkIn, checkOut, price]);
-
+    setNights(validNights);
+    setServiceFee(sFee);
+    setTax(t);
+    setTotal(subtotal + sFee + t);
+  }, [range, price]);
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/bookings/listing/${listingId}`)
+      .then((res) => {
+        const blocked = res.data.map((b) => ({
+          startDate: new Date(b.dateFrom),
+          endDate: new Date(b.dateTo),
+          key: "blocked", // key is required by react-date-range
+          color: "#ccc",
+          disabled: true,
+        }));
+        setBookedRanges(blocked);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to load booking dates", err);
+      });
+  }, [listingId]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -39,8 +60,8 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         `${import.meta.env.VITE_API_URL}/api/bookings`,
         {
           listingId,
-          dateFrom: checkIn,
-          dateTo: checkOut,
+          dateFrom: range[0].startDate,
+          dateTo: range[0].endDate,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -62,30 +83,13 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         ৳{price} <span className="text-sm">night</span>
       </div>
 
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Check-in</label>
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            required
-            min={todayStr}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Check-out</label>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            min={checkIn || todayStr}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-      </div>
+      <DateRange
+        editableDateInputs={true}
+        onChange={(item) => setRange([item.selection])}
+        moveRangeOnFirstSelection={false}
+        ranges={range}
+        minDate={new Date()}
+      />
 
       <div>
         <label className="block text-sm font-medium">Guests</label>

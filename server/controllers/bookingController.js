@@ -118,6 +118,21 @@ exports.getBookingsByHost = async (req, res) => {
   }
 };
 
+exports.getBookingsForListing = async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      listingId: req.params.listingId,
+      status: { $ne: "cancelled" },
+    }).select("dateFrom dateTo");
+
+    res.json(bookings);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch bookings", error: err.message });
+  }
+};
+
 // ✅ Accept a booking
 exports.acceptBooking = async (req, res) => {
   try {
