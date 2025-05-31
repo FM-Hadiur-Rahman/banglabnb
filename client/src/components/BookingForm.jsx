@@ -69,8 +69,14 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
       );
       alert("✅ Booking request sent!");
     } catch (err) {
-      alert("❌ Booking failed.");
-      console.error(err);
+      if (err.response?.status === 409) {
+        alert(
+          "❌ These dates are already booked. Please choose different ones."
+        );
+      } else {
+        alert("❌ Booking failed.");
+      }
+      console.error("❌ Booking error:", err);
     }
   };
 
