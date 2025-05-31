@@ -81,7 +81,6 @@ const CreateListingPage = () => {
       <input
         name="location"
         placeholder="Location"
-        onChange={handleChange}
         className="w-full p-2 border mb-2"
       />
       <input
@@ -104,7 +103,9 @@ const CreateListingPage = () => {
         type="file"
         accept="image/*"
         multiple
-        onChange={(e) => setImages([...e.target.files])}
+        onChange={(e) => {
+          setImages((prev) => [...prev, ...Array.from(e.target.files)]);
+        }}
       />
 
       {uploading && <p>Uploading image...</p>}
