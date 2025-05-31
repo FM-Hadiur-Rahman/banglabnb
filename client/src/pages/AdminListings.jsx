@@ -36,7 +36,7 @@ const AdminListings = () => {
           {listings.map((l) => (
             <tr key={l._id} className="border-t">
               <td>{l.title}</td>
-              <td>{l.location}</td>
+              <td>{l.location?.address}</td>
               <td>
                 {l.hostId?.name} ({l.hostId?.email})
               </td>

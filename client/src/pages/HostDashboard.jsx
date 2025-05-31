@@ -62,7 +62,7 @@ const HostDashboard = () => {
               className="border p-4 rounded shadow bg-white flex flex-col"
             >
               <img
-                src={listing.images}
+                src={listing.images?.[0]}
                 alt={listing.title}
                 className="w-full h-40 object-cover rounded mb-3"
               />
