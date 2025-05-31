@@ -21,6 +21,12 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
 
   const [bookedRanges, setBookedRanges] = useState([]);
 
+  const isDateBooked = (date) => {
+    return bookedRanges.some((range) => {
+      return date >= range.startDate && date <= range.endDate;
+    });
+  };
+
   useEffect(() => {
     const { startDate, endDate } = range[0];
     const diff = (endDate - startDate) / (1000 * 60 * 60 * 24);
@@ -90,11 +96,11 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
       </div>
 
       <DateRange
-        editableDateInputs={true}
-        onChange={(item) => setRange([item.selection])}
-        moveRangeOnFirstSelection={false}
         ranges={range}
+        onChange={(item) => setRange([item.selection])}
         minDate={new Date()}
+        rangeColors={["#f43f5e"]}
+        disabledDay={isDateBooked}
       />
 
       <div>
