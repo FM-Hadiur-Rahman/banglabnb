@@ -88,7 +88,11 @@ const ListingDetailPage = () => {
 
       {/* Right: Booking Box */}
       <div className="bg-white border rounded-lg p-6 shadow-md h-fit sticky top-20">
-        <BookingForm listingId={listing._id} price={listing.price} />
+        <BookingForm
+          listingId={listing._id}
+          price={listing.price}
+          maxGuests={listing.maxGuests}
+        />
       </div>
     </div>
   );
