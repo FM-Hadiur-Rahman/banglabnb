@@ -1,4 +1,3 @@
-// client/src/components/Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
 
@@ -10,6 +9,23 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const menuRef = useRef();
+
+  const getDashboardPath = () => {
+    if (user.role === "admin") return "/admin/dashboard";
+    if (user.role === "host") return "/host/dashboard";
+    return "/dashboard";
+  };
+
+  const getRoleInfo = () => {
+    switch (user.role) {
+      case "admin":
+        return { icon: "🛡️", badgeColor: "bg-red-100 text-red-800" };
+      case "host":
+        return { icon: "🏠", badgeColor: "bg-indigo-100 text-indigo-800" };
+      default:
+        return { icon: "🙋‍♂️", badgeColor: "bg-green-100 text-green-800" };
+    }
+  };
 
   useEffect(() => {
     const close = (e) => {
@@ -31,9 +47,10 @@ const Navbar = () => {
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="text-gray-700 hover:text-green-600 font-medium flex items-center space-x-1"
+            className="text-gray-700 hover:text-green-600 font-medium flex items-center space-x-2"
           >
-            <span>👤 {user.name}</span>
+            <span className="text-xl">{getRoleInfo().icon}</span>
+            <span>{user.name}</span>
             <svg
               className="w-4 h-4 ml-1"
               fill="none"
@@ -46,9 +63,17 @@ const Navbar = () => {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 min-w-[12rem] bg-white border rounded shadow-lg z-50 whitespace-nowrap">
+            <div className="absolute right-0 mt-2 min-w-[13rem] bg-white border rounded shadow-lg z-50 whitespace-nowrap">
+              <div
+                className={`px-4 py-2 text-sm font-semibold ${
+                  getRoleInfo().badgeColor
+                }`}
+              >
+                {user.role.toUpperCase()}
+              </div>
+
               <Link
-                to="/host/dashboard"
+                to={getDashboardPath()}
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setDropdownOpen(false)}
               >
@@ -61,7 +86,7 @@ const Navbar = () => {
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => setDropdownOpen(false)}
                 >
-                  Create Listing
+                  ➕ Create Listing
                 </Link>
               )}
 
