@@ -28,28 +28,34 @@ const Navbar = () => {
         return { icon: "🙋‍♂️", badgeColor: "bg-green-100 text-green-800" };
     }
   };
+
   const handleRoleSwitch = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const res = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/auth/switch-role`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      const updatedUser = res.data;
+      const newRole = res.data.newRole;
 
+      // ✅ Update localStorage user
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+      const updatedUser = { ...currentUser, role: newRole };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      toast.success(`✅ Switched to ${updatedUser.role} role!`);
+      // ✅ Show correct toast
+      toast.success(`✅ Switched to ${newRole.toUpperCase()} role`);
 
-      // ⏳ Small delay for UX, then redirect
-      setTimeout(() => {
-        if (updatedUser.role === "host") navigate("/host/dashboard");
-        else if (updatedUser.role === "admin") navigate("/admin/dashboard");
-        else navigate("/dashboard");
-      }, 1000);
+      // ✅ Redirect to correct dashboard
+      if (newRole === "admin") navigate("/admin/dashboard");
+      else if (newRole === "host") navigate("/host/dashboard");
+      else navigate("/dashboard");
     } catch (err) {
       console.error("Role switch error:", err);
       toast.error("❌ Failed to switch role");
@@ -105,7 +111,7 @@ const Navbar = () => {
                   onClick={handleRoleSwitch}
                   className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
                 >
-                  🔄 Switch to {user?.role === "host" ? "User" : "Host"}
+                  🔄 Switch to {user?.role === "host" ? "User" : "Host"} Mode
                 </button>
               )}
               <Link
