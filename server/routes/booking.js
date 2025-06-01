@@ -19,4 +19,7 @@ router.put("/:id/accept", protect, bookingCtrl.acceptBooking); // ✅ Add this l
 // Cancel a booking
 router.put("/:id/cancel", protect, bookingCtrl.cancelBooking);
 
+router.patch("/:id/checkin", protect, bookingCtrl.checkIn);
+router.patch("/:id/checkout", protect, bookingCtrl.checkOut);
+
 module.exports = router;

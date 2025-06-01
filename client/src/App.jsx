@@ -22,6 +22,7 @@ import AdminBookings from "./pages/AdminBookings";
 import AdminListings from "./pages/AdminListings";
 import RegisterStep1 from "./pages/RegisterStep1";
 import RegisterStep2 from "./pages/RegisterStep2";
+import DashboardBookings from "./pages/DashboardBookings";
 
 function App() {
   return (
@@ -115,6 +116,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/dashboard/bookings" element={<DashboardBookings />} />
         </Route>
       </Routes>
     </Router>

@@ -213,3 +213,31 @@ exports.cancelBooking = async (req, res) => {
       .json({ message: "Failed to cancel booking", error: err.message });
   }
 };
+
+exports.checkIn = async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking || booking.guestId.toString() !== req.user.id)
+    return res.status(403).json({ message: "Unauthorized" });
+
+  const now = new Date();
+  if (now < new Date(booking.dateFrom))
+    return res.status(400).json({ message: "Too early to check in" });
+
+  booking.checkInAt = now;
+  await booking.save();
+  res.json({ message: "Checked in", booking });
+};
+
+exports.checkOut = async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking || booking.guestId.toString() !== req.user.id)
+    return res.status(403).json({ message: "Unauthorized" });
+
+  const now = new Date();
+  if (now < new Date(booking.dateTo))
+    return res.status(400).json({ message: "Too early to check out" });
+
+  booking.checkOutAt = now;
+  await booking.save();
+  res.json({ message: "Checked out", booking });
+};
