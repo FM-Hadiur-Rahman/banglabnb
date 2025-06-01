@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
+import axios from "axios";
 
 const Navbar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
