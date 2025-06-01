@@ -33,7 +33,7 @@ const Navbar = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/users/switch-role`,
+        `${import.meta.env.VITE_API_URL}/api/auth/switch-role`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -101,12 +101,7 @@ const Navbar = () => {
                 {user.role.toUpperCase()}
               </div>
               {user.role !== "admin" && (
-                <button
-                  onClick={handleRoleSwitch}
-                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-                >
-                  🔄 Switch to {user?.role === "host" ? "User" : "Host"}
-                </button>
+                <button onClick={() => handleRoleSwitch} />
               )}
               <Link
                 to={getDashboardPath()}
