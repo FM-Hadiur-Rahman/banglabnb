@@ -194,3 +194,14 @@ exports.resetPassword = async (req, res) => {
 
   res.json({ message: "✅ Password reset successfully!" });
 };
+
+// PATCH /api/auth/switch-role
+exports.switchRole = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  user.role = user.role === "user" ? "host" : "user";
+  await user.save();
+
+  res.json({ message: "Role switched", newRole: user.role });
+};

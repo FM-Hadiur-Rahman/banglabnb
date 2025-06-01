@@ -71,6 +71,34 @@ const Navbar = () => {
               >
                 {user.role.toUpperCase()}
               </div>
+              {user.role !== "admin" && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await axios.patch(
+                        `${import.meta.env.VITE_API_URL}/api/auth/switch-role`,
+                        {},
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem(
+                              "token"
+                            )}`,
+                          },
+                        }
+                      );
+                      const updatedUser = { ...user, role: res.data.newRole };
+                      localStorage.setItem("user", JSON.stringify(updatedUser));
+                      window.location.reload(); // reload UI with new role
+                    } catch (err) {
+                      console.error("Failed to switch role:", err);
+                      alert("❌ Could not switch role");
+                    }
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                >
+                  🔁 Switch to {user.role === "user" ? "Host" : "User"}
+                </button>
+              )}
 
               <Link
                 to={getDashboardPath()}
