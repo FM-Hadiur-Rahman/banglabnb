@@ -101,7 +101,12 @@ const Navbar = () => {
                 {user.role.toUpperCase()}
               </div>
               {user.role !== "admin" && (
-                <button onClick={() => handleRoleSwitch} />
+                <button
+                  onClick={handleRoleSwitch}
+                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                >
+                  🔄 Switch to {user?.role === "host" ? "User" : "Host"}
+                </button>
               )}
               <Link
                 to={getDashboardPath()}
