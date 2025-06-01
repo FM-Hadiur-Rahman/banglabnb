@@ -12,7 +12,9 @@ const BookingCard = ({ booking, onCheckIn, onCheckOut, onLeaveReview }) => {
   return (
     <div className="border border-gray-200 rounded-lg shadow bg-white p-4 space-y-2">
       <h3 className="text-lg font-semibold">{booking.listingId?.title}</h3>
-      <p className="text-sm text-gray-500">{booking.listingId?.location}</p>
+      <p className="text-sm text-gray-500">
+        {booking.listingId?.location?.address}
+      </p>
       <p className="text-sm text-gray-600">
         📅 {dateFrom.toLocaleDateString()} → {dateTo.toLocaleDateString()}
       </p>
