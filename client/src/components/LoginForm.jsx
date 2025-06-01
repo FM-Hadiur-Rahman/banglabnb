@@ -55,7 +55,13 @@ const LoginForm = () => {
 
       // ✅ Redirect based on role
       const userRole = res.data.role || "user";
-      navigate(userRole === "host" ? "/host/dashboard" : "/dashboard");
+      navigate(
+        userRole === "admin"
+          ? "/admin/dashboard"
+          : userRole === "host"
+          ? "/host/dashboard"
+          : "/dashboard"
+      );
     } catch (err) {
       alert("❌ Login failed. Please check your credentials.");
       console.error(err);
