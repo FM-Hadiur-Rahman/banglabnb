@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -25,6 +26,33 @@ const Navbar = () => {
         return { icon: "🏠", badgeColor: "bg-indigo-100 text-indigo-800" };
       default:
         return { icon: "🙋‍♂️", badgeColor: "bg-green-100 text-green-800" };
+    }
+  };
+  const handleRoleSwitch = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/users/switch-role`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const updatedUser = res.data;
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      toast.success(`✅ Switched to ${updatedUser.role} role!`);
+
+      // ⏳ Small delay for UX, then redirect
+      setTimeout(() => {
+        if (updatedUser.role === "host") navigate("/host/dashboard");
+        else if (updatedUser.role === "admin") navigate("/admin/dashboard");
+        else navigate("/dashboard");
+      }, 1000);
+    } catch (err) {
+      console.error("Role switch error:", err);
+      toast.error("❌ Failed to switch role");
     }
   };
 
@@ -74,33 +102,12 @@ const Navbar = () => {
               </div>
               {user.role !== "admin" && (
                 <button
-                  onClick={async () => {
-                    try {
-                      const res = await axios.patch(
-                        `${import.meta.env.VITE_API_URL}/api/auth/switch-role`,
-                        {},
-                        {
-                          headers: {
-                            Authorization: `Bearer ${localStorage.getItem(
-                              "token"
-                            )}`,
-                          },
-                        }
-                      );
-                      const updatedUser = { ...user, role: res.data.newRole };
-                      localStorage.setItem("user", JSON.stringify(updatedUser));
-                      window.location.reload(); // reload UI with new role
-                    } catch (err) {
-                      console.error("Failed to switch role:", err);
-                      alert("❌ Could not switch role");
-                    }
-                  }}
+                  onClick={handleRoleSwitch}
                   className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
                 >
-                  🔁 Switch to {user.role === "user" ? "Host" : "User"}
+                  🔄 Switch to {user?.role === "host" ? "User" : "Host"}
                 </button>
               )}
-
               <Link
                 to={getDashboardPath()}
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import ListingsPage from "./pages/ListingsPage";
@@ -27,6 +30,7 @@ import DashboardBookings from "./pages/DashboardBookings";
 function App() {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} /> {/* ✅ Fix this line */}
