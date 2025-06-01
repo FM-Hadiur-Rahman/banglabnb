@@ -30,7 +30,7 @@ import DashboardBookings from "./pages/DashboardBookings";
 function App() {
   return (
     <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-middle" autoClose={3000} />
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} /> {/* ✅ Fix this line */}
