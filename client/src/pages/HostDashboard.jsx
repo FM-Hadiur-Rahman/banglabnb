@@ -128,7 +128,9 @@ const HostDashboard = () => {
                   📅 {new Date(b.dateFrom).toLocaleDateString()} →{" "}
                   {new Date(b.dateTo).toLocaleDateString()}
                 </div>
-                <div className="text-sm">👤 Guest ID: {b.guestId}</div>
+                <div className="text-sm">
+                  👤 Guest ID: {b.guestId._id || "Unknown"}
+                </div>
               </li>
             ))}
           </ul>
