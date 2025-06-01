@@ -214,6 +214,7 @@ exports.cancelBooking = async (req, res) => {
   }
 };
 
+// ✅ Check-in
 exports.checkIn = async (req, res) => {
   const booking = await Booking.findById(req.params.id);
   if (!booking || booking.guestId.toString() !== req.user.id)
@@ -228,6 +229,7 @@ exports.checkIn = async (req, res) => {
   res.json({ message: "Checked in", booking });
 };
 
+// ✅ Check-out
 exports.checkOut = async (req, res) => {
   const booking = await Booking.findById(req.params.id);
   if (!booking || booking.guestId.toString() !== req.user.id)
