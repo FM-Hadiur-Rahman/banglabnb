@@ -1,4 +1,3 @@
-// export default ListingDetailPage;
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -8,20 +7,12 @@ import ReviewList from "../components/ReviewList";
 const ListingDetailPage = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
-  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/listings/${id}`)
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
-
-    if (id) {
-      axios
-        .get(`${import.meta.env.VITE_API_URL}/api/reviews/${id}`)
-        .then((res) => setReviews(res.data))
-        .catch((err) => console.error("Failed to load reviews:", err));
-    }
   }, [id]);
 
   if (!listing) return <p className="text-center">Loading listing...</p>;
@@ -51,19 +42,12 @@ const ListingDetailPage = () => {
             This cozy place can host up to {listing.maxGuests} guests.
           </p>
         </div>
-      </div>
-      {reviews.length > 0 && (
-        <div className="lg:col-span-2 mt-8 space-y-4">
-          <div className="text-xl font-semibold">
-            ⭐{" "}
-            {(
-              reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-            ).toFixed(1)}{" "}
-            · {reviews.length} review{reviews.length > 1 && "s"}
-          </div>
-          <ReviewList reviews={reviews} />
+
+        {/* ✅ ReviewList goes here */}
+        <div className="mt-8 space-y-4">
+          <ReviewList listingId={listing._id} />
         </div>
-      )}
+      </div>
 
       {/* Right: Booking Box */}
       <div className="bg-white border rounded-lg p-6 shadow-md h-fit sticky top-20">
