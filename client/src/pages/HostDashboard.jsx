@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import EarningsChart from "../components/EarningsChart";
+import ReviewsChart from "../components/ReviewsChart";
 
 const HostDashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -96,22 +98,8 @@ const HostDashboard = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div>
-          <h3 className="text-lg font-semibold mb-2">📈 Monthly Earnings</h3>
-          <img
-            src="/charts/earnings.png"
-            alt="Earnings chart"
-            className="w-full rounded shadow"
-          />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
-          <img
-            src="/charts/reviews.png"
-            alt="Reviews chart"
-            className="w-full rounded shadow"
-          />
-        </div>
+        <EarningsChart />
+        <ReviewsChart />
       </div>
 
       {/* Upcoming Check-ins */}
