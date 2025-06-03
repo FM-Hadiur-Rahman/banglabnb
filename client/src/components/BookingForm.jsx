@@ -62,25 +62,52 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post(
+      // Step 1: Create booking
+      const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/bookings`,
         {
           listingId,
           dateFrom: range[0].startDate,
           dateTo: range[0].endDate,
+          guests,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("✅ Booking request sent!");
+
+      const booking = res.data; // 🟢 booking._id, booking.total, etc.
+
+      // Step 2: Trigger payment
+      const paymentRes = await axios.post(
+        `/api/payment/initiate`,
+        {
+          amount: total,
+          bookingId: booking._id,
+          customer: {
+            name: booking.user.name,
+            email: booking.user.email,
+            address: booking.user.address || "Bangladesh",
+            phone: booking.user.phone,
+          },
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (paymentRes.data?.url) {
+        window.location.href = paymentRes.data.url; // Redirect to SSLCOMMERZ
+      } else {
+        alert("⚠️ Payment gateway URL missing.");
+      }
     } catch (err) {
       if (err.response?.status === 409) {
         alert(
           "❌ These dates are already booked. Please choose different ones."
         );
       } else {
-        alert("❌ Booking failed.");
+        alert("❌ Booking or payment failed.");
       }
       console.error("❌ Booking error:", err);
     }

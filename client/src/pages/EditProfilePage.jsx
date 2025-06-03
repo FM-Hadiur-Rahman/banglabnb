@@ -22,7 +22,7 @@ const EditProfilePage = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "banglabnb"); // 🔁 replace with your actual preset
+    formData.append("upload_preset", "banglabnb_unsigned"); // 🔁 replace with your actual preset
 
     try {
       const res = await axios.post(

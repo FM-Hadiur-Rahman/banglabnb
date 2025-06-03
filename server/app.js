@@ -10,6 +10,8 @@ const bookingRoutes = require("./routes/booking");
 const adminRoutes = require("./routes/admin"); // ✅ Admin routes
 const reviewRoutes = require("./routes/reviewRoutes"); // 👈 Add this
 const statsRoutes = require("./routes/stats");
+const userRoutes = require("./routes/userRoutes.js");
+const paymentRoutes = require("./routes/payment");
 
 dotenv.config();
 const app = express();
@@ -41,6 +43,8 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes); // 👈 mount it like other routes
 app.use("/api/reviews", reviewRoutes); // 👈 Mount here
 app.use("/api/stats", statsRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/payment", paymentRoutes);
 
 connectDB()
   .then(() => {

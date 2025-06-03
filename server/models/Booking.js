@@ -28,6 +28,17 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
+
+    // 🔄 NEW FIELDS FOR PAYMENT
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "failed"],
+      default: "unpaid",
+    },
+    transactionId: { type: String }, // sent to SSLCOMMERZ
+    valId: { type: String }, // returned from SSLCOMMERZ
+    paidAmount: { type: Number }, // optional for record
+    paidAt: { type: Date }, // timestamp of payment
   },
   { timestamps: true }
 );
