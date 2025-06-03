@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const Booking = require("../models/Booking"); // 🔄 Import your Booking model
+require("dotenv").config();
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
