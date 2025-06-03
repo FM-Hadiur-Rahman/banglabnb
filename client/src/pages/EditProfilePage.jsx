@@ -1,0 +1,106 @@
+import React, { useState } from "react";
+import axios from "axios";
+
+const EditProfilePage = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [form, setForm] = useState({
+    name: user.name,
+    phone: user.phone || "",
+    avatar: user.avatar || "",
+  });
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "banglabnb"); // 🔁 replace with your actual preset
+
+    try {
+      const res = await axios.post(
+        "https://api.cloudinary.com/v1_1/dkftfpn0d/image/upload", // 🔁 your Cloud name
+        formData
+      );
+      setForm((prev) => ({ ...prev, avatar: res.data.secure_url }));
+    } catch (err) {
+      console.error("Cloudinary Upload Failed:", err);
+      alert("❌ Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/users/me`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      localStorage.setItem("user", JSON.stringify(res.data));
+      setMessage("✅ Profile updated!");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to update profile.");
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white shadow rounded">
+      <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+
+      <div className="text-center mb-4">
+        <img
+          src={form.avatar || "/default-avatar.png"}
+          alt="Avatar"
+          className="w-24 h-24 rounded-full mx-auto object-cover"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="mt-2"
+        />
+        {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
+      </div>
+
+      <form onSubmit={handleUpdate} className="space-y-4">
+        <input
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Full Name"
+          className="w-full border px-3 py-2 rounded"
+        />
+        <input
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          placeholder="Phone Number"
+          className="w-full border px-3 py-2 rounded"
+        />
+
+        <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+          Save Changes
+        </button>
+      </form>
+
+      {message && <p className="mt-4 text-center text-sm">{message}</p>}
+    </div>
+  );
+};
+
+export default EditProfilePage;

@@ -26,11 +26,12 @@ import AdminListings from "./pages/AdminListings";
 import RegisterStep1 from "./pages/RegisterStep1";
 import RegisterStep2 from "./pages/RegisterStep2";
 import DashboardBookings from "./pages/DashboardBookings";
+import EditProfilePage from "./pages/EditProfilePage";
 
 function App() {
   return (
     <Router>
-      <ToastContainer position="top-middle" autoClose={3000} />
+      <ToastContainer position="top-left" autoClose={3000} />
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} /> {/* ✅ Fix this line */}
@@ -121,6 +122,14 @@ function App() {
             }
           />
           <Route path="/dashboard/bookings" element={<DashboardBookings />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <EditProfilePage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>

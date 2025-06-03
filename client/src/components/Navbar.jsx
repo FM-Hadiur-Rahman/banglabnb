@@ -141,6 +141,9 @@ const Navbar = () => {
                   My Bookings
                 </Link>
               )}
+              <Link to="/profile" className="text-blue-600 hover:underline">
+                🙍 Edit Profile
+              </Link>
 
               <button
                 onClick={() => {
