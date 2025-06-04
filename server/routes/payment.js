@@ -38,6 +38,8 @@ router.post("/initiate", async (req, res) => {
 
   try {
     const response = await axios.post(process.env.SSLCOMMERZ_API_URL, data);
+    console.log("📤 Payload to SSLCOMMERZ:", data);
+
     res.json({ url: response.data.GatewayPageURL });
   } catch (err) {
     console.error("SSLCOMMERZ ERROR:", err);
