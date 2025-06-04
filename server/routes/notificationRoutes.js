@@ -4,6 +4,6 @@ const router = express.Router();
 const { getNotifications } = require("../controllers/notificationController");
 const protect = require("../middleware/protect");
 
-router.get("/notifications", protect, getNotifications);
+router.get("/", protect, getNotifications);
 
 module.exports = router;

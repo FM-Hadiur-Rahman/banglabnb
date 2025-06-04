@@ -3,7 +3,7 @@ const Notification = require("../models/Notification");
 exports.getNotifications = async (req, res) => {
   try {
     const userId = req.user?._id; // ✅ depends on your auth middleware
-    const notifications = await Notification.find({ user: userId }).sort({
+    const notifications = await Notification.find({ userId }).sort({
       createdAt: -1,
     });
     res.json(notifications);
