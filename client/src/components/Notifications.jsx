@@ -6,18 +6,10 @@ const Notifications = () => {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get("/api/notifications")
       .then((res) => {
-        if (Array.isArray(res.data)) {
-          setNotifications(res.data);
-        } else {
-          console.error("Unexpected response:", res.data);
-          setNotifications([]);
-        }
+        const notes = Array.isArray(res.data) ? res.data : [];
+        setNotifications(notes);
       })
       .catch((err) => {
         console.error("Fetch notifications error:", err);
