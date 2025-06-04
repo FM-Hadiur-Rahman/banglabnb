@@ -1,11 +1,14 @@
-// controllers/notificationController.js
+const Notification = require("../models/Notification");
+
 exports.getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ userId: req.user.id }).sort(
-      { createdAt: -1 }
-    );
+    const userId = req.user?._id; // ✅ depends on your auth middleware
+    const notifications = await Notification.find({ user: userId }).sort({
+      createdAt: -1,
+    });
     res.json(notifications);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch notifications" });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

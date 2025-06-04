@@ -5,28 +5,40 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("/api/notifications")
-      .then((res) => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Or use auth context if you have it
+        const res = await axios.get("/api/notifications", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         const notes = Array.isArray(res.data) ? res.data : [];
         setNotifications(notes);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Fetch notifications error:", err);
         setNotifications([]);
-      });
+      }
+    };
+
+    fetchNotifications();
   }, []);
 
   return (
     <div className="bg-white p-4 rounded shadow">
       <h2 className="text-xl font-bold mb-3">🔔 Notifications</h2>
-      <ul className="space-y-2">
-        {notifications.map((note, idx) => (
-          <li key={idx} className="text-gray-700">
-            {note.message}
-          </li>
-        ))}
-      </ul>
+      {notifications.length > 0 ? (
+        <ul className="space-y-2">
+          {notifications.map((note, idx) => (
+            <li key={idx} className="text-gray-700">
+              {note.message}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">No notifications found.</p>
+      )}
     </div>
   );
 };
