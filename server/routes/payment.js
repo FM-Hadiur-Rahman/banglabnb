@@ -71,6 +71,7 @@ router.post("/initiate", async (req, res) => {
     res.status(500).json({ error: "Payment initiation failed" });
   }
 });
+// 1️⃣ POST: SSLCOMMERZ redirects here after successful payment
 router.post("/success", async (req, res) => {
   const { tran_id, val_id, amount } = req.body;
 
@@ -86,12 +87,17 @@ router.post("/success", async (req, res) => {
     booking.status = "confirmed";
     await booking.save();
 
-    // ✅ Use redirect with GET param
+    // ✅ Redirect to frontend as GET
     res.redirect(`https://banglabnb.com/payment-success?status=paid`);
   } catch (err) {
     console.error("❌ Payment success error:", err);
-    res.status(500).send("Server error");
+    res.redirect("https://banglabnb.com/payment-fail");
   }
+});
+
+// 2️⃣ Optional: fallback GET route for testing redirect
+router.get("/success", (req, res) => {
+  res.redirect("https://banglabnb.com/payment-success?status=paid");
 });
 
 router.post("/fail", (req, res) => {
