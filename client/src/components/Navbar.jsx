@@ -121,6 +121,13 @@ const Navbar = () => {
               >
                 Dashboard
               </Link>
+              <Link
+                to="/my-account"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setDropdownOpen(false)}
+              >
+                👤 My Account
+              </Link>
 
               {user.role === "host" && (
                 <Link

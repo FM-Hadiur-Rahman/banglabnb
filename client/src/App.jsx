@@ -27,6 +27,7 @@ import RegisterStep1 from "./pages/RegisterStep1";
 import RegisterStep2 from "./pages/RegisterStep2";
 import DashboardBookings from "./pages/DashboardBookings";
 import EditProfilePage from "./pages/EditProfilePage";
+import MyAccountPage from "./pages/MyAccoountPage";
 
 function App() {
   return (
@@ -127,6 +128,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <EditProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-account"
+            element={
+              <ProtectedRoute>
+                <MyAccountPage />
               </ProtectedRoute>
             }
           />

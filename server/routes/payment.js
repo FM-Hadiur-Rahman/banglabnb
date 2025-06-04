@@ -21,15 +21,20 @@ router.post("/initiate", async (req, res) => {
     store_passwd: process.env.SSLCOMMERZ_STORE_PASS,
     total_amount: amount,
     currency: "BDT",
-    tran_id, // ✅ use saved one
+    tran_id,
     success_url: "https://banglabnb.com/payment-success",
     fail_url: "https://banglabnb.com/payment-fail",
     cancel_url: "https://banglabnb.com/payment-cancel",
     ipn_url: "https://banglabnb-api.onrender.com/api/payment/ipn",
+
     cus_name: customer.name,
     cus_email: customer.email,
-    cus_add1: customer.address,
-    cus_phone: customer.phone,
+    cus_add1: customer.address || "Dhaka",
+    cus_city: "Dhaka",
+    cus_postcode: "1200",
+    cus_country: "Bangladesh",
+    cus_phone: customer.phone || "01763558585",
+
     shipping_method: "NO",
     product_name: "BanglaBnB Booking",
     product_category: "Reservation",
