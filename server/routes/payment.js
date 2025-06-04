@@ -11,6 +11,7 @@ const qs = require("querystring");
 const generateInvoice = require("../utils/generateInvoice");
 const path = require("path");
 const Notification = require("../models/Notification");
+const fs = require("fs");
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
@@ -80,11 +81,11 @@ router.post("/success", async (req, res) => {
   const { tran_id, val_id, amount } = req.body;
 
   try {
-    // Find the booking using the transaction ID
-    const booking = await Booking.findOne({ transactionId: tran_id });
+    const booking = await Booking.findOne({ transactionId: tran_id })
+      .populate("guestId")
+      .populate("listingId");
     if (!booking) return res.status(404).send("Booking not found");
 
-    // Update booking status
     booking.paymentStatus = "paid";
     booking.valId = val_id;
     booking.paidAmount = amount;
@@ -92,49 +93,46 @@ router.post("/success", async (req, res) => {
     booking.status = "confirmed";
     await booking.save();
 
-    // Fetch related guest and listing (with host)
-    const guest = await User.findById(booking.guestId);
-    const listing = await Listing.findById(booking.listingId).populate(
-      "hostId"
-    );
-
+    const guest = booking.guestId;
+    const listing = booking.listingId;
     const from = new Date(booking.dateFrom).toLocaleDateString();
     const to = new Date(booking.dateTo).toLocaleDateString();
 
-    // 🎉 Email to Guest
-    if (guest && listing) {
+    // 🧾 Generate Invoice
+    const invoicePath = await generateInvoice(booking, listing, guest); // 🧾 Utility function
+
+    // 📧 Guest email
+    await sendEmail({
+      to: guest.email,
+      subject: "✅ Your BanglaBnB Booking is Confirmed!",
+      html: `
+        <h2>Hi ${guest.name},</h2>
+        <p>Your payment for <strong>${listing.title}</strong> was successful.</p>
+        <p>📍 Location: ${listing.location?.address}</p>
+        <p>📅 Dates: ${from} → ${to}</p>
+        <p>Thank you for using BanglaBnB!</p>
+      `,
+    });
+
+    // 📧 Host email
+    if (listing.hostId?.email) {
       await sendEmail({
-        to: guest.email,
-        subject: "✅ Your BanglaBnB Booking is Confirmed!",
+        to: listing.hostId.email,
+        subject: "📢 New Paid Booking on BanglaBnB!",
         html: `
-          <h2>Hi ${guest.name},</h2>
-          <p>Your payment for <strong>${listing.title}</strong> was successful.</p>
+          <h2>Hello ${listing.hostId.name},</h2>
+          <p>${guest.name} has paid and confirmed a booking for your listing: <strong>${listing.title}</strong></p>
           <p>📍 Location: ${listing.location?.address}</p>
           <p>📅 Dates: ${from} → ${to}</p>
-          <p>Thank you for using BanglaBnB!</p>
         `,
       });
-
-      // 📬 Email to Host
-      if (listing.hostId?.email) {
-        await sendEmail({
-          to: listing.hostId.email,
-          subject: "📢 New Paid Booking on BanglaBnB!",
-          html: `
-            <h2>Hello ${listing.hostId.name},</h2>
-            <p>${guest.name} has paid and confirmed a booking for your listing: <strong>${listing.title}</strong></p>
-            <p>📍 Location: ${listing.location?.address}</p>
-            <p>📅 Dates: ${from} → ${to}</p>
-            <p>Please get ready to host!</p>
-          `,
-        });
-      }
     }
 
+    // 📧 Invoice Email
     await sendEmail({
-      to: booking.guestId.email,
+      to: guest.email,
       subject: "📄 Your Booking Invoice - BanglaBnB",
-      html: `<p>Hi ${booking.guestId.name}, please find your booking invoice attached.</p>`,
+      html: `<p>Hi ${guest.name}, please find your booking invoice attached.</p>`,
       attachments: [
         {
           filename: `invoice-${booking._id}.pdf`,
@@ -142,13 +140,15 @@ router.post("/success", async (req, res) => {
         },
       ],
     });
+
+    // 🔔 In-app Notification
     await Notification.create({
-      userId: booking.guestId._id,
-      message: `🎉 Payment received for booking at ${booking.listingId.title}`,
+      userId: guest._id,
+      message: `🎉 Payment received for booking at ${listing.title}`,
       type: "payment",
     });
 
-    // ✅ Redirect to frontend React route
+    // ✅ Redirect
     res.redirect("https://banglabnb.com/payment-success?status=paid");
   } catch (err) {
     console.error("❌ Payment success error:", err);
