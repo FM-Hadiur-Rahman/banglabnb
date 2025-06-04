@@ -43,7 +43,7 @@ const MyBookingsPage = () => {
               </h3>
 
               <p className="text-sm text-gray-500 mb-1">
-                📍 {booking.listingId?.location || "Unknown"}
+                📍 {booking.listingId?.location?.address || "Unknown"}
               </p>
 
               <p className="text-sm text-gray-600 mb-1">
