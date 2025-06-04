@@ -3,6 +3,7 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const Booking = require("../models/Booking"); // 🔄 Import your Booking model
+const qs = require("querystring");
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
@@ -42,7 +43,16 @@ router.post("/initiate", async (req, res) => {
   };
 
   try {
-    const response = await axios.post(process.env.SSLCOMMERZ_API_URL, data);
+    // const response = await axios.post(process.env.SSLCOMMERZ_API_URL, data);
+    const response = await axios.post(
+      process.env.SSLCOMMERZ_API_URL,
+      qs.stringify(data), // encode data
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
     console.log("✅ SSLCOMMERZ RESPONSE:", response.data);
 
     // Important: log fallback if GatewayPageURL is missing

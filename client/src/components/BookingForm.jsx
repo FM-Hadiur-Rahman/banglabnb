@@ -57,6 +57,7 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         console.error("❌ Failed to load booking dates", err);
       });
   }, [listingId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -102,6 +103,8 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         alert("⚠️ Payment gateway URL missing.");
       }
     } catch (err) {
+      console.error("❌ Booking error:", err?.response?.data || err.message);
+
       if (err.response?.status === 409) {
         alert(
           "❌ These dates are already booked. Please choose different ones."

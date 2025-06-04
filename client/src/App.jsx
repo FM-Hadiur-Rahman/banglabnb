@@ -28,6 +28,9 @@ import RegisterStep2 from "./pages/RegisterStep2";
 import DashboardBookings from "./pages/DashboardBookings";
 import EditProfilePage from "./pages/EditProfilePage";
 import MyAccountPage from "./pages/MyAccoountPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentFailPage from "./pages/PaymentFailPage";
+import PaymentCancelPage from "./pages/PaymentCancelPage";
 
 function App() {
   return (
@@ -139,6 +142,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-fail" element={<PaymentFailPage />} />
+          <Route path="/payment-cancel" element={<PaymentCancelPage />} />
         </Route>
       </Routes>
     </Router>
