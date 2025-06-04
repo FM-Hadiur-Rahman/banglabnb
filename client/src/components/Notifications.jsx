@@ -5,7 +5,24 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/notifications").then((res) => setNotifications(res.data));
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setNotifications(res.data);
+        } else {
+          console.error("Unexpected response:", res.data);
+          setNotifications([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Fetch notifications error:", err);
+        setNotifications([]);
+      });
   }, []);
 
   return (
