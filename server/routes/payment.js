@@ -77,7 +77,6 @@ router.post("/success", async (req, res) => {
 
   try {
     const booking = await Booking.findOne({ transactionId: tran_id });
-
     if (!booking) return res.status(404).send("Booking not found");
 
     booking.paymentStatus = "paid";
@@ -87,17 +86,25 @@ router.post("/success", async (req, res) => {
     booking.status = "confirmed";
     await booking.save();
 
-    // ✅ Redirect to frontend as GET
-    res.redirect(`https://banglabnb.com/payment-success?status=paid`);
+    // ✅ Use a client-side redirect instead of a 302
+    res.send(`
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+          <title>Redirecting...</title>
+          <script>
+            window.location.href = "https://banglabnb.com/payment-success?status=paid";
+          </script>
+        </head>
+        <body>
+          Redirecting to payment success page...
+        </body>
+      </html>
+    `);
   } catch (err) {
     console.error("❌ Payment success error:", err);
-    res.redirect("https://banglabnb.com/payment-fail");
+    res.status(500).send("Server error");
   }
-});
-
-// 2️⃣ Optional: fallback GET route for testing redirect
-router.get("/success", (req, res) => {
-  res.redirect("https://banglabnb.com/payment-success?status=paid");
 });
 
 router.post("/fail", (req, res) => {
