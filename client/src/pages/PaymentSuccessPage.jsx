@@ -1,22 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const PaymentSuccessPage = () => {
+  const [params] = useSearchParams();
+  const status = params.get("status");
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-green-600 mb-4">
-          🎉 Payment Successful!
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-green-100 p-6 rounded shadow">
+        <h1 className="text-2xl font-bold text-green-700 mb-2">
+          ✅ Payment {status === "paid" ? "Successful" : "Status Unknown"}
         </h1>
-        <p className="text-gray-700 mb-6">
-          Thank you for your booking. Your payment has been confirmed.
-        </p>
-        <Link
-          to="/dashboard"
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Go to Dashboard
-        </Link>
+        <p className="text-gray-700">Thank you for your booking!</p>
       </div>
     </div>
   );

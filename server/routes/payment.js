@@ -71,30 +71,29 @@ router.post("/initiate", async (req, res) => {
     res.status(500).json({ error: "Payment initiation failed" });
   }
 });
-
 router.post("/success", async (req, res) => {
   const { tran_id, val_id, amount } = req.body;
 
   try {
     const booking = await Booking.findOne({ transactionId: tran_id });
 
-    if (!booking) {
-      return res.status(404).send("Booking not found");
-    }
+    if (!booking) return res.status(404).send("Booking not found");
 
     booking.paymentStatus = "paid";
     booking.valId = val_id;
     booking.paidAmount = amount;
     booking.paidAt = new Date();
-    booking.status = "confirmed"; // Optional
+    booking.status = "confirmed";
     await booking.save();
 
-    res.redirect("https://banglabnb.com/payment-success");
+    // ✅ Use redirect with GET param
+    res.redirect(`https://banglabnb.com/payment-success?status=paid`);
   } catch (err) {
-    console.error("Payment success error:", err);
+    console.error("❌ Payment success error:", err);
     res.status(500).send("Server error");
   }
 });
+
 router.post("/fail", (req, res) => {
   res.redirect("https://banglabnb.com/payment-fail");
 });

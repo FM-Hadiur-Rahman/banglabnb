@@ -25,6 +25,7 @@ app.use(
   })
 );
 
+app.use(express.urlencoded({ extended: true })); // ✅ For form-encoded data
 app.use(express.json());
 
 app.use((req, res, next) => {
