@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ListingCard from "./ListingCard";
 import { Link } from "react-router-dom";
+import Notifications from "./Notifications";
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -34,7 +35,7 @@ const Dashboard = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-2">Welcome, {user?.name}!</h2>
       <p className="mb-4">Email: {user?.email}</p>
-
+      <Notifications />
       <div className="flex gap-6 flex-wrap mb-6">
         <Link
           to="/dashboard/bookings"

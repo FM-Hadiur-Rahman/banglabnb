@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/protect");
 const bookingCtrl = require("../controllers/bookingController");
+const path = require("path");
+const fs = require("fs");
 
 // Create a booking (guests)
 router.post("/", protect, bookingCtrl.createBooking);
@@ -13,13 +15,28 @@ router.get("/user", protect, bookingCtrl.getBookingsByGuest);
 router.get("/host", protect, bookingCtrl.getBookingsByHost);
 router.get("/listing/:listingId", bookingCtrl.getBookingsForListing);
 
-// accept a booking
-router.put("/:id/accept", protect, bookingCtrl.acceptBooking); // ✅ Add this line
+// Accept a booking
+router.put("/:id/accept", protect, bookingCtrl.acceptBooking);
 
 // Cancel a booking
 router.put("/:id/cancel", protect, bookingCtrl.cancelBooking);
 
+// Check-in / Check-out
 router.patch("/:id/checkin", protect, bookingCtrl.checkIn);
 router.patch("/:id/checkout", protect, bookingCtrl.checkOut);
+
+// ✅ Download invoice
+router.get("/:id/invoice", protect, async (req, res) => {
+  const invoicePath = path.join(
+    __dirname,
+    "../invoices",
+    `invoice-${req.params.id}.pdf`
+  );
+  if (fs.existsSync(invoicePath)) {
+    res.sendFile(invoicePath);
+  } else {
+    res.status(404).json({ message: "Invoice not found" });
+  }
+});
 
 module.exports = router;

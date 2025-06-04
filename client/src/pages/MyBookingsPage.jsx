@@ -41,11 +41,9 @@ const MyBookingsPage = () => {
               <h3 className="text-lg font-semibold mb-2 text-green-800">
                 {booking.listingId?.title || "Untitled Listing"}
               </h3>
-
               <p className="text-sm text-gray-500 mb-1">
                 📍 {booking.listingId?.location?.address || "Unknown"}
               </p>
-
               <p className="text-sm text-gray-600 mb-1">
                 💰{" "}
                 <span className="font-medium text-green-700">
@@ -53,12 +51,10 @@ const MyBookingsPage = () => {
                 </span>{" "}
                 / night
               </p>
-
               <p className="text-sm text-gray-600 mb-1">
                 📅 {new Date(booking.dateFrom).toLocaleDateString()} →{" "}
                 {new Date(booking.dateTo).toLocaleDateString()}
               </p>
-
               <span
                 className={`inline-block mt-3 px-3 py-1 text-xs rounded-full font-semibold ${
                   booking.status === "confirmed"
@@ -70,6 +66,11 @@ const MyBookingsPage = () => {
               >
                 {booking.status.toUpperCase()}
               </span>
+              {booking.paymentStatus === "paid" && (
+                <div className="mt-3">
+                  <InvoicePreview bookingId={booking._id} />
+                </div>
+              )}
             </div>
           ))}
         </div>
