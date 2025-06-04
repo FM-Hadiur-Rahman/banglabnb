@@ -54,7 +54,7 @@ exports.createBooking = async (req, res) => {
         html: `
         <h2>Hi ${guest.name},</h2>
         <p>Your booking at <strong>${listing.title}</strong> is confirmed.</p>
-        <p>📍 Location: ${listing.location}</p>
+        <p>📍 Location: ${listing.location?.address}</p>
         <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
         <p>Thank you for using BanglaBnB!</p>
         `,
@@ -70,7 +70,7 @@ exports.createBooking = async (req, res) => {
           <p>${guest.name} has booked your listing: <strong>${
             listing.title
           }</strong></p>
-          <p>📍 Location: ${listing.location}</p>
+          <p>📍 Location: ${listing.location?.address}</p>
           <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
           <p>Please confirm or cancel it from your dashboard.</p>
           `,

@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const Booking = require("../models/Booking"); // 🔄 Import your Booking model
-require("dotenv").config();
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
@@ -17,7 +17,7 @@ router.post("/initiate", async (req, res) => {
   });
 
   const data = {
-    store_id: process.env.SSLCOMMERZ_STORE_ID,
+    store_id: process.env.SSLCOMMERZ_STORE_ID || "bangl683f39645be2d",
     store_passwd: process.env.SSLCOMMERZ_STORE_PASS,
     total_amount: amount,
     currency: "BDT",
@@ -43,11 +43,21 @@ router.post("/initiate", async (req, res) => {
 
   try {
     const response = await axios.post(process.env.SSLCOMMERZ_API_URL, data);
-    console.log("📤 Payload to SSLCOMMERZ:", data);
+    console.log("✅ SSLCOMMERZ RESPONSE:", response.data);
+
+    // Important: log fallback if GatewayPageURL is missing
+    if (!response.data.GatewayPageURL) {
+      console.error("❌ Missing GatewayPageURL. Full response:");
+      console.error(response.data);
+      return res.status(400).json({ error: "Payment gateway URL missing" });
+    }
 
     res.json({ url: response.data.GatewayPageURL });
   } catch (err) {
-    console.error("SSLCOMMERZ ERROR:", err);
+    console.error(
+      "❌ SSLCOMMERZ AXIOS ERROR:",
+      err?.response?.data || err.message
+    );
     res.status(500).json({ error: "Payment initiation failed" });
   }
 });
