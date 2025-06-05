@@ -39,4 +39,17 @@ router.get("/:id/invoice", protect, async (req, res) => {
   }
 });
 
+router.get("/:bookingId/invoice", protect, async (req, res) => {
+  const invoicePath = path.join(
+    __dirname,
+    `../invoices/invoice-${req.params.bookingId}.pdf`
+  );
+
+  if (!fs.existsSync(invoicePath)) {
+    return res.status(404).send("Invoice not found");
+  }
+
+  res.download(invoicePath); // triggers file download
+});
+
 module.exports = router;

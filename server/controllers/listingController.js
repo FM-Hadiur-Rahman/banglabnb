@@ -76,9 +76,6 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    console.log("📸 req.files:", req.files); // ADD THIS
-    console.log("📨 req.body:", req.body); // ADD THIS
-
     const imageUrls = (req.files || []).map((file) => file.path);
 
     const location = JSON.parse(req.body.location);

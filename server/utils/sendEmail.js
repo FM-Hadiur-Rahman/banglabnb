@@ -10,12 +10,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, attachments }) => {
   const mailOptions = {
     from: `"BanglaBnB" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,
+    attachments,
   };
 
   try {

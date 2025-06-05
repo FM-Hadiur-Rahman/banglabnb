@@ -98,54 +98,74 @@ router.post("/success", async (req, res) => {
     const from = new Date(booking.dateFrom).toLocaleDateString();
     const to = new Date(booking.dateTo).toLocaleDateString();
 
-    // 🧾 Generate Invoice
-    const invoicePath = await generateInvoice(booking, listing, guest); // 🧾 Utility function
+    // 🧾 Generate Invoice (returns local path)
+    const invoicePath = await generateInvoice(booking, listing, guest);
 
-    // 📧 Guest email
+    // 📧 Guest email with invoice attached
     await sendEmail({
       to: guest.email,
-      subject: "✅ Your BanglaBnB Booking is Confirmed!",
+      subject: "📄 Your BanglaBnB Invoice is Ready!",
       html: `
-        <h2>Hi ${guest.name},</h2>
-        <p>Your payment for <strong>${listing.title}</strong> was successful.</p>
-        <p>📍 Location: ${listing.location?.address}</p>
-        <p>📅 Dates: ${from} → ${to}</p>
-        <p>Thank you for using BanglaBnB!</p>
+        <div style="font-family: Arial, sans-serif; color: #1a202c; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px;">
+          <h2 style="color: #10b981; text-align: center;">🧾 BanglaBnB Booking Invoice</h2>
+          <p>Dear <strong>${guest.name}</strong>,</p>
+          <p>Thank you for your booking with <strong>BanglaBnB</strong>! Your payment has been successfully processed.</p>
+          <hr style="margin: 20px 0;" />
+          <h3>🛏️ Listing Details</h3>
+          <p><strong>${listing.title}</strong></p>
+          <p>📍 ${listing.location?.address}</p>
+          <p>📅 <strong>${from} → ${to}</strong></p>
+          <h3>💵 Payment Summary</h3>
+          <p>Total Paid: <strong>৳${booking.paidAmount}</strong></p>
+          <p>Status: ✅ Paid</p>
+          <p style="font-size: 14px; color: #4a5568;">আপনার বুকিং ইনভয়েস তৈরি হয়েছে। এটি মেইলে সংযুক্ত রয়েছে।</p>
+        </div>
       `,
-    });
-
-    // 📧 Host email
-    if (listing.hostId?.email) {
-      await sendEmail({
-        to: listing.hostId.email,
-        subject: "📢 New Paid Booking on BanglaBnB!",
-        html: `
-          <h2>Hello ${listing.hostId.name},</h2>
-          <p>${guest.name} has paid and confirmed a booking for your listing: <strong>${listing.title}</strong></p>
-          <p>📍 Location: ${listing.location?.address}</p>
-          <p>📅 Dates: ${from} → ${to}</p>
-        `,
-      });
-    }
-
-    // 📧 Invoice Email
-    await sendEmail({
-      to: guest.email,
-      subject: "📄 Your Booking Invoice - BanglaBnB",
-      html: `<p>Hi ${guest.name}, please find your booking invoice attached.</p>`,
       attachments: [
         {
           filename: `invoice-${booking._id}.pdf`,
           path: invoicePath,
+          contentType: "application/pdf",
         },
       ],
     });
+
+    // 📧 Host email with same attachment
+    if (listing.hostId?.email) {
+      await sendEmail({
+        to: listing.hostId.email,
+        subject: "📢 New Paid Booking on Your Listing!",
+        html: `
+        <div style="font-family: Arial, sans-serif; color: #1a202c; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px;">
+          <h2 style="color: #2563eb; text-align: center;">📢 New Booking Received!</h2>
+          <p>Dear <strong>${listing.hostId.name}</strong>,</p>
+          <p>🎉 A guest has paid and confirmed a booking on your listing <strong>${listing.title}</strong>.</p>
+          <p>📍 ${listing.location?.address}</p>
+          <p>📅 ${from} → ${to}</p>
+          <p>👤 ${guest.name} (${guest.email})</p>
+          <p>💵 ৳${booking.paidAmount} — Paid</p>
+          <p style="font-size: 14px; color: #4a5568;">ইনভয়েস মেইলের সাথে সংযুক্ত রয়েছে।</p>
+        </div>
+      `,
+        attachments: [
+          {
+            filename: `invoice-${booking._id}.pdf`,
+            path: invoicePath,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+    }
 
     // 🔔 In-app Notification
     await Notification.create({
       userId: guest._id,
       message: `🎉 Payment received for booking at ${listing.title}`,
       type: "payment",
+    });
+    // 🧹 Clean up local invoice file
+    fs.unlink(invoicePath, (err) => {
+      if (err) console.warn("⚠️ Could not delete invoice:", err);
     });
 
     // ✅ Redirect

@@ -89,6 +89,19 @@ const Dashboard = () => {
                   {new Date(b.dateTo).toLocaleDateString()}
                 </div>
                 <div className="text-sm">👤 Guest ID: {b.guestId}</div>
+
+                {b.paymentStatus === "paid" && (
+                  <a
+                    href={`${import.meta.env.VITE_API_URL}/api/invoices/${
+                      b._id
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-1"
+                  >
+                    📄 Download Invoice
+                  </a>
+                )}
               </li>
             ))}
           </ul>

@@ -22,6 +22,7 @@ const bookingSchema = new mongoose.Schema(
     },
     checkInAt: { type: Date },
     checkOutAt: { type: Date },
+    invoiceUrl: { type: String }, // Add this line
 
     status: {
       type: String,
@@ -40,6 +41,7 @@ const bookingSchema = new mongoose.Schema(
     paidAmount: { type: Number }, // optional for record
     paidAt: { type: Date }, // timestamp of payment
   },
+
   { timestamps: true }
 );
 
