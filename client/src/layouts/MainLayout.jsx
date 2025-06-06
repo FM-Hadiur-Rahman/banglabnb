@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -14,9 +15,7 @@ const MainLayout = () => {
         <Outlet />
       </main>
 
-      <footer className="bg-green-700 text-white text-center py-4">
-        <p>&copy; {new Date().getFullYear()} BanglaBnB. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
