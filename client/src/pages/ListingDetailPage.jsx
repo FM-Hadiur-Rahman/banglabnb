@@ -7,6 +7,7 @@ import ReviewList from "../components/ReviewList";
 const ListingDetailPage = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // ✅ Modal state
 
   useEffect(() => {
     axios
@@ -21,17 +22,20 @@ const ListingDetailPage = () => {
     <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left: Image Gallery and Details */}
       <div className="lg:col-span-2 space-y-6">
+        {/* 🖼 Image Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {listing.images?.map((url, idx) => (
             <img
               key={idx}
               src={url}
               alt={`Image ${idx + 1}`}
-              className="w-full h-52 object-cover rounded"
+              className="w-full h-52 object-cover rounded cursor-pointer hover:opacity-90 transition-transform hover:scale-105"
+              onClick={() => setSelectedImage(url)}
             />
           ))}
         </div>
 
+        {/* 🧾 Listing Details */}
         <div>
           <h1 className="text-3xl font-bold">{listing.title}</h1>
           <p className="text-gray-600 mt-1">{listing.location?.address}</p>
@@ -43,13 +47,13 @@ const ListingDetailPage = () => {
           </p>
         </div>
 
-        {/* ✅ ReviewList goes here */}
+        {/* ⭐ Reviews */}
         <div className="mt-8 space-y-4">
           <ReviewList listingId={listing._id} />
         </div>
       </div>
 
-      {/* Right: Booking Box */}
+      {/* Right: Booking Form */}
       <div className="bg-white border rounded-lg p-6 shadow-md h-fit sticky top-20">
         <BookingForm
           listingId={listing._id}
@@ -57,6 +61,31 @@ const ListingDetailPage = () => {
           maxGuests={listing.maxGuests}
         />
       </div>
+
+      {/* ✅ Modal Image Viewer */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full p-4"
+            onClick={(e) => e.stopPropagation()} // Prevent click from closing
+          >
+            <button
+              className="absolute top-2 right-2 text-white text-3xl font-bold"
+              onClick={() => setSelectedImage(null)}
+            >
+              &times;
+            </button>
+            <img
+              src={selectedImage}
+              alt="Full preview"
+              className="w-full h-auto rounded shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
