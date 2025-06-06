@@ -3,6 +3,7 @@ import axios from "axios";
 import ListingCard from "./ListingCard";
 import { Link } from "react-router-dom";
 import Notifications from "./Notifications";
+import ChatBox from "../components/ChatBox";
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -28,6 +29,19 @@ const Dashboard = () => {
           setCheckIns(future);
         })
         .catch((err) => console.error("❌ Error fetching check-ins:", err));
+    }
+  }, [user]);
+  // Add inside the component body, after `checkIns` useEffect
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+    if (user?.role === "host") {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/api/chats/host`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+        .then((res) => setChats(res.data))
+        .catch((err) => console.error("❌ Error loading chats:", err));
     }
   }, [user]);
 
@@ -117,6 +131,27 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {listings.map((listing) => (
               <ListingCard key={listing._id} listing={listing} />
+            ))}
+          </div>
+        )}
+      </div>
+      {/* 🔔 Host Chat Section */}
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold mb-4">💬 Guest Chats</h3>
+        {chats.length === 0 ? (
+          <p className="text-gray-500">You don’t have any chats yet.</p>
+        ) : (
+          <div className="space-y-6">
+            {chats.map((chat) => (
+              <div
+                key={chat._id}
+                className="border rounded p-4 shadow bg-gray-50"
+              >
+                <h4 className="font-semibold mb-2">
+                  Booking ID: {chat.bookingId}
+                </h4>
+                <ChatBox chatId={chat._id} user={user} />
+              </div>
             ))}
           </div>
         )}

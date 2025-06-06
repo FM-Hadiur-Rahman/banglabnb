@@ -50,3 +50,4 @@ const ChatBox = ({ chatId, user }) => {
     </div>
   );
 };
+export default ChatBox;
