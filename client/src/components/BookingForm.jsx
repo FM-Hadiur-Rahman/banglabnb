@@ -125,13 +125,17 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         ৳{price} <span className="text-sm">night</span>
       </div>
 
-      <DateRange
-        ranges={range}
-        onChange={(item) => setRange([item.selection])}
-        minDate={new Date()}
-        rangeColors={["#f43f5e"]}
-        disabledDay={isDateBooked}
-      />
+      <div className="w-full overflow-x-auto">
+        <div className="max-w-full">
+          <DateRange
+            ranges={range}
+            onChange={(item) => setRange([item.selection])}
+            minDate={new Date()}
+            rangeColors={["#f43f5e"]}
+            disabledDay={isDateBooked}
+          />
+        </div>
+      </div>
 
       <div>
         <label className="block text-sm font-medium">Guests</label>

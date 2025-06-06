@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Custom fix for react-date-range calendar overflow */
+.rdrCalendarWrapper {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
