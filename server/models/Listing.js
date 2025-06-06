@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { divisions } = require("../data/districts");
 
 const listingSchema = new mongoose.Schema(
   {
@@ -20,8 +21,6 @@ const listingSchema = new mongoose.Schema(
         required: true,
       },
     },
-    division: { type: String },
-    district: { type: String },
 
     maxGuests: {
       type: Number,
@@ -29,7 +28,34 @@ const listingSchema = new mongoose.Schema(
       default: 2,
     },
 
-    hostId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    division: {
+      type: String,
+      required: true,
+      enum: Object.keys(divisions),
+    },
+
+    district: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return Object.values(divisions).flat().includes(value);
+        },
+        message: (props) => `${props.value} is not a valid district.`,
+      },
+    },
+
+    roomType: {
+      type: String,
+      required: true,
+      enum: ["Hotel", "Resort", "Guest House", "Personal Property", "Other"],
+    },
+
+    hostId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
