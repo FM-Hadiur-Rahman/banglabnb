@@ -266,8 +266,13 @@ const Navbar = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="hover:text-green-600 font-medium flex items-center space-x-2"
               >
-                <span className="text-xl">{getRoleInfo().icon}</span>
-                <span>{user.name}</span>
+                <img
+                  src={user.avatar || "/default-avatar.png"}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <span className="ml-2">{user.name}</span>
+
                 <svg
                   className="w-4 h-4 ml-1"
                   fill="none"
@@ -376,9 +381,22 @@ const Navbar = () => {
         <div className="sm:hidden mt-2 px-4 pb-3 space-y-2 text-gray-700">
           {isLoggedIn ? (
             <>
-              <p className="text-sm font-semibold text-green-700">
-                {getRoleInfo().icon} {user.name} ({user.role})
-              </p>
+              <div className="flex items-center space-x-2">
+                <img
+                  src={user.avatar || "/default-avatar.png"}
+                  alt="Avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-green-700">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user.role.toUpperCase()}
+                  </p>
+                </div>
+              </div>
+
               <Link to={getDashboardPath()} className="block">
                 Dashboard
               </Link>
