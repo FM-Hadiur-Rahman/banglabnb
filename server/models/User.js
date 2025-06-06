@@ -8,8 +8,13 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
-    match: /^\+?\d{10,15}$/, // accepts +880..., +49..., etc.
+    validate: {
+      validator: function (v) {
+        return /^\+8801[3-9][0-9]{8}$/.test(v); // Bangladeshi format
+      },
+      message: (props) =>
+        `${props.value} is not a valid Bangladeshi phone number!`,
+    },
   },
   phoneVerified: {
     type: Boolean,

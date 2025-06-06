@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const EditProfilePage = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -12,7 +13,9 @@ const EditProfilePage = () => {
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const cleanValue = name === "phone" ? value.replace(/\s+/g, "") : value;
+    setForm({ ...form, [name]: cleanValue });
   };
 
   const handleImageUpload = async (e) => {
@@ -22,11 +25,11 @@ const EditProfilePage = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "banglabnb_unsigned"); // 🔁 replace with your actual preset
+    formData.append("upload_preset", "banglabnb_unsigned"); // replace with your actual preset
 
     try {
       const res = await axios.post(
-        "https://api.cloudinary.com/v1_1/dkftfpn0d/image/upload", // 🔁 your Cloud name
+        "https://api.cloudinary.com/v1_1/dkftfpn0d/image/upload", // your Cloudinary cloud name
         formData
       );
       setForm((prev) => ({ ...prev, avatar: res.data.secure_url }));
@@ -37,6 +40,7 @@ const EditProfilePage = () => {
       setUploading(false);
     }
   };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -50,14 +54,14 @@ const EditProfilePage = () => {
         }
       );
 
-      // ✅ Correctly store updated user and token
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
 
-      setMessage("✅ Profile updated!");
+      toast.success("✅ Profile updated!");
+      setMessage(""); // Optional: remove setMessage if using toast
     } catch (err) {
       console.error(err);
-      setMessage("❌ Failed to update profile.");
+      toast.error("❌ Failed to update profile.");
     }
   };
 

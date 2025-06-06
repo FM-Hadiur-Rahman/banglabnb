@@ -1,4 +1,3 @@
-// controllers/userController.js
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
@@ -15,7 +14,7 @@ exports.updateCurrentUser = async (req, res) => {
       new: true,
     }).select("-password");
 
-    const token = generateToken(user._id);
+    const token = generateToken(user);
     res.json({ user, token });
   } catch (err) {
     res.status(500).json({ error: "Failed to update profile." });
