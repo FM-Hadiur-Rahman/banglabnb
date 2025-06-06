@@ -14,6 +14,8 @@ const userRoutes = require("./routes/userRoutes.js");
 const paymentRoutes = require("./routes/payment");
 const notificationRoutes = require("./routes/notificationRoutes");
 const invoiceRoutes = require("./routes/invoice");
+const chatRoutes = require("./routes/chatRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 dotenv.config();
 const app = express();
@@ -51,6 +53,8 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/wishlist", require("./routes/wishlist"));
+app.use("/api/chats", chatRoutes); // All chat endpoints: /api/chats
+app.use("/api/messages", messageRoutes);
 
 connectDB()
   .then(() => {

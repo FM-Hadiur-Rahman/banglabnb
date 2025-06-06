@@ -168,6 +168,19 @@ router.post("/success", async (req, res) => {
       if (err) console.warn("⚠️ Could not delete invoice:", err);
     });
 
+    //for chat between host and guest
+    await axios.post(
+      `${VITE_API_URL}/api/chats`,
+      {
+        bookingId: booking._id,
+        listingId: listing._id,
+        hostId: listing.ownerId,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
     // ✅ Redirect
     res.redirect("https://banglabnb.com/payment-success?status=paid");
   } catch (err) {
