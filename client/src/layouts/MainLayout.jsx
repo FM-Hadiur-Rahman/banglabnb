@@ -16,6 +16,14 @@ const MainLayout = () => {
       </main>
 
       <Footer />
+      <div className="fixed bottom-6 right-6 z-50 bg-green-700 text-white shadow-lg rounded-lg px-4 py-3 text-sm w-64">
+        <h4 className="font-semibold mb-1">✅ Verified & Trusted</h4>
+        <ul className="list-disc list-inside space-y-1 text-xs text-white/90">
+          <li>Verified by National ID</li>
+          <li>Secure Payments</li>
+          <li>Comfortable Stays</li>
+        </ul>
+      </div>
     </div>
   );
 };
