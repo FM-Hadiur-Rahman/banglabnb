@@ -42,42 +42,6 @@ exports.createBooking = async (req, res) => {
       dateTo,
     });
 
-    // // ✅ Notify guest and host via email
-    // const guest = await User.findById(req.user.id);
-    // const listing = await Listing.findById(listingId).populate("hostId");
-
-    // if (guest && listing) {
-    //   // 🎉 Email to Guest
-    //   await sendEmail({
-    //     to: guest.email,
-    //     subject: "✅ Your BanglaBnB Booking is Confirmed!",
-    //     html: `
-    //     <h2>Hi ${guest.name},</h2>
-    //     <p>Your booking at <strong>${listing.title}</strong> is confirmed.</p>
-    //     <p>📍 Location: ${listing.location?.address}</p>
-    //     <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
-    //     <p>Thank you for using BanglaBnB!</p>
-    //     `,
-    //   });
-
-    //   // 📬 Email to Host
-    //   if (listing.hostId?.email) {
-    //     await sendEmail({
-    //       to: listing.hostId.email,
-    //       subject: "📢 New Booking Request on BanglaBnB!",
-    //       html: `
-    //       <h2>Hello ${listing.hostId.name},</h2>
-    //       <p>${guest.name} has booked your listing: <strong>${
-    //         listing.title
-    //       }</strong></p>
-    //       <p>📍 Location: ${listing.location?.address}</p>
-    //       <p>📅 Dates: ${from.toLocaleDateString()} → ${to.toLocaleDateString()}</p>
-    //       <p>Please confirm or cancel it from your dashboard.</p>
-    //       `,
-    //     });
-    //   }
-    // }
-
     res.status(201).json(newBooking);
   } catch (err) {
     console.error("❌ Booking failed:", err);

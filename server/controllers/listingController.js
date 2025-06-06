@@ -1,13 +1,6 @@
 const Listing = require("../models/Listing");
 const Booking = require("../models/Booking");
 
-// GET all listings
-// exports.getAllListings = async (req, res) => {
-//   const listings = await Listing.find();
-//   res.json(listings);
-// };
-
-// GET all listings with optional filters
 exports.getAllListings = async (req, res) => {
   try {
     const { location, from, to, guests, type, minPrice, maxPrice } = req.query;
