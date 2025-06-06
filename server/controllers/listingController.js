@@ -93,6 +93,7 @@ exports.createListing = async (req, res) => {
       location,
       images: imageUrls,
       hostId: req.user._id,
+      roomType: req.body.roomType,
     });
 
     res.status(201).json(newListing);

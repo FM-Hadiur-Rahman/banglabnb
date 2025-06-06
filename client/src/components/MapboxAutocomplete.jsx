@@ -13,14 +13,16 @@ const MapboxAutocomplete = ({ onSelectLocation }) => {
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
+
+    // ✅ Initialize Map
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: [90.4125, 23.8103], // Dhaka
+      center: [90.4125, 23.8103], // Default to Dhaka
       zoom: 9,
     });
 
-    // ✅ Geolocation (center to user)
+    // ✅ Try to center map to user's location
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { longitude, latitude } = pos.coords;
@@ -29,27 +31,28 @@ const MapboxAutocomplete = ({ onSelectLocation }) => {
       () => console.warn("📍 Location access denied")
     );
 
+    // ✅ Add geocoder
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl,
       marker: false,
       placeholder: "Search for location...",
     });
-
     mapRef.current.addControl(geocoder);
 
-    // ✅ Map click to set marker
-    mapRef.current.on("click", (e) => {
-      const { lng, lat } = e.lngLat;
-      updateMarker([lng, lat]);
-    });
-
-    // ✅ Geocoder result
+    // ✅ Handle result from geocoder
     geocoder.on("result", (e) => {
       const { center, place_name } = e.result;
       updateMarker(center, place_name);
     });
 
+    // ✅ Handle map click
+    mapRef.current.on("click", (e) => {
+      const { lng, lat } = e.lngLat;
+      updateMarker([lng, lat]);
+    });
+
+    // ✅ Update or place marker
     function updateMarker(coords, label = null) {
       if (markerRef.current) markerRef.current.remove();
 
@@ -57,31 +60,37 @@ const MapboxAutocomplete = ({ onSelectLocation }) => {
         .setLngLat(coords)
         .addTo(mapRef.current);
 
-      const updateAddress = (lng, lat) => {
-        fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            const address = label || data.features?.[0]?.place_name || "";
-            if (onSelectLocation)
-              onSelectLocation({ coordinates: [lng, lat], address });
-          });
+      const [lng, lat] = coords;
+
+      const updateAddress = async () => {
+        try {
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`
+          );
+          const data = await res.json();
+          const address = label || data.features?.[0]?.place_name || "";
+          if (onSelectLocation) {
+            onSelectLocation({ coordinates: [lng, lat], address });
+          }
+        } catch (err) {
+          console.warn("❌ Reverse geocoding failed:", err);
+        }
       };
 
-      const [lng, lat] = coords;
-      updateAddress(lng, lat);
+      updateAddress();
 
       markerRef.current.on("dragend", () => {
         const { lng, lat } = markerRef.current.getLngLat();
         updateAddress(lng, lat);
       });
     }
+
     return () => {
-      mapRef.current?.remove(); // 🧹 Cleanup
+      mapRef.current?.remove(); // 🧹 Clean up map instance
       mapRef.current = null;
     };
-  }, [onSelectLocation]);
+  }, []); // ❗ Removed onSelectLocation to avoid re-running useEffect on every re-render
+
   return (
     <div
       ref={mapContainerRef}
@@ -92,4 +101,4 @@ const MapboxAutocomplete = ({ onSelectLocation }) => {
   );
 };
 
-export default MapboxAutocomplete;
+export default React.memo(MapboxAutocomplete);
