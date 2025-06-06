@@ -172,8 +172,8 @@ const CreateListingPage = () => {
         <option value="">Select Room Type</option>
         <option value="Hotel">Hotel</option>
         <option value="Resort">Resort</option>
-        <option value="Hotel">Guest House</option>
-        <option value="Resort">Personal Property</option>
+        <option value="Guest House">Guest House</option>
+        <option value="Personal Property">Personal Property</option>
         <option value="Other">Other</option>
       </select>
 
