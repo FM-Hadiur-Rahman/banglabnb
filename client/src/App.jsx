@@ -31,6 +31,8 @@ import MyAccountPage from "./pages/MyAccoountPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
+import HelpCenterPage from "./pages/HelpCenterPage";
+import ContactUsPage from "./pages/ContactUsPage";
 
 function App() {
   return (
@@ -145,6 +147,8 @@ function App() {
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/payment-fail" element={<PaymentFailPage />} />
           <Route path="/payment-cancel" element={<PaymentCancelPage />} />
+          <Route path="/help" element={<HelpCenterPage />} />
+          <Route path="/contact" element={<ContactUsPage />} />
         </Route>
       </Routes>
     </Router>

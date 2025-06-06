@@ -6,36 +6,46 @@ import Footer from "../components/Footer";
 const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Detect scroll
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Sticky Header with scroll effect */}
+      {/* Header with shrinking effect */}
       <header
-        className={`sticky top-0 z-40 py-3 px-6 flex justify-between items-center shadow-md backdrop-blur-md transition-all duration-300 ${
-          isScrolled ? "bg-white/80" : "bg-white"
+        className={`sticky top-0 z-40 px-6 flex justify-between items-center shadow-md backdrop-blur-md transition-all duration-300 ${
+          isScrolled ? "bg-white/80 py-2" : "bg-white py-6"
         }`}
       >
-        <Link to="/" className="flex items-center space-x-2" title="Go to Home">
+        <Link
+          to="/"
+          className="flex items-center space-x-2 transition-all duration-300"
+          title="Go to Home"
+        >
           <img
             src="/banglabnb-logo.png"
             alt="BanglaBnB Logo"
-            className="w-8 h-8 object-contain"
+            className={`object-contain transition-all duration-300 ${
+              isScrolled ? "w-6 h-6" : "w-10 h-10"
+            }`}
           />
-          <span className="text-green-700 font-bold text-lg">BanglaBnB</span>
+          <span
+            className={`text-green-700 font-bold transition-all duration-300 ${
+              isScrolled ? "text-base" : "text-xl"
+            }`}
+          >
+            BanglaBnB
+          </span>
         </Link>
         <Navbar />
       </header>
 
-      {/* Main */}
+      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-8">
         <Outlet />
       </main>
