@@ -170,7 +170,7 @@ router.post("/success", async (req, res) => {
 
     //for chat between host and guest
     await axios.post(
-      `${VITE_API_URL}/api/chats`,
+      `${process.env.VITE_API_URL}/api/chats`,
       {
         bookingId: booking._id,
         listingId: listing._id,

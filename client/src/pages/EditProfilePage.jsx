@@ -37,7 +37,6 @@ const EditProfilePage = () => {
       setUploading(false);
     }
   };
-
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -50,7 +49,11 @@ const EditProfilePage = () => {
           },
         }
       );
-      localStorage.setItem("user", JSON.stringify(res.data));
+
+      // ✅ Correctly store updated user and token
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.token);
+
       setMessage("✅ Profile updated!");
     } catch (err) {
       console.error(err);

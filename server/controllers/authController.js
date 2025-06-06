@@ -197,11 +197,17 @@ exports.resetPassword = async (req, res) => {
 
 // PATCH /api/auth/switch-role
 exports.switchRole = async (req, res) => {
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ message: "User not found" });
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-  user.role = user.role === "user" ? "host" : "user";
-  await user.save();
+    user.role = user.role === "user" ? "host" : "user";
 
-  res.json({ message: "Role switched", newRole: user.role });
+    await user.save({ validateBeforeSave: false }); // ✅ Skip full validation
+
+    res.json({ message: "Role switched", newRole: user.role });
+  } catch (error) {
+    console.error("Role switch error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
 };
