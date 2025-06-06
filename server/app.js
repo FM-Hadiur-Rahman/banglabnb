@@ -50,6 +50,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/wishlist", require("./routes/wishlist"));
 
 connectDB()
   .then(() => {

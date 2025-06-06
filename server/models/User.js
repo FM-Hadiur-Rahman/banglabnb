@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
   verificationToken: String,
 
   avatar: { type: String, default: "" },
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],
 });
 
 // Hash password before saving

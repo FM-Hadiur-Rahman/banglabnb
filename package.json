@@ -10,6 +10,7 @@
     "concurrently": "^9.1.2"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2"
   }

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const router = express.Router();
 const Booking = require("../models/Booking");
-const protect = require("../middlewares/protect");
+const protect = require("../middleware/protect");
 
 // 📥 GET /api/invoices/:bookingId
 router.get("/:bookingId", protect, async (req, res) => {

@@ -10,31 +10,37 @@ const Booking = require("../models/Booking");
 // GET all listings with optional filters
 exports.getAllListings = async (req, res) => {
   try {
-    const { location, from, to, guests } = req.query;
+    const { location, from, to, guests, type, minPrice, maxPrice } = req.query;
     const query = {};
 
-    // Location filter
+    // Flexible filters
     if (location) {
-      query.location = { $regex: location, $options: "i" };
+      query["location.address"] = { $regex: location, $options: "i" };
     }
 
-    // Guests filter
+    if (type) {
+      query.type = type; // e.g., 'hotel', 'resort'
+    }
+
     if (guests) {
       query.maxGuests = { $gte: parseInt(guests) };
     }
 
-    // Step 1: Base listings
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
     let listings = await Listing.find(query);
 
-    // Step 2: Convert date strings to Date objects
-    const dateFrom = from ? new Date(from) : null;
-    const dateTo = to ? new Date(to) : null;
-
-    // Step 3: Filter out overlapping bookings
-    if (dateFrom && dateTo) {
+    // Date-based availability filter
+    if (from && to) {
       const Booking = require("../models/Booking");
+      const dateFrom = new Date(from);
+      const dateTo = new Date(to);
 
-      const bookedListings = await Booking.find({
+      const bookedIds = await Booking.find({
         $or: [
           {
             dateFrom: { $lte: dateTo },
@@ -43,9 +49,7 @@ exports.getAllListings = async (req, res) => {
         ],
       }).distinct("listingId");
 
-      listings = listings.filter(
-        (listing) => !bookedListings.includes(listing._id.toString())
-      );
+      listings = listings.filter((l) => !bookedIds.includes(l._id.toString()));
     }
 
     res.json(listings);
