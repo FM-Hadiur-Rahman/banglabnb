@@ -18,8 +18,9 @@ exports.updateCurrentUser = async (req, res) => {
     }).select("-password");
 
     // ✅ Optional: only regenerate token if sensitive fields change
-    const token = generateToken(user);
-    res.json({ user, token });
+    // 🟩 Only generate token if sensitive fields were changed
+    // const token = generateToken(user);
+    res.json({ user });
   } catch (err) {
     res.status(500).json({ error: "Failed to update profile." });
   }
