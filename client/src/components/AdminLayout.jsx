@@ -26,6 +26,12 @@ const AdminLayout = ({ children }) => {
           <a href="/admin/bookings" className="hover:underline">
             Bookings
           </a>
+          <a href="/admin/user-breakdown" className="hover:underline">
+            User Breakdown
+          </a>
+          <a href="/admin/kyc" className="hover:underline">
+            KYC Verifications
+          </a>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

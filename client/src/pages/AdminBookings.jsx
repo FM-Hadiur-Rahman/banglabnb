@@ -42,8 +42,16 @@ const AdminBookings = () => {
               </td>
               <td>{b.listingId?.title}</td>
               <td>{b.status}</td>
-              <td>{new Date(b.checkIn).toLocaleDateString()}</td>
-              <td>{new Date(b.checkOut).toLocaleDateString()}</td>
+              <td>
+                {b.dateFrom
+                  ? new Date(b.dateFrom).toLocaleDateString("en-GB")
+                  : "—"}
+              </td>
+              <td>
+                {b.dateTo
+                  ? new Date(b.dateTo).toLocaleDateString("en-GB")
+                  : "—"}
+              </td>
             </tr>
           ))}
         </tbody>

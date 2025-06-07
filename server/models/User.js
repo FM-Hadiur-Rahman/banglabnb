@@ -40,6 +40,16 @@ const userSchema = new mongoose.Schema({
 
   avatar: { type: String, default: "" },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],
+  kyc: {
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    nidUrl: String, // NID image
+    selfieUrl: String, // Selfie with ID
+    rejectionReason: String,
+  },
 });
 
 // Hash password before saving
