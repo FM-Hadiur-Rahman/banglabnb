@@ -201,55 +201,76 @@ router.get("/revenue", protect, authorize("admin"), async (req, res) => {
       path: "listingId",
       populate: {
         path: "hostId",
-        select: "name", // optional
+        select: "name",
       },
     });
 
-    // Total revenue
-    const total = bookings.reduce((sum, b) => sum + (b.paidAmount || 0), 0);
+    const PLATFORM_FEE_PERCENT = 10;
+    const TAX_PERCENT = 5;
 
-    // Revenue per month (last 12 months)
+    let totalRevenue = 0;
+    let totalTax = 0;
+    let totalPlatformFee = 0;
+    let totalHostPayout = 0;
+
     const monthly = {};
-    bookings.forEach((b) => {
-      const month = new Date(b.createdAt).toISOString().slice(0, 7);
-      monthly[month] = (monthly[month] || 0) + (b.paidAmount || 0);
-    });
-
-    // Top listings
     const listingMap = {};
+    const hostMap = {};
+
     bookings.forEach((b) => {
+      const amount = b.paidAmount || 0;
+      const tax = (amount * TAX_PERCENT) / 100;
+      const fee = (amount * PLATFORM_FEE_PERCENT) / 100;
+      const hostIncome = amount - tax - fee;
+
+      totalRevenue += amount;
+      totalTax += tax;
+      totalPlatformFee += fee;
+      totalHostPayout += hostIncome;
+
+      const month = new Date(b.createdAt).toISOString().slice(0, 7);
+      monthly[month] = (monthly[month] || 0) + amount;
+
+      // Listings
       const listing = b.listingId;
       if (listing?._id) {
         listingMap[listing._id] = listingMap[listing._id] || {
           title: listing.title,
           total: 0,
         };
-        listingMap[listing._id].total += b.paidAmount || 0;
+        listingMap[listing._id].total += amount;
       }
-    });
-    const topListings = Object.entries(listingMap)
-      .map(([id, info]) => ({ id, ...info }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
 
-    // Top hosts
-    const hostMap = {};
-    bookings.forEach((b) => {
-      const host = b.listingId?.hostId;
+      // Hosts
+      const host = listing?.hostId;
       if (host?._id) {
         hostMap[host._id] = hostMap[host._id] || {
           name: host.name,
           total: 0,
         };
-        hostMap[host._id].total += b.paidAmount || 0;
+        hostMap[host._id].total += hostIncome;
       }
     });
+
+    const topListings = Object.entries(listingMap)
+      .map(([id, info]) => ({ id, ...info }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+
     const topHosts = Object.entries(hostMap)
       .map(([id, info]) => ({ id, ...info }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 5);
 
-    res.json({ total, monthly, topListings, topHosts });
+    res.json({
+      totalRevenue,
+      totalTax,
+      totalPlatformFee,
+      totalHostPayout,
+      monthly,
+      topListings,
+      topHosts,
+    });
   } catch (err) {
     console.error("❌ Revenue analytics error:", err);
     res.status(500).json({ message: "Failed to fetch revenue data" });

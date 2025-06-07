@@ -1,94 +1,134 @@
 // pages/AdminRevenue.jsx
 import React, { useEffect, useState } from "react";
-import AdminLayout from "../components/AdminLayout";
 import axios from "axios";
+import AdminLayout from "../components/AdminLayout";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
 
 const AdminRevenue = () => {
-  const [data, setData] = useState({
-    total: 0,
-    monthly: {},
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    totalTax: 0,
+    totalPlatformFee: 0,
+    totalHostPayout: 0,
     topListings: [],
     topHosts: [],
+    monthly: {},
   });
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/admin/revenue`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setData(res.data))
-      .catch((err) => console.error("❌ Revenue fetch failed:", err));
+    const fetchRevenue = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("user"))?.token;
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/admin/revenue`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setStats(res.data);
+      } catch (err) {
+        console.error("❌ Revenue fetch failed:", err);
+      }
+    };
+
+    fetchRevenue();
   }, []);
 
-  const chartData = Object.entries(data.monthly).map(([month, total]) => ({
-    month,
-    revenue: total,
-  }));
+  const monthlyData = Object.entries(stats.monthly || {}).map(
+    ([month, value]) => ({
+      month,
+      revenue: value,
+    })
+  );
 
   return (
     <AdminLayout>
       <h2 className="text-2xl font-bold mb-6">🧾 Revenue Analytics</h2>
 
-      <div className="mb-6 bg-white p-4 rounded shadow">
-        <h3 className="text-xl font-semibold mb-2">📊 Monthly Revenue</h3>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          title="Total Revenue"
+          value={`৳ ${(stats.totalRevenue ?? 0).toLocaleString()}`}
+        />
+        <StatCard
+          title="Govt. Tax (5%)"
+          value={`৳ ${(stats.totalTax ?? 0).toLocaleString()}`}
+        />
+        <StatCard
+          title="Platform Fee (10%)"
+          value={`৳ ${(stats.totalPlatformFee ?? 0).toLocaleString()}`}
+        />
+        <StatCard
+          title="Host Payout"
+          value={`৳ ${(stats.totalHostPayout ?? 0).toLocaleString()}`}
+        />
+      </div>
+
+      {/* Monthly Revenue Line Chart */}
+      <div className="bg-white p-6 rounded shadow mb-6">
+        <h3 className="text-lg font-semibold mb-4">📈 Monthly Revenue</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+          <LineChart data={monthlyData}>
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="#4F46E5"
-              strokeWidth={2}
-            />
+            <Line type="monotone" dataKey="revenue" stroke="#3b82f6" />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
+      {/* Top Listings and Hosts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="text-xl font-semibold mb-2">💰 Total Revenue</h3>
-          <p className="text-3xl font-bold text-green-600">
-            ৳ {data.total.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="text-xl font-semibold mb-2">🏆 Top Listings</h3>
-          <ul className="list-disc ml-4">
-            {data.topListings.map((l) => (
-              <li key={l.id}>
-                {l.title} — ৳ {l.total.toLocaleString()}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="bg-white p-4 rounded shadow md:col-span-2">
-          <h3 className="text-xl font-semibold mb-2">👑 Top Hosts</h3>
-          <ul className="list-disc ml-4">
-            {data.topHosts.map((h) => (
-              <li key={h.id}>
-                {h.name} — ৳ {h.total.toLocaleString()}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <TableCard
+          title="🏆 Top Listings"
+          data={stats.topListings ?? []}
+          type="listing"
+        />
+        <TableCard
+          title="💼 Top Hosts"
+          data={stats.topHosts ?? []}
+          type="host"
+        />
       </div>
     </AdminLayout>
   );
 };
+
+// Reusable Stat Card
+const StatCard = ({ title, value }) => (
+  <div className="bg-white rounded shadow p-4 text-center">
+    <h4 className="text-sm text-gray-500">{title}</h4>
+    <p className="text-xl font-bold text-gray-800">{value}</p>
+  </div>
+);
+
+// Reusable Table Card
+const TableCard = ({ title, data, type }) => (
+  <div className="bg-white p-4 rounded shadow">
+    <h4 className="text-lg font-semibold mb-4">{title}</h4>
+    <ul className="space-y-2">
+      {data.length === 0 ? (
+        <li className="text-gray-500 text-sm">No data available</li>
+      ) : (
+        data.map((item) => (
+          <li key={item.id} className="flex justify-between text-sm">
+            <span>{type === "listing" ? item.title : item.name}</span>
+            <span className="font-semibold">
+              ৳ {(item.total ?? 0).toLocaleString()}
+            </span>
+          </li>
+        ))
+      )}
+    </ul>
+  </div>
+);
 
 export default AdminRevenue;
