@@ -1,4 +1,6 @@
 // 📁 src/pages/MyBookingsPage.jsx
+const InvoicePreview = React.lazy(() => import("../components/InvoicePreview"));
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -68,7 +70,9 @@ const MyBookingsPage = () => {
               </span>
               {booking.paymentStatus === "paid" && (
                 <div className="mt-3">
-                  <InvoicePreview bookingId={booking._id} />
+                  <Suspense fallback={<div>Loading invoice...</div>}>
+                    <InvoicePreview booking={booking} />
+                  </Suspense>
                 </div>
               )}
             </div>
