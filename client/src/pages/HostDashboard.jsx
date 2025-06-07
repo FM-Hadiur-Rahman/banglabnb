@@ -72,12 +72,20 @@ const HostDashboard = () => {
           <h1 className="text-3xl font-bold">Welcome, {user?.name} 👋</h1>
           <p className="text-gray-600">Email: {user?.email}</p>
         </div>
-        <Link
-          to="/host/create"
-          className="mt-4 md:mt-0 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          ➕ Create New Listing
-        </Link>
+        <div className="flex gap-4 mt-4 md:mt-0">
+          <Link
+            to="/dashboard/chats"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            💬 Guest Chats
+          </Link>
+          <Link
+            to="/host/create"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            ➕ Create New Listing
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

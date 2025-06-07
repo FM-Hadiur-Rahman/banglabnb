@@ -33,6 +33,7 @@ import PaymentFailPage from "./pages/PaymentFailPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import ContactUsPage from "./pages/ContactUsPage";
+import GuestChatsRoute from "./routes/GuestChatsRoute";
 
 function App() {
   return (
@@ -149,6 +150,7 @@ function App() {
           <Route path="/payment-cancel" element={<PaymentCancelPage />} />
           <Route path="/help" element={<HelpCenterPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/dashboard/chats" element={<GuestChatsRoute />} />
         </Route>
       </Routes>
     </Router>

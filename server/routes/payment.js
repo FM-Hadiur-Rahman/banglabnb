@@ -168,6 +168,10 @@ router.post("/success", async (req, res) => {
       if (err) console.warn("⚠️ Could not delete invoice:", err);
     });
 
+    const token = jwt.sign({ id: guest._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
     //for chat between host and guest
     await axios.post(
       `${process.env.VITE_API_URL}/api/chats`,

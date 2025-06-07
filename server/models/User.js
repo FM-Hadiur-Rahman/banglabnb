@@ -10,12 +10,14 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (v) {
-        return /^\+8801[3-9][0-9]{8}$/.test(v); // Bangladeshi format
+        // Accept either +8801XXXXXXXXX or 01XXXXXXXXX
+        return /^(?:\+8801|01)[3-9][0-9]{8}$/.test(v);
       },
       message: (props) =>
         `${props.value} is not a valid Bangladeshi phone number!`,
     },
   },
+
   phoneVerified: {
     type: Boolean,
     default: false,
