@@ -3,7 +3,7 @@ const generateToken = require("../utils/generateToken");
 
 exports.updateCurrentUser = async (req, res) => {
   const updates = {};
-  const allowed = ["name", "phone", "avatar"];
+  const allowed = ["name", "phone", "avatar", "email", "password", "role"];
 
   allowed.forEach((key) => {
     const value = req.body[key];
@@ -13,15 +13,26 @@ exports.updateCurrentUser = async (req, res) => {
   });
 
   try {
+    const userBefore = await User.findById(req.user._id).select("-password");
+
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
     }).select("-password");
 
-    // ✅ Optional: only regenerate token if sensitive fields change
-    // 🟩 Only generate token if sensitive fields were changed
-    // const token = generateToken(user);
-    res.json({ user });
+    // Only regenerate token if sensitive fields changed
+    const sensitiveFields = ["email", "password", "role"];
+    const hasSensitiveChange = sensitiveFields.some(
+      (key) => updates[key] && updates[key] !== userBefore[key]
+    );
+
+    let token;
+    if (hasSensitiveChange) {
+      token = generateToken(user);
+    }
+
+    res.json({ user, token }); // token is optional
   } catch (err) {
+    console.error("❌ Failed to update user:", err);
     res.status(500).json({ error: "Failed to update profile." });
   }
 };

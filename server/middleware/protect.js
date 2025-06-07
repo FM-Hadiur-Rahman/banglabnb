@@ -9,13 +9,13 @@ const protect = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select("-password");
 
-      // Load the user object
-      const user = await User.findById(decoded._id).select("-password");
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
 
-      if (!user) return res.status(401).json({ message: "User not found" });
-
-      req.user = user; // ✅ Now you have full access to _id, role, etc.
+      req.user = user;
       next();
     } catch (err) {
       console.error("❌ Invalid token", err);
