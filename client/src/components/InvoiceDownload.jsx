@@ -3,9 +3,7 @@ import React from "react";
 const InvoiceDownload = ({ bookingId }) => {
   const handleDownload = () => {
     const token = localStorage.getItem("token");
-    const url = `${
-      import.meta.env.VITE_API_URL
-    }/api/bookings/${bookingId}/invoice`;
+    const url = `${import.meta.env.VITE_API_URL}/api/invoices/${bookingId}`;
 
     fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
