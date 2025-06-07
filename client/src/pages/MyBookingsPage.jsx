@@ -1,5 +1,4 @@
-// 📁 src/pages/MyBookingsPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 const InvoicePreview = React.lazy(() => import("../components/InvoicePreview"));
 
