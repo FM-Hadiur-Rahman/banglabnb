@@ -34,6 +34,7 @@ import PaymentCancelPage from "./pages/PaymentCancelPage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import GuestChatsRoute from "./routes/GuestChatsRoute";
+import MyWishlistPage from "./pages/MyWishlistPage";
 
 function App() {
   return (
@@ -151,6 +152,7 @@ function App() {
           <Route path="/help" element={<HelpCenterPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/dashboard/chats" element={<GuestChatsRoute />} />
+          <Route path="/wishlist" element={<MyWishlistPage />} />
         </Route>
       </Routes>
     </Router>

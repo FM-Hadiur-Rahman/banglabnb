@@ -12,6 +12,7 @@ const generateInvoice = require("../utils/generateInvoice");
 const path = require("path");
 const Notification = require("../models/Notification");
 const fs = require("fs");
+const jwt = require("jsonwebtoken");
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
