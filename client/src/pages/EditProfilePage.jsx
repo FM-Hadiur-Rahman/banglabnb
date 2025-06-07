@@ -62,8 +62,12 @@ const EditProfilePage = () => {
         }
       );
 
+      // ✅ Only store token if returned
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      localStorage.setItem("token", res.data.token);
+
       toast.success("✅ Profile updated!");
     } catch (err) {
       console.error(err);
