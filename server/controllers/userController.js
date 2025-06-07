@@ -6,7 +6,10 @@ exports.updateCurrentUser = async (req, res) => {
   const allowed = ["name", "phone", "avatar"];
 
   allowed.forEach((key) => {
-    if (req.body[key] !== undefined) updates[key] = req.body[key];
+    const value = req.body[key];
+    if (value !== undefined && value !== "") {
+      updates[key] = value;
+    }
   });
 
   try {
@@ -14,6 +17,7 @@ exports.updateCurrentUser = async (req, res) => {
       new: true,
     }).select("-password");
 
+    // ✅ Optional: only regenerate token if sensitive fields change
     const token = generateToken(user);
     res.json({ user, token });
   } catch (err) {

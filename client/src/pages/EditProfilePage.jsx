@@ -43,10 +43,18 @@ const EditProfilePage = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    const filteredPayload = {};
+    Object.entries(form).forEach(([key, value]) => {
+      if (value.trim() !== "") {
+        filteredPayload[key] = value.trim();
+      }
+    });
+
     try {
       const res = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/users/me`,
-        form,
+        filteredPayload,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -56,9 +64,7 @@ const EditProfilePage = () => {
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
-
       toast.success("✅ Profile updated!");
-      setMessage(""); // Optional: remove setMessage if using toast
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to update profile.");
