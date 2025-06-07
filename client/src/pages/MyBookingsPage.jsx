@@ -72,7 +72,7 @@ const MyBookingsPage = () => {
               {booking.paymentStatus === "paid" && (
                 <div className="mt-3">
                   <Suspense fallback={<div>Loading invoice...</div>}>
-                    <InvoiceDownload booking={booking._id} />
+                    <InvoiceDownload bookingId={booking._id} />
                   </Suspense>
                 </div>
               )}
