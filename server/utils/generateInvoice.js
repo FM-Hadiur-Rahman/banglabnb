@@ -3,7 +3,7 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
 
-const generateInvoice = async (booking, listing, guest) => {
+const generateInvoice = async (booking, listing, guest, streamTo = null) => {
   return new Promise(async (resolve, reject) => {
     const invoiceDir = path.join(__dirname, "../invoices");
     if (!fs.existsSync(invoiceDir))
@@ -13,8 +13,18 @@ const generateInvoice = async (booking, listing, guest) => {
     const qrPath = path.join(invoiceDir, `qr-${booking._id}.png`);
     const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-    const stream = fs.createWriteStream(filePath);
-    doc.pipe(stream);
+    // 🔀 Pipe based on context
+    if (streamTo) {
+      doc.pipe(streamTo); // ✅ stream to browser
+    } else {
+      const stream = fs.createWriteStream(filePath);
+      doc.pipe(stream);
+      stream.on("finish", () => {
+        resolve(filePath);
+        fs.unlink(qrPath, () => {});
+      });
+      stream.on("error", reject);
+    }
 
     // Load resources
     const logoPath = path.join(__dirname, "../assets/banglabnb-logo.png");
@@ -128,11 +138,10 @@ const generateInvoice = async (booking, listing, guest) => {
       });
 
     doc.end();
-    stream.on("finish", () => {
-      resolve(filePath);
+    if (streamTo) {
       fs.unlink(qrPath, () => {});
-    });
-    stream.on("error", reject);
+      resolve(); // ✅ finish for browser streaming
+    }
   });
 };
 

@@ -4,11 +4,12 @@ const path = require("path");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const protect = require("../middleware/protect");
+const generateInvoice = require("../utils/generateInvoice"); // make sure this path is correct
 
 // 📥 GET /api/invoices/:bookingId
 router.get("/:bookingId", protect, async (req, res) => {
   const { bookingId } = req.params;
-  const userId = req.user._id; // from isAuthenticated middleware
+  const userId = req.user._id;
 
   try {
     const booking = await Booking.findById(bookingId)
@@ -17,7 +18,6 @@ router.get("/:bookingId", protect, async (req, res) => {
 
     if (!booking) return res.status(404).send("Booking not found");
 
-    // 🔐 Access Control: guest or host only
     const isGuest = booking.guestId._id.equals(userId);
     const isHost = booking.listingId.hostId?.equals(userId);
 
@@ -25,19 +25,18 @@ router.get("/:bookingId", protect, async (req, res) => {
       return res.status(403).send("Unauthorized to access this invoice");
     }
 
-    const invoicePath = path.join(
-      __dirname,
-      `../invoices/invoice-${booking._id}.pdf`
+    // 🧾 Set headers to download
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=BanglaBnB-Invoice-${booking._id}.pdf`
     );
+    res.setHeader("Content-Type", "application/pdf");
 
-    if (!fs.existsSync(invoicePath)) {
-      return res.status(404).send("Invoice not generated yet.");
-    }
-
-    res.download(invoicePath, `BanglaBnB-Invoice-${booking._id}.pdf`);
+    // 🪄 Regenerate and stream to browser
+    await generateInvoice(booking, booking.listingId, booking.guestId, res);
   } catch (err) {
-    console.error("❌ Invoice download error:", err);
-    res.status(500).send("Server error");
+    console.error("❌ Invoice generation error:", err);
+    res.status(500).send("Failed to generate invoice");
   }
 });
 
