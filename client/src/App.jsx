@@ -2,48 +2,142 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Layouts
 import MainLayout from "./layouts/MainLayout";
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+// General Pages
 import Home from "./pages/Home";
 import ListingsPage from "./pages/ListingsPage";
-import HostDashboard from "./pages/HostDashboard";
-import CreateListingPage from "./pages/CreateListingPage";
-import EditListingPage from "./pages/EditListingPage";
+import ListingDetailPage from "./pages/ListingDetailPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import ListingDetailPage from "./pages/ListingDetailPage";
-import MyBookingsPage from "./pages/MyBookingsPage";
-import HostListingBookingsPage from "./pages/HostListingBookingPage";
+import RegisterStep1 from "./pages/RegisterStep1";
+import RegisterStep2 from "./pages/RegisterStep2";
 import VerifyEmail from "./pages/VerifyEmail";
 import VerifyNotice from "./pages/VerifyNotice";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminUsers from "./pages/AdminUsers";
-import AdminBookings from "./pages/AdminBookings";
-import AdminListings from "./pages/AdminListings";
-import RegisterStep1 from "./pages/RegisterStep1";
-import RegisterStep2 from "./pages/RegisterStep2";
+import HelpCenterPage from "./pages/HelpCenterPage";
+import ContactUsPage from "./pages/ContactUsPage";
+import MyWishlistPage from "./pages/MyWishlistPage";
+
+// User Dashboard
+import DashboardPage from "./pages/DashboardPage";
 import DashboardBookings from "./pages/DashboardBookings";
 import EditProfilePage from "./pages/EditProfilePage";
 import MyAccountPage from "./pages/MyAccoountPage";
+import GuestChatsRoute from "./routes/GuestChatsRoute";
+
+// Payment Pages
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
-import HelpCenterPage from "./pages/HelpCenterPage";
-import ContactUsPage from "./pages/ContactUsPage";
-import GuestChatsRoute from "./routes/GuestChatsRoute";
-import MyWishlistPage from "./pages/MyWishlistPage";
+
+// Host Pages
+import HostDashboard from "./pages/HostDashboard";
+import CreateListingPage from "./pages/CreateListingPage";
+import EditListingPage from "./pages/EditListingPage";
+import HostListingBookingsPage from "./pages/HostListingBookingPage";
+
+// Booking Pages
+import MyBookingsPage from "./pages/MyBookingsPage";
+
+// Admin Pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminListings from "./pages/AdminListings";
+import AdminBookings from "./pages/AdminBookings";
+import AdminKYC from "./pages/AdminKYC";
+import AdminUserBreakdown from "./pages/AdminUserBreakdown";
+import AdminFlagged from "./pages/AdminFlagged";
+import AdminRevenue from "./pages/AdminRevenue";
 
 function App() {
   return (
     <Router>
       <ToastContainer position="top-left" autoClose={3000} />
       <Routes>
+        {/* Main Layout Wrapper */}
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} /> {/* ✅ Fix this line */}
+          {/* Public Routes */}
+          <Route index element={<Home />} />
           <Route path="listings" element={<ListingsPage />} />
+          <Route path="listings/:id" element={<ListingDetailPage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterStep1 />} />
+          <Route path="register/step2" element={<RegisterStep2 />} />
+          <Route path="verify-email" element={<VerifyEmail />} />
+          <Route path="verify" element={<VerifyNotice />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="help" element={<HelpCenterPage />} />
+          <Route path="contact" element={<ContactUsPage />} />
+
+          {/* Payment Results */}
+          <Route path="payment-success" element={<PaymentSuccessPage />} />
+          <Route path="payment-fail" element={<PaymentFailPage />} />
+          <Route path="payment-cancel" element={<PaymentCancelPage />} />
+
+          {/* Guest/User Protected Routes */}
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard/bookings"
+            element={
+              <ProtectedRoute>
+                <DashboardBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <EditProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="my-account"
+            element={
+              <ProtectedRoute>
+                <MyAccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard/chats"
+            element={
+              <ProtectedRoute>
+                <GuestChatsRoute />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="wishlist"
+            element={
+              <ProtectedRoute>
+                <MyWishlistPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Host Protected Routes */}
           <Route
             path="host/dashboard"
             element={
@@ -68,37 +162,18 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
           <Route
-            path="dashboard"
+            path="host/listings/:id/bookings"
             element={
-              <ProtectedRoute>
-                <DashboardPage />
+              <ProtectedRoute requiredRole="host">
+                <HostListingBookingsPage />
               </ProtectedRoute>
             }
           />
-          <Route path="/listings/:id" element={<ListingDetailPage />} />
+
+          {/* Admin Protected Routes */}
           <Route
-            path="my-bookings"
-            element={
-              <ProtectedRoute>
-                <MyBookingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/host/listings/:id/bookings"
-            element={<HostListingBookingsPage />}
-          />
-          <Route path="/register" element={<RegisterStep1 />} />
-          <Route path="/register/step2" element={<RegisterStep2 />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/verify" element={<VerifyNotice />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route
-            path="/admin/dashboard"
+            path="admin/dashboard"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
@@ -106,7 +181,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/users"
+            path="admin/users"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminUsers />
@@ -114,7 +189,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/listings"
+            path="admin/listings"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminListings />
@@ -122,37 +197,46 @@ function App() {
             }
           />
           <Route
-            path="/admin/bookings"
+            path="admin/bookings"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminBookings />
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard/bookings" element={<DashboardBookings />} />
           <Route
-            path="/profile"
+            path="admin/kyc"
             element={
-              <ProtectedRoute>
-                <EditProfilePage />
+              <ProtectedRoute requiredRole="admin">
+                <AdminKYC />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/my-account"
+            path="admin/user-breakdown"
             element={
-              <ProtectedRoute>
-                <MyAccountPage />
+              <ProtectedRoute requiredRole="admin">
+                <AdminUserBreakdown />
               </ProtectedRoute>
             }
           />
-          <Route path="/payment-success" element={<PaymentSuccessPage />} />
-          <Route path="/payment-fail" element={<PaymentFailPage />} />
-          <Route path="/payment-cancel" element={<PaymentCancelPage />} />
-          <Route path="/help" element={<HelpCenterPage />} />
-          <Route path="/contact" element={<ContactUsPage />} />
-          <Route path="/dashboard/chats" element={<GuestChatsRoute />} />
-          <Route path="/wishlist" element={<MyWishlistPage />} />
+          <Route
+            path="admin/flagged"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminFlagged />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="admin/revenue"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminRevenue />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>

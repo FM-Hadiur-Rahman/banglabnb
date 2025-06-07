@@ -197,9 +197,13 @@ router.put(
 // Revenue analytics route
 router.get("/revenue", protect, authorize("admin"), async (req, res) => {
   try {
-    const bookings = await Booking.find({ paymentStatus: "paid" }).populate(
-      "listingId hostId"
-    );
+    const bookings = await Booking.find({ paymentStatus: "paid" }).populate({
+      path: "listingId",
+      populate: {
+        path: "hostId",
+        select: "name", // optional
+      },
+    });
 
     // Total revenue
     const total = bookings.reduce((sum, b) => sum + (b.paidAmount || 0), 0);
@@ -207,20 +211,20 @@ router.get("/revenue", protect, authorize("admin"), async (req, res) => {
     // Revenue per month (last 12 months)
     const monthly = {};
     bookings.forEach((b) => {
-      const month = new Date(b.createdAt).toISOString().slice(0, 7); // e.g. "2025-06"
+      const month = new Date(b.createdAt).toISOString().slice(0, 7);
       monthly[month] = (monthly[month] || 0) + (b.paidAmount || 0);
     });
 
     // Top listings
     const listingMap = {};
     bookings.forEach((b) => {
-      const id = b.listingId?._id;
-      if (id) {
-        listingMap[id] = listingMap[id] || {
-          title: b.listingId.title,
+      const listing = b.listingId;
+      if (listing?._id) {
+        listingMap[listing._id] = listingMap[listing._id] || {
+          title: listing.title,
           total: 0,
         };
-        listingMap[id].total += b.paidAmount || 0;
+        listingMap[listing._id].total += b.paidAmount || 0;
       }
     });
     const topListings = Object.entries(listingMap)
@@ -231,13 +235,13 @@ router.get("/revenue", protect, authorize("admin"), async (req, res) => {
     // Top hosts
     const hostMap = {};
     bookings.forEach((b) => {
-      const hostId = b.listingId?.hostId?._id;
-      if (hostId) {
-        hostMap[hostId] = hostMap[hostId] || {
-          name: b.listingId.hostId.name,
+      const host = b.listingId?.hostId;
+      if (host?._id) {
+        hostMap[host._id] = hostMap[host._id] || {
+          name: host.name,
           total: 0,
         };
-        hostMap[hostId].total += b.paidAmount || 0;
+        hostMap[host._id].total += b.paidAmount || 0;
       }
     });
     const topHosts = Object.entries(hostMap)
