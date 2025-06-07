@@ -194,5 +194,62 @@ router.put(
     res.json({ message: "✅ Unflagged", item });
   }
 );
+// Revenue analytics route
+router.get("/revenue", protect, authorize("admin"), async (req, res) => {
+  try {
+    const bookings = await Booking.find({ paymentStatus: "paid" }).populate(
+      "listingId hostId"
+    );
+
+    // Total revenue
+    const total = bookings.reduce((sum, b) => sum + (b.paidAmount || 0), 0);
+
+    // Revenue per month (last 12 months)
+    const monthly = {};
+    bookings.forEach((b) => {
+      const month = new Date(b.createdAt).toISOString().slice(0, 7); // e.g. "2025-06"
+      monthly[month] = (monthly[month] || 0) + (b.paidAmount || 0);
+    });
+
+    // Top listings
+    const listingMap = {};
+    bookings.forEach((b) => {
+      const id = b.listingId?._id;
+      if (id) {
+        listingMap[id] = listingMap[id] || {
+          title: b.listingId.title,
+          total: 0,
+        };
+        listingMap[id].total += b.paidAmount || 0;
+      }
+    });
+    const topListings = Object.entries(listingMap)
+      .map(([id, info]) => ({ id, ...info }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+
+    // Top hosts
+    const hostMap = {};
+    bookings.forEach((b) => {
+      const hostId = b.listingId?.hostId?._id;
+      if (hostId) {
+        hostMap[hostId] = hostMap[hostId] || {
+          name: b.listingId.hostId.name,
+          total: 0,
+        };
+        hostMap[hostId].total += b.paidAmount || 0;
+      }
+    });
+    const topHosts = Object.entries(hostMap)
+      .map(([id, info]) => ({ id, ...info }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+
+    res.json({ total, monthly, topListings, topHosts });
+  } catch (err) {
+    console.error("❌ Revenue analytics error:", err);
+    res.status(500).json({ message: "Failed to fetch revenue data" });
+  }
+});
 
 module.exports = router;
