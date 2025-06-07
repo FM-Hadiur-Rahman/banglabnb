@@ -1,8 +1,7 @@
 // 📁 src/pages/MyBookingsPage.jsx
-const InvoicePreview = React.lazy(() => import("../components/InvoicePreview"));
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const InvoicePreview = React.lazy(() => import("../components/InvoicePreview"));
 
 const MyBookingsPage = () => {
   const [bookings, setBookings] = useState([]);
