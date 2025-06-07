@@ -1,6 +1,9 @@
 import React, { useEffect, useState, Suspense } from "react";
 import axios from "axios";
-const InvoicePreview = React.lazy(() => import("../components/InvoicePreview"));
+
+const InvoiceDownload = React.lazy(() =>
+  import("../components/InvoiceDownload")
+);
 
 const MyBookingsPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -69,7 +72,7 @@ const MyBookingsPage = () => {
               {booking.paymentStatus === "paid" && (
                 <div className="mt-3">
                   <Suspense fallback={<div>Loading invoice...</div>}>
-                    <InvoicePreview booking={booking} />
+                    <InvoiceDownload booking={booking._id} />
                   </Suspense>
                 </div>
               )}
