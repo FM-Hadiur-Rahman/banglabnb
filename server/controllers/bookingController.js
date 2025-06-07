@@ -36,7 +36,7 @@ exports.createBooking = async (req, res) => {
 
     // ✅ Create the booking
     const newBooking = await Booking.create({
-      guestId: req.user.id,
+      guestId: req.user._id,
       listingId,
       dateFrom,
       dateTo,
@@ -54,7 +54,7 @@ exports.createBooking = async (req, res) => {
 // ✅ Get all bookings made by the current user (guest)
 exports.getBookingsByGuest = async (req, res) => {
   try {
-    const bookings = await Booking.find({ guestId: req.user.id })
+    const bookings = await Booking.find({ guestId: req.user._id })
       .populate("listingId")
       .sort({ createdAt: -1 });
     res.json(bookings);
@@ -68,7 +68,7 @@ exports.getBookingsByGuest = async (req, res) => {
 // ✅ Get all bookings for listings owned by the current host
 exports.getBookingsByHost = async (req, res) => {
   try {
-    const hostListings = await Listing.find({ hostId: req.user.id });
+    const hostListings = await Listing.find({ hostId: req.user._id });
     const listingIds = hostListings.map((l) => l._id);
     const bookings = await Booking.find({ listingId: { $in: listingIds } })
       .populate("guestId")
@@ -100,12 +100,12 @@ exports.getBookingsForListing = async (req, res) => {
 // ✅ Accept a booking
 exports.acceptBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await Booking.findById(req.params._id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     // Only host can accept
     const listing = await Listing.findById(booking.listingId);
-    if (listing.hostId.toString() !== req.user.id)
+    if (listing.hostId.toString() !== req.user._id)
       return res.status(403).json({ message: "Not authorized" });
 
     booking.status = "confirmed";
@@ -134,14 +134,14 @@ exports.acceptBooking = async (req, res) => {
 // ✅ Cancel a booking
 exports.cancelBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await Booking.findById(req.params._id);
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     // Find the listing to check host ownership
     const listing = await Listing.findById(booking.listingId);
-    const isHost = listing.hostId.toString() === req.user.id;
-    const isGuest = booking.guestId.toString() === req.user.id;
+    const isHost = listing.hostId.toString() === req.user._id;
+    const isGuest = booking.guestId.toString() === req.user._id;
 
     if (!isHost && !isGuest) {
       return res
@@ -180,8 +180,8 @@ exports.cancelBooking = async (req, res) => {
 
 // ✅ Check-in
 exports.checkIn = async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
-  if (!booking || booking.guestId.toString() !== req.user.id)
+  const booking = await Booking.findById(req.params._id);
+  if (!booking || booking.guestId.toString() !== req.user._id)
     return res.status(403).json({ message: "Unauthorized" });
 
   const now = new Date();
@@ -195,8 +195,8 @@ exports.checkIn = async (req, res) => {
 
 // ✅ Check-out
 exports.checkOut = async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
-  if (!booking || booking.guestId.toString() !== req.user.id)
+  const booking = await Booking.findById(req.params._id);
+  if (!booking || booking.guestId.toString() !== req.user._id)
     return res.status(403).json({ message: "Unauthorized" });
 
   const now = new Date();
