@@ -6,6 +6,8 @@ const User = require("../models/User");
 const Listing = require("../models/Listing");
 const Booking = require("../models/Booking");
 
+const Payout = require("../models/Payout"); // 👈 import the model
+
 // Example admin-only route
 router.get("/stats", protect, authorize("admin"), async (req, res) => {
   const users = await User.countDocuments();
@@ -276,5 +278,42 @@ router.get("/revenue", protect, authorize("admin"), async (req, res) => {
     res.status(500).json({ message: "Failed to fetch revenue data" });
   }
 });
+
+// GET: Fetch all pending payouts
+router.get(
+  "/payouts/pending",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const payouts = await Payout.find({ status: "pending" })
+        .populate("bookingId", "paidAmount createdAt")
+        .populate("hostId", "name email phone");
+
+      res.json(payouts);
+    } catch (err) {
+      console.error("❌ Failed to fetch pending payouts:", err);
+      res.status(500).json({ message: "Failed to fetch payouts" });
+    }
+  }
+);
+router.put(
+  "/payouts/:id/mark-paid",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const payout = await Payout.findByIdAndUpdate(
+        req.params.id,
+        { status: "paid", date: new Date() },
+        { new: true }
+      );
+      res.json({ message: "✅ Payout marked as paid", payout });
+    } catch (err) {
+      console.error("❌ Failed to update payout:", err);
+      res.status(500).json({ message: "Failed to update payout" });
+    }
+  }
+);
 
 module.exports = router;

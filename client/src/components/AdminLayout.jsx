@@ -37,6 +37,9 @@ const AdminLayout = ({ children }) => {
           <Link to="/admin/revenue" className="hover:underline">
             💰 Revenue Analytics
           </Link>
+          <Link to="/admin/payouts" className="...">
+            💸 Payouts
+          </Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

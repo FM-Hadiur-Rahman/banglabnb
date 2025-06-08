@@ -13,6 +13,7 @@ const path = require("path");
 const Notification = require("../models/Notification");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const Payout = require("../models/Payout");
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
@@ -185,6 +186,22 @@ router.post("/success", async (req, res) => {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
+    const TAX = 5; // percent
+    const PLATFORM_FEE = 10; // percent
+
+    const gross = booking.paidAmount;
+    const tax = (gross * TAX) / 100;
+    const fee = (gross * PLATFORM_FEE) / 100;
+    const hostPayout = gross - tax - fee;
+
+    await Payout.create({
+      bookingId: booking._id,
+      hostId: listing.hostId?._id || listing.ownerId,
+      amount: hostPayout,
+      method: "manual", // or 'sslcommerz' if integrated payout later
+      status: "pending",
+      notes: `Auto-created after payment of ৳${gross}`,
+    });
 
     // ✅ Redirect
     res.redirect("https://banglabnb.com/payment-success?status=paid");

@@ -52,6 +52,7 @@ import AdminKYC from "./pages/AdminKYC";
 import AdminUserBreakdown from "./pages/AdminUserBreakdown";
 import AdminFlagged from "./pages/AdminFlagged";
 import AdminRevenue from "./pages/AdminRevenue";
+import AdminPayouts from "./pages/AdminPayouts";
 
 function App() {
   return (
@@ -237,6 +238,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/admin/payouts" element={<AdminPayouts />} />
         </Route>
       </Routes>
     </Router>
