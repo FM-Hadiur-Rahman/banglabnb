@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
+const { cloudinary } = require("../config/cloudinary"); // adjust the path if needed
 
 exports.registerStep1 = async (req, res) => {
   try {
@@ -61,22 +62,42 @@ exports.registerStep1 = async (req, res) => {
 };
 
 exports.verifyIdentityHandler = async (req, res) => {
-  const { userId } = req.body;
-  const { idDocument, livePhoto } = req.files;
+  const { userId, livePhotoBase64 } = req.body;
+  const { idDocument, livePhoto } = req.files || {};
 
-  if (!userId || !idDocument || !livePhoto)
-    return res.status(400).json({ message: "Missing required files or ID." });
+  if (!userId || !idDocument)
+    return res
+      .status(400)
+      .json({ message: "Missing required ID document or user ID." });
 
   const user = await User.findById(userId);
   if (!user) return res.status(404).json({ message: "User not found" });
 
-  user.idDocumentUrl = idDocument[0].path;
-  user.livePhotoUrl = livePhoto[0].path;
+  // ✅ ID Document via Cloudinary (already handled by multer)
+  user.idDocumentUrl = idDocument[0].path; // this will be Cloudinary URL
+
+  // ✅ Handle live photo from either multer or base64
+  if (livePhoto && livePhoto[0]) {
+    user.livePhotoUrl = livePhoto[0].path;
+  } else if (livePhotoBase64) {
+    try {
+      const result = await cloudinary.uploader.upload(livePhotoBase64, {
+        folder: "banglabnb/verifications",
+        public_id: `livePhoto-${Date.now()}`,
+      });
+      user.livePhotoUrl = result.secure_url;
+    } catch (err) {
+      console.error("❌ Cloudinary base64 upload failed:", err.message);
+      return res.status(500).json({ message: "Failed to upload selfie image" });
+    }
+  } else {
+    return res.status(400).json({ message: "Live photo is required" });
+  }
+
   user.signupStep = 2;
   user.identityVerified = false;
 
   await user.save();
-
   res.status(200).json({ message: "Identity verification submitted" });
 };
 

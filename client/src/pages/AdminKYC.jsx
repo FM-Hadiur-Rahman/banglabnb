@@ -53,14 +53,15 @@ const AdminKYC = () => {
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <img
-                  src={user.kyc?.nidUrl}
+                  src={user.idDocumentUrl}
                   alt="NID"
-                  className="w-full h-40 object-cover rounded"
+                  className="w-48 h-auto rounded shadow"
                 />
+
                 <img
-                  src={user.kyc?.selfieUrl}
+                  src={user.livePhotoUrl}
                   alt="Selfie"
-                  className="w-full h-40 object-cover rounded"
+                  className="w-48 h-auto rounded shadow"
                 />
               </div>
 

@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import SelfieCapture from "../components/SelfieCapture"; // ✅ import it
 
 const SignupFormStep2 = () => {
   const [idDocument, setIdDocument] = useState(null);
-  const [livePhoto, setLivePhoto] = useState(null);
+  // in SignupFormStep2.jsx
+  const [livePhotoFile, setLivePhotoFile] = useState(null);
+  const [livePhotoBase64, setLivePhotoBase64] = useState(null);
+
   const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
@@ -17,7 +21,12 @@ const SignupFormStep2 = () => {
     const formData = new FormData();
     formData.append("userId", userId);
     formData.append("idDocument", idDocument);
-    formData.append("livePhoto", livePhoto);
+
+    if (livePhotoFile) {
+      formData.append("livePhoto", livePhotoFile);
+    } else if (livePhotoBase64) {
+      formData.append("livePhotoBase64", livePhotoBase64);
+    }
 
     try {
       await axios.post(
@@ -56,12 +65,22 @@ const SignupFormStep2 = () => {
         required
       />
 
-      <label className="block">Upload Live Photo Holding ID</label>
+      <label className="block">Upload Live Photo Holding ID (Optional)</label>
       <input
         type="file"
         accept="image/*"
-        onChange={(e) => setLivePhoto(e.target.files[0])}
-        required
+        onChange={(e) => {
+          setLivePhotoBase64(null);
+          setLivePhotoFile(e.target.files[0]);
+        }}
+      />
+
+      <p className="text-sm text-gray-500">OR take a live selfie</p>
+      <SelfieCapture
+        onCapture={(img) => {
+          setLivePhotoFile(null); // disable file upload if using camera
+          setLivePhotoBase64(img);
+        }}
       />
 
       <button

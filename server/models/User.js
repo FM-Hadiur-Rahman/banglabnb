@@ -46,9 +46,13 @@ const userSchema = new mongoose.Schema({
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-    nidUrl: String, // NID image
-    selfieUrl: String, // Selfie with ID
-    rejectionReason: String,
+    nidUrl: String,
+    selfieUrl: String,
+    reason: {
+      type: String,
+      default: "",
+    },
+    timestamp: Date,
   },
 });
 
