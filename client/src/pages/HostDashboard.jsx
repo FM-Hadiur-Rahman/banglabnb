@@ -74,7 +74,7 @@ const HostDashboard = () => {
         </div>
         <div className="flex gap-4 mt-4 md:mt-0">
           <Link
-            to="/dashboard/chats"
+            to="/dashboard/host/chats"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
           >
             💬 Guest Chats

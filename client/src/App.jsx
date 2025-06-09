@@ -28,6 +28,7 @@ import DashboardBookings from "./pages/DashboardBookings";
 import EditProfilePage from "./pages/EditProfilePage";
 import MyAccountPage from "./pages/MyAccoountPage";
 import GuestChatsRoute from "./routes/GuestChatsRoute";
+import HostChatsRoute from "./routes/HostChatsRoute";
 
 // Payment Pages
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
@@ -129,6 +130,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/dashboard/host/chats" element={<HostChatsRoute />} />
           <Route
             path="wishlist"
             element={
