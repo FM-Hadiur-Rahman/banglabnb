@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import Webcam from "react-webcam";
 
 const SelfieCapture = ({ onCapture }) => {
   const webcamRef = useRef(null);
