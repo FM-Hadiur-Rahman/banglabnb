@@ -154,11 +154,15 @@ exports.loginUser = async (req, res) => {
 
     // ✅ Add isVerified to response
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isVerified: user.isVerified,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        avatar: user.avatar || "",
+        role: user.role,
+        isVerified: user.isVerified,
+      },
       token: generateToken(user),
     });
   } catch (err) {

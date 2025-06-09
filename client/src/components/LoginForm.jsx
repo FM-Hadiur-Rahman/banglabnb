@@ -38,18 +38,7 @@ const LoginForm = () => {
 
       // ✅ Save token & user only if verified
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          _id: res.data._id,
-          name: res.data.name,
-          email: res.data.email,
-          phone: res.data.phone,
-          role: res.data.role,
-          token: res.data.token,
-          isVerified: res.data.isVerified,
-        })
-      );
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       setMessage("✅ Logged in successfully!");
       setFormData({ email: "", password: "" });
