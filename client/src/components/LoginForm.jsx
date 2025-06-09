@@ -30,7 +30,7 @@ const LoginForm = () => {
         }
       );
 
-      if (!res.data.isVerified) {
+      if (!res.data.user?.isVerified) {
         alert("⚠️ Please verify your email before logging in.");
         setIsLoading(false);
         return;
@@ -44,7 +44,7 @@ const LoginForm = () => {
       setFormData({ email: "", password: "" });
 
       // ✅ Redirect based on role
-      const userRole = res.data.role || "user";
+      const userRole = res.data.user?.role || "user";
       navigate(
         userRole === "admin"
           ? "/admin/dashboard"
