@@ -23,6 +23,7 @@ router.post(
   "/signup/step2",
   upload.fields([
     { name: "idDocument", maxCount: 1 },
+    { name: "idBack", maxCount: 1 }, // ✅ You must add this
     { name: "livePhoto", maxCount: 1 },
   ]),
   checkSignupStep,

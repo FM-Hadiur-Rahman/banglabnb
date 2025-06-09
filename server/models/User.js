@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   idDocumentUrl: String,
+  idBackUrl: String,
   livePhotoUrl: String,
   identityVerified: { type: Boolean, default: false },
   signupStep: { type: Number, default: 1 },

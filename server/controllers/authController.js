@@ -48,7 +48,7 @@ exports.registerStep1 = async (req, res) => {
       html: `<h2>Hi ${name},</h2>
       <p>Thanks for signing up as a ${role}.</p>
       <p>Please verify your email by clicking the link below:</p>
-      <a href="${verifyUrl}">Verify Email</a>`,
+      <a href="${verifyUrl}">Verify Email, by clicking this link</a>`,
     });
 
     res.status(201).json({
@@ -63,20 +63,22 @@ exports.registerStep1 = async (req, res) => {
 
 exports.verifyIdentityHandler = async (req, res) => {
   const { userId, livePhotoBase64 } = req.body;
-  const { idDocument, livePhoto } = req.files || {};
+  const { idDocument, idBack, livePhoto } = req.files || {};
 
-  if (!userId || !idDocument)
+  if (!userId || !idDocument || !idBack) {
     return res
       .status(400)
-      .json({ message: "Missing required ID document or user ID." });
+      .json({ message: "Missing required ID document, ID back, or user ID." });
+  }
 
   const user = await User.findById(userId);
   if (!user) return res.status(404).json({ message: "User not found" });
 
-  // ✅ ID Document via Cloudinary (already handled by multer)
-  user.idDocumentUrl = idDocument[0].path; // this will be Cloudinary URL
+  // ✅ ID Front & Back via multer (already handled by Cloudinary)
+  user.idDocumentUrl = idDocument[0].path; // Front side
+  user.idBackUrl = idBack[0].path; // ✅ Back side (NEW)
 
-  // ✅ Handle live photo from either multer or base64
+  // ✅ Live photo via file or base64
   if (livePhoto && livePhoto[0]) {
     user.livePhotoUrl = livePhoto[0].path;
   } else if (livePhotoBase64) {

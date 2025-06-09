@@ -5,6 +5,8 @@ import SelfieCapture from "../components/SelfieCapture"; // ✅ import it
 
 const SignupFormStep2 = () => {
   const [idDocument, setIdDocument] = useState(null);
+  const [idBack, setIdBack] = useState(null);
+
   // in SignupFormStep2.jsx
   const [livePhotoFile, setLivePhotoFile] = useState(null);
   const [livePhotoBase64, setLivePhotoBase64] = useState(null);
@@ -21,6 +23,7 @@ const SignupFormStep2 = () => {
     const formData = new FormData();
     formData.append("userId", userId);
     formData.append("idDocument", idDocument);
+    formData.append("idBack", idBack); // ✅ NEW
 
     if (livePhotoFile) {
       formData.append("livePhoto", livePhotoFile);
@@ -62,6 +65,13 @@ const SignupFormStep2 = () => {
         type="file"
         accept="image/*,application/pdf"
         onChange={(e) => setIdDocument(e.target.files[0])}
+        required
+      />
+      <label className="block">Upload Back Side of ID</label>
+      <input
+        type="file"
+        accept="image/*,application/pdf"
+        onChange={(e) => setIdBack(e.target.files[0])}
         required
       />
 
