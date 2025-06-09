@@ -130,7 +130,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard/host/chats" element={<HostChatsRoute />} />
+          <Route
+            path="/dashboard/host/chats"
+            element={
+              <ProtectedRoute requiredRole="host">
+                <HostChatsRoute />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="wishlist"
             element={
