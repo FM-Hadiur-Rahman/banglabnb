@@ -37,7 +37,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user?.role === "host") {
       axios
-        .get(`${import.meta.env.VITE_API_URL}/api/chats/host`, {
+        .get(`${import.meta.env.VITE_API_URL}/api/chats`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
         .then((res) => setChats(res.data))

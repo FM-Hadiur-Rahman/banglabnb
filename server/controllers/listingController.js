@@ -73,9 +73,21 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
-    const imageUrls = (req.files || []).map((file) => file.path);
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No images uploaded" });
+    }
 
-    const location = JSON.parse(req.body.location);
+    let location;
+    try {
+      location =
+        typeof req.body.location === "string"
+          ? JSON.parse(req.body.location)
+          : req.body.location;
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid location format" });
+    }
+
+    const imageUrls = req.files.map((file) => file.path);
 
     const newListing = await Listing.create({
       title: req.body.title,
@@ -92,7 +104,9 @@ exports.createListing = async (req, res) => {
     res.status(201).json(newListing);
   } catch (err) {
     console.error("❌ Listing creation failed:", err);
-    res.status(500).json({ message: "Listing creation failed" });
+    res
+      .status(500)
+      .json({ message: "Listing creation failed", error: err.message });
   }
 };
 
