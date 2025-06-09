@@ -182,7 +182,7 @@ router.post("/success", async (req, res) => {
           {
             bookingId: booking._id,
             listingId: listing._id,
-            hostId: listing.ownerId,
+            hostId: listing.hostId,
           },
           {
             headers: { Authorization: `Bearer ${token}` },

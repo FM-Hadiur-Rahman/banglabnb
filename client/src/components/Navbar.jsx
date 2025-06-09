@@ -11,7 +11,9 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
   const token = localStorage.getItem("token");
   const isLoggedIn = user && token && user.isVerified;
 
@@ -83,7 +85,7 @@ const Navbar = () => {
                 className="hover:text-green-600 font-medium flex items-center space-x-2"
               >
                 <img
-                  src={user.avatar || "/default-avatar.png"}
+                  src={user?.avatar || "/default-avatar.png"}
                   alt="Profile"
                   className="w-8 h-8 rounded-full object-cover"
                 />
