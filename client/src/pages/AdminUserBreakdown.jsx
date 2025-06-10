@@ -10,7 +10,7 @@ const AdminUserBreakdown = () => {
   });
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/admin/user-breakdown`, {
         headers: { Authorization: `Bearer ${token}` },

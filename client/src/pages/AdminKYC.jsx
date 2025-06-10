@@ -6,7 +6,7 @@ const AdminKYC = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
 
   const fetchPending = async () => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
     const res = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/admin/kyc/pending`,
       {
@@ -23,7 +23,7 @@ const AdminKYC = () => {
   const handleKycAction = async (userId, action) => {
     const reason =
       action === "rejected" ? prompt("Reason for rejection?") : null;
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
 
     await axios.patch(
       `${import.meta.env.VITE_API_URL}/api/admin/kyc/${userId}`,

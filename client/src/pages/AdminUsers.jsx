@@ -6,7 +6,7 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
 
   const fetchUsers = async () => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
     const res = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/admin/users`,
       {
@@ -18,7 +18,7 @@ const AdminUsers = () => {
 
   const deleteUser = async (id) => {
     if (!confirm("Are you sure?")) return;
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
     await axios.delete(
       `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
       {

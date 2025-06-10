@@ -8,7 +8,7 @@ const AdminPayouts = () => {
 
   const fetchPayouts = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.token;
+      const token = localStorage.getItem("token");
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/payouts/pending`,
         {
@@ -27,7 +27,7 @@ const AdminPayouts = () => {
       return;
 
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.token;
+      const token = localStorage.getItem("token");
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/admin/payouts/${id}/mark-paid`,
         {},

@@ -7,7 +7,7 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
 
   const fetchBookings = async () => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = localStorage.getItem("token");
     const res = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/admin/bookings`,
       {

@@ -25,7 +25,7 @@ const AdminRevenue = () => {
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
-        const token = JSON.parse(localStorage.getItem("user"))?.token;
+        const token = localStorage.getItem("token");
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/admin/revenue`,
           {
