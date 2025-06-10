@@ -11,32 +11,11 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-
+  const token = localStorage.getItem("token");
   const isLoggedIn = user && token && user.isVerified;
-
-  // Sync localStorage -> state whenever it changes
-  useEffect(() => {
-    const syncUser = () => {
-      const updatedUser = JSON.parse(localStorage.getItem("user"));
-      const updatedToken = localStorage.getItem("token");
-      setUser(updatedUser);
-      setToken(updatedToken);
-    };
-
-    window.addEventListener("storage", syncUser); // cross-tab sync
-    window.addEventListener("focus", syncUser); // tab focus sync
-
-    return () => {
-      window.removeEventListener("storage", syncUser);
-      window.removeEventListener("focus", syncUser);
-    };
-  }, []);
 
   const getDashboardPath = () => {
     if (user.role === "admin") return "/admin/dashboard";
@@ -267,11 +246,7 @@ const Navbar = () => {
               </button>
               <button
                 onClick={() => {
-                  localStorage.removeItem("user");
-                  localStorage.removeItem("token");
-                  setUser(null);
-                  setToken(null);
-                  setDropdownOpen(false);
+                  localStorage.clear();
                   navigate("/login");
                 }}
                 className="block text-red-600"
