@@ -33,7 +33,19 @@ const VerifyEmail = () => {
           navigate(`/register/step2?userId=${userId}`);
         }, 3000);
       })
-      .catch(() => setMessage("❌ Invalid or expired token."));
+      .catch(() => {
+        setMessage(
+          <>
+            ❌ Invalid or expired token.{" "}
+            <button
+              className="text-blue-600 underline"
+              onClick={() => navigate("/resend-verification")}
+            >
+              Resend Verification Email
+            </button>
+          </>
+        );
+      });
   }, [searchParams, navigate]);
 
   return (

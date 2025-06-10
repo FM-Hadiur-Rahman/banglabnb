@@ -15,6 +15,7 @@ import RegisterPage from "./pages/RegisterPage";
 import RegisterStep1 from "./pages/RegisterStep1";
 import RegisterStep2 from "./pages/RegisterStep2";
 import VerifyEmail from "./pages/VerifyEmail";
+import ResendVerificationPage from "./pages/ResendVerificationPage";
 import VerifyNotice from "./pages/VerifyNotice";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -70,6 +71,11 @@ function App() {
           <Route path="register" element={<RegisterStep1 />} />
           <Route path="register/step2" element={<RegisterStep2 />} />
           <Route path="verify-email" element={<VerifyEmail />} />
+          <Route
+            path="/resend-verification"
+            element={<ResendVerificationPage />}
+          />
+
           <Route path="verify" element={<VerifyNotice />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />

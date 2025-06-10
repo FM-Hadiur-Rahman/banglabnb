@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   verificationToken: String,
+  verificationTokenExpires: {
+    type: Date,
+  },
 
   avatar: { type: String, default: "" },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],

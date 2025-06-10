@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/cloudinaryUpload");
-
 const protect = require("../middleware/protect");
-const { switchRole } = require("../controllers/authController");
-
 const checkSignupStep = require("../middleware/checkSignupStep");
 
 const {
@@ -14,6 +11,9 @@ const {
   resetPassword,
   registerStep1,
   verifyIdentityHandler,
+  getUserIdFromToken,
+  switchRole,
+  resendVerificationEmail,
 } = require("../controllers/authController");
 
 router.post("/signup/step1", registerStep1); // ✅ preferred
@@ -37,5 +37,8 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 router.patch("/switch-role", protect, switchRole);
+
+router.get("/verify-token", getUserIdFromToken);
+router.post("/resend-verification", resendVerificationEmail);
 
 module.exports = router;

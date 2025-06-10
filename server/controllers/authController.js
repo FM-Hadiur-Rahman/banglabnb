@@ -36,6 +36,7 @@ exports.registerStep1 = async (req, res) => {
       district,
       isVerified: false,
       verificationToken: hashedToken, // ✅ save hashed token
+      verificationTokenExpires: Date.now() + 60 * 60 * 1000, // 🔐 1 hour from now
       identityVerified: false,
       signupStep: 1,
     });
@@ -47,8 +48,9 @@ exports.registerStep1 = async (req, res) => {
       subject: "Verify your BanglaBnB account",
       html: `<h2>Hi ${name},</h2>
       <p>Thanks for signing up as a ${role}.</p>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verifyUrl}">Verify Email, by clicking this link</a>`,
+        <p>Please verify your email:</p>
+  <a href="${verifyUrl}">🌐 Verify via Web</a><br/>
+  <a href="banglabnbmobile://verify-email?token=${rawToken}">📱 Open in App</a>`,
     });
 
     res.status(201).json({
@@ -114,7 +116,10 @@ exports.verifyEmail = async (req, res) => {
 
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-  const user = await User.findOne({ verificationToken: hashedToken });
+  const user = await User.findOne({
+    verificationToken: hashedToken,
+    verificationTokenExpires: { $gt: Date.now() }, // 🔐 Check expiry
+  });
 
   if (!user) {
     return res.status(400).json({ message: "Invalid or expired token" });
@@ -122,12 +127,50 @@ exports.verifyEmail = async (req, res) => {
 
   user.isVerified = true;
   user.verificationToken = undefined;
+  user.verificationTokenExpires = undefined;
+
   await user.save();
 
   res.json({
     message: "✅ Email verified successfully!",
     userId: user._id,
   });
+};
+// POST /api/auth/resend-verification
+exports.resendVerificationEmail = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email is required." });
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found." });
+
+  if (user.isVerified) {
+    return res.status(400).json({ message: "User is already verified." });
+  }
+
+  // Generate new token and expiry
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  user.verificationToken = hashedToken;
+  user.verificationTokenExpires = Date.now() + 60 * 60 * 1000; // ⏰ 1 hour from now
+  await user.save({ validateBeforeSave: false });
+
+  const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`;
+
+  await sendEmail({
+    to: email,
+    subject: "🔁 Resend Verification - BanglaBnB",
+    html: `<h2>Hello ${user.name},</h2>
+    <p>Please verify your email to activate your account:</p>
+    <a href="${verifyUrl}">🌐 Verify via Web</a><br/>
+    <a href="banglabnbmobile://verify-email?token=${rawToken}">📱 Open in App</a>`,
+  });
+
+  res.json({ message: "✅ New verification email sent." });
 };
 
 exports.loginUser = async (req, res) => {
@@ -237,4 +280,16 @@ exports.switchRole = async (req, res) => {
     console.error("Role switch error:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
+};
+exports.getUserIdFromToken = async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ message: "Token is required" });
+
+  const hashed = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({ verificationToken: hashed });
+
+  if (!user)
+    return res.status(404).json({ message: "Invalid or expired token" });
+
+  return res.status(200).json({ userId: user._id });
 };
