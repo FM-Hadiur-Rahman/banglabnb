@@ -358,24 +358,34 @@ router.get("/stats", protect, authorize("admin"), async (req, res) => {
   });
 });
 
-router.get("/refund-requests", protectAdmin, async (req, res) => {
-  const bookings = await Booking.find({
-    "extraPayment.status": "refund_requested",
-  })
-    .populate("guestId")
-    .populate("listingId");
+router.get(
+  "/refund-requests",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    const bookings = await Booking.find({
+      "extraPayment.status": "refund_requested",
+    })
+      .populate("guestId")
+      .populate("listingId");
 
-  res.json(bookings);
-});
+    res.json(bookings);
+  }
+);
 
-router.patch("/mark-refunded/:id", protectAdmin, async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
-  if (!booking) return res.status(404).json({ message: "Booking not found" });
+router.patch(
+  "/mark-refunded/:id",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-  booking.extraPayment.status = "refunded";
-  await booking.save();
+    booking.extraPayment.status = "refunded";
+    await booking.save();
 
-  res.json({ message: "Refund marked as completed" });
-});
+    res.json({ message: "Refund marked as completed" });
+  }
+);
 
 // === Other ===

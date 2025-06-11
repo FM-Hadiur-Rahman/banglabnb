@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../layouts/AdminLayout"; // ✅ your shared admin layout
+import AdminLayout from "../components/AdminLayout"; // ✅ your shared admin layout
 
 const AdminRefundsPage = () => {
   const [refunds, setRefunds] = useState([]);
