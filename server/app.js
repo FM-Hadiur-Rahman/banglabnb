@@ -62,6 +62,12 @@ app.use("/api/wishlist", require("./routes/wishlist"));
 app.use("/api/chats", chatRoutes); // All chat endpoints: /api/chats
 app.use("/api/messages", messageRoutes);
 
+app.use((err, req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://banglabnb.com");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(500).json({ message: "Internal Server Error" });
+});
+
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
