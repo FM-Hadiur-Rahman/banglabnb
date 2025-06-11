@@ -83,6 +83,24 @@ const BookingCard = ({
       console.error(err);
     }
   };
+  const handleClaimRefund = async (bookingId) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/payment/claim-refund`,
+        { bookingId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success("✅ Refund claim submitted");
+      window.location.reload();
+    } catch (err) {
+      console.error("❌ Refund claim failed", err);
+      toast.error("Refund claim failed");
+    }
+  };
 
   return (
     <div className="border border-gray-200 rounded-lg shadow bg-white p-4 space-y-2">
@@ -141,6 +159,15 @@ const BookingCard = ({
           to the reduced booking duration.
         </div>
       )}
+      {booking.extraPayment?.status === "refund_pending" &&
+        !booking.extraPayment?.refundClaimed && (
+          <button
+            onClick={() => handleClaimRefund(booking._id)}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded mt-2"
+          >
+            💸 Claim Refund
+          </button>
+        )}
 
       <div className="flex gap-2 mt-3 flex-wrap">
         {canModify && (

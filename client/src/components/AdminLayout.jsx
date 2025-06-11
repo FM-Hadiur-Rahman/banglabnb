@@ -40,6 +40,12 @@ const AdminLayout = ({ children }) => {
           <Link to="/admin/payouts" className="...">
             💸 Payouts
           </Link>
+          <Link
+            to="/admin/refunds"
+            className="flex items-center gap-2 text-sm text-white hover:text-yellow-300"
+          >
+            💸 Refunds
+          </Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

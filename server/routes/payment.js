@@ -336,5 +336,44 @@ router.post("/extra-success", async (req, res) => {
     "https://banglabnb.com/payment-success?status=extra-paid"
   );
 });
+router.post("/claim-refund", async (req, res) => {
+  const { bookingId } = req.body;
+  const userId = req.user._id;
+
+  const booking = await Booking.findById(bookingId);
+
+  if (!booking || booking.guestId.toString() !== userId.toString()) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  if (
+    booking.extraPayment?.status !== "refund_pending" ||
+    booking.extraPayment?.refundClaimed
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Refund not applicable or already claimed" });
+  }
+
+  // ✅ Mark refund as claimed
+  booking.extraPayment.status = "refund_requested";
+  booking.extraPayment.refundClaimed = true;
+  await booking.save();
+
+  // 📧 Notify admin
+  await sendEmail({
+    to: process.env.ADMIN_EMAIL,
+    subject: "⚠️ Refund Request from Guest",
+    html: `
+      <p>Guest <strong>${
+        req.user.name
+      }</strong> has claimed a refund for booking ID: ${bookingId}</p>
+      <p>Amount: ৳${Math.abs(booking.extraPayment.amount)}</p>
+      <p>Please review and process the refund manually.</p>
+    `,
+  });
+
+  res.json({ message: "Refund claim submitted" });
+});
 
 module.exports = router;

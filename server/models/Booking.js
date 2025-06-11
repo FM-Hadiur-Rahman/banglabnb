@@ -63,13 +63,21 @@ const bookingSchema = new mongoose.Schema(
 
       status: {
         type: String,
-        enum: ["pending", "paid", "not_required", "refund_pending"],
+        enum: [
+          "pending",
+          "paid",
+          "not_required",
+          "refund_pending",
+          "refunded",
+          "refund_requested",
+        ],
         default: "not_required",
       },
       transactionId: { type: String, select: false },
       valId: { type: String, select: false },
 
       paidAt: Date,
+      refundClaimed: { type: Boolean, default: false }, // ✅ new
     },
   },
   { timestamps: true }

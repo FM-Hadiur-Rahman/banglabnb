@@ -56,6 +56,7 @@ import AdminUserBreakdown from "./pages/AdminUserBreakdown";
 import AdminFlagged from "./pages/AdminFlagged";
 import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
+import AdminRefundsPage from "./pages/AdminRefundsPage";
 
 function App() {
   return (
@@ -257,6 +258,7 @@ function App() {
             }
           />
           <Route path="/admin/payouts" element={<AdminPayouts />} />
+          <Route path="/admin/refunds" element={<AdminRefundsPage />} />
         </Route>
       </Routes>
     </Router>
