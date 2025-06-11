@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { authHeader } from "../utils/authHeader"; // 🔄 adjust path
+import authHeader from "../utils/authHeader"; // 🔄 adjust path
 export const API = import.meta.env.VITE_API_URL;
 
 const VerifyPhonePage = () => {
