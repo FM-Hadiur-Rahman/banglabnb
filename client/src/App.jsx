@@ -55,6 +55,7 @@ import AdminUserBreakdown from "./pages/AdminUserBreakdown";
 import AdminFlagged from "./pages/AdminFlagged";
 import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
+import VerifyPhonePage from "./pages/VerifyPhone";
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
           <Route path="register" element={<RegisterStep1 />} />
           <Route path="register/step2" element={<RegisterStep2 />} />
           <Route path="verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-phone" element={<VerifyPhonePage />} />
           <Route
             path="/resend-verification"
             element={<ResendVerificationPage />}
