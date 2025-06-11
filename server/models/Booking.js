@@ -20,15 +20,16 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    checkInAt: { type: Date },
-    checkOutAt: { type: Date },
-    invoiceUrl: { type: String }, // Add this line
+    checkInAt: Date,
+    checkOutAt: Date,
+    invoiceUrl: String,
 
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
+
     modificationRequest: {
       status: {
         type: String,
@@ -39,20 +40,38 @@ const bookingSchema = new mongoose.Schema(
         from: Date,
         to: Date,
       },
-      requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      requestedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     },
-    // 🔄 NEW FIELDS FOR PAYMENT
+
     paymentStatus: {
       type: String,
-      enum: ["unpaid", "paid", "failed"],
+      enum: ["unpaid", "partial", "paid", "failed"],
       default: "unpaid",
     },
-    transactionId: { type: String }, // sent to SSLCOMMERZ
-    valId: { type: String }, // returned from SSLCOMMERZ
-    paidAmount: { type: Number }, // optional for record
-    paidAt: { type: Date }, // timestamp of payment
-  },
+    transactionId: String,
+    valId: String,
+    paidAmount: Number,
+    paidAt: Date,
 
+    // ✅ Extra payment tracking after modification
+    extraPayment: {
+      required: { type: Boolean, default: false },
+      amount: { type: Number, default: 0 },
+
+      status: {
+        type: String,
+        enum: ["pending", "paid", "not_required"],
+        default: "not_required",
+      },
+      transactionId: { type: String, select: false },
+      valId: { type: String, select: false },
+
+      paidAt: Date,
+    },
+  },
   { timestamps: true }
 );
 

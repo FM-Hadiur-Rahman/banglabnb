@@ -245,4 +245,96 @@ router.post("/ipn", async (req, res) => {
   res.status(200).send("IPN received");
 });
 
+// POST /api/payment/extra
+router.post("/extra", async (req, res) => {
+  const { bookingId, amount } = req.body;
+  const booking = await Booking.findById(bookingId).populate("guestId");
+
+  if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+  const extraTranId = `EXTRA_${bookingId}_${Date.now()}`;
+
+  booking.extraPayment = {
+    amount,
+    status: "pending",
+    transactionId: extraTranId,
+  };
+
+  await booking.save();
+
+  const customer = booking.guestId;
+
+  const data = {
+    store_id: process.env.SSLCOMMERZ_STORE_ID,
+    store_passwd: process.env.SSLCOMMERZ_STORE_PASS,
+    total_amount: amount,
+    currency: "BDT",
+    tran_id: extraTranId,
+    success_url: "https://banglabnb-api.onrender.com/api/payment/extra-success",
+    fail_url: "https://banglabnb.com/payment-fail",
+    cancel_url: "https://banglabnb.com/payment-cancel",
+    cus_name: customer.name,
+    cus_email: customer.email,
+    cus_add1: customer.address || "Dhaka",
+    cus_city: "Dhaka",
+    cus_postcode: "1200",
+    cus_country: "Bangladesh",
+    cus_phone: customer.phone || "01700000000",
+    shipping_method: "NO",
+    product_name: "Extra Booking Payment",
+    product_category: "Reservation",
+    product_profile: "general",
+  };
+
+  try {
+    const response = await axios.post(
+      process.env.SSLCOMMERZ_API_URL,
+      qs.stringify(data),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    if (!response.data.GatewayPageURL) {
+      return res.status(400).json({ error: "Payment URL generation failed" });
+    }
+
+    res.json({ url: response.data.GatewayPageURL });
+  } catch (err) {
+    console.error("SSLCOMMERZ extra payment error:", err.message);
+    res.status(500).json({ error: "Payment initiation failed" });
+  }
+});
+router.post("/extra-success", async (req, res) => {
+  const { tran_id, amount } = req.body;
+
+  const booking = await Booking.findOne({
+    "extraPayment.transactionId": tran_id,
+  });
+
+  if (!booking) return res.status(404).send("Booking not found");
+
+  booking.extraPayment.status = "paid";
+  booking.paidAmount += Number(amount);
+  booking.paymentStatus = "paid"; // booking is now fully paid
+  await booking.save();
+
+  // 🔔 Send notification or email if needed
+  try {
+    await sendEmail({
+      to: booking.guestId.email,
+      subject: "✅ Extra Payment Received",
+      html: `<p>Thank you for paying ৳${amount}. Your updated booking is now fully confirmed.</p>`,
+    });
+  } catch (e) {
+    console.warn("Extra payment email failed:", e.message);
+  }
+
+  return res.redirect(
+    "https://banglabnb.com/payment-success?status=extra-paid"
+  );
+});
+
 module.exports = router;

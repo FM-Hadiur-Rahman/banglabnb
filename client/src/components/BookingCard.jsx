@@ -1,5 +1,10 @@
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { DateRange } from "react-date-range";
+import { isWithinInterval } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+import { toast } from "react-toastify"; // ✅ if not already imported
 
 const BookingCard = ({
   booking,
@@ -9,8 +14,15 @@ const BookingCard = ({
   onRequestModification,
 }) => {
   const [showModifyForm, setShowModifyForm] = useState(false);
-  const [newFrom, setNewFrom] = useState("");
-  const [newTo, setNewTo] = useState("");
+  const [newRange, setNewRange] = useState([
+    {
+      startDate: new Date(booking.dateFrom),
+      endDate: new Date(booking.dateTo),
+      key: "selection",
+    },
+  ]);
+  const [bookedRanges, setBookedRanges] = useState([]);
+
   const now = new Date();
   const dateFrom = new Date(booking.dateFrom);
   const dateTo = new Date(booking.dateTo);
@@ -23,6 +35,55 @@ const BookingCard = ({
     !booking.checkInAt &&
     booking.modificationRequest?.status !== "requested";
 
+  useEffect(() => {
+    axios
+      .get(
+        `${import.meta.env.VITE_API_URL}/api/bookings/listing/${
+          booking.listingId._id
+        }`
+      )
+      .then((res) => {
+        const ranges = res.data
+          .filter((b) => b._id !== booking._id) // exclude current booking
+          .map((b) => ({
+            startDate: new Date(b.dateFrom),
+            endDate: new Date(b.dateTo),
+          }));
+        setBookedRanges(ranges);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to load blocked dates", err);
+      });
+  }, [booking]);
+
+  const isDateBlocked = (date) => {
+    return bookedRanges.some((range) =>
+      isWithinInterval(date, { start: range.startDate, end: range.endDate })
+    );
+  };
+
+  const initiateExtraPayment = async (bookingId, amount) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/payment/extra`,
+        { bookingId, amount },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        toast.error("⚠️ Payment gateway URL missing.");
+      }
+    } catch (err) {
+      toast.error("❌ Failed to initiate extra payment");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="border border-gray-200 rounded-lg shadow bg-white p-4 space-y-2">
       <h3 className="text-lg font-semibold">{booking.listingId?.title}</h3>
@@ -32,6 +93,8 @@ const BookingCard = ({
       <p className="text-sm text-gray-600">
         📅 {dateFrom.toLocaleDateString()} → {dateTo.toLocaleDateString()}
       </p>
+
+      {/* Show modification status */}
       {booking.modificationRequest?.status === "requested" && (
         <p className="text-sm text-yellow-600 mt-2">
           🔄 Date change requested:{" "}
@@ -58,6 +121,20 @@ const BookingCard = ({
       <p className="text-sm text-gray-600">
         💰 ৳{booking.listingId?.price} / night
       </p>
+      {booking.extraPayment?.required &&
+        booking.extraPayment?.status === "pending" && (
+          <div className="bg-yellow-100 text-yellow-800 p-3 rounded text-sm">
+            🛎 Extra payment of ৳{booking.extraPayment.amount} required.
+            <button
+              onClick={() =>
+                initiateExtraPayment(booking._id, booking.extraPayment.amount)
+              }
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded ml-3"
+            >
+              Pay Now
+            </button>
+          </div>
+        )}
 
       <div className="flex gap-2 mt-3 flex-wrap">
         {canModify && (
@@ -68,34 +145,33 @@ const BookingCard = ({
             >
               ✏️ Request Date Change
             </button>
+
             {showModifyForm && (
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  onRequestModification(booking._id, newFrom, newTo);
+                  onRequestModification(
+                    booking._id,
+                    newRange[0].startDate,
+                    newRange[0].endDate
+                  );
                   setShowModifyForm(false);
                 }}
-                className="w-full mt-2 space-y-2"
+                className="w-full mt-3 space-y-3"
               >
-                <input
-                  type="date"
-                  value={newFrom}
-                  onChange={(e) => setNewFrom(e.target.value)}
-                  className="border p-1 rounded w-full"
-                  required
+                <DateRange
+                  ranges={newRange}
+                  onChange={(item) => setNewRange([item.selection])}
+                  minDate={new Date()}
+                  disabledDay={isDateBlocked}
+                  rangeColors={["#f43f5e"]}
                 />
-                <input
-                  type="date"
-                  value={newTo}
-                  onChange={(e) => setNewTo(e.target.value)}
-                  className="border p-1 rounded w-full"
-                  required
-                />
+
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded"
                 >
-                  Submit Request
+                  Submit Modification Request
                 </button>
               </form>
             )}
