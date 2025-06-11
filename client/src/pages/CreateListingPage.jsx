@@ -81,11 +81,12 @@ const CreateListingPage = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
-    if (!user.phoneVerified) {
-      toast.warn("📱 Mobile verification required to create listing.");
-      navigate("/verify-phone");
-      return;
-    }
+    //PHONE VERIFICATION
+    // if (!user.phoneVerified) {
+    //   toast.warn("📱 Mobile verification required to create listing.");
+    //   navigate("/verify-phone");
+    //   return;
+    // }
 
     const formData = new FormData();
     images.forEach((img) => formData.append("images", img));
