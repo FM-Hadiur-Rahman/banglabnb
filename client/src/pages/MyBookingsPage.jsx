@@ -10,6 +10,7 @@ const MyBookingsPage = () => {
   const [loading, setLoading] = useState(true); // new
 
   const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     if (!user?._id) return;
 

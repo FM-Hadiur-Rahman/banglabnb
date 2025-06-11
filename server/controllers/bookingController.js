@@ -316,3 +316,41 @@ exports.checkOut = async (req, res) => {
 
   res.json({ message: "Checked out", booking });
 };
+exports.requestModification = async (req, res) => {
+  const { from, to } = req.body;
+  const booking = await Booking.findById(req.params.id);
+
+  if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+  if (booking.status !== "pending") {
+    return res
+      .status(400)
+      .json({ message: "Only pending bookings can be modified" });
+  }
+
+  booking.modificationRequest = {
+    status: "requested",
+    requestedDates: { from, to },
+    requestedBy: req.user._id,
+  };
+
+  await booking.save();
+  res.json({ message: "Modification requested", booking });
+};
+exports.respondModification = async (req, res) => {
+  const { action } = req.body; // "accepted" or "rejected"
+  const booking = await Booking.findById(req.params.id);
+
+  if (!booking || !["accepted", "rejected"].includes(action))
+    return res.status(400).json({ message: "Invalid request" });
+
+  if (action === "accepted") {
+    booking.dateFrom = booking.modificationRequest.requestedDates.from;
+    booking.dateTo = booking.modificationRequest.requestedDates.to;
+  }
+
+  booking.modificationRequest.status = action;
+  await booking.save();
+
+  res.json({ message: `Modification ${action}`, booking });
+};

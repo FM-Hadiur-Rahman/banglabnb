@@ -24,6 +24,17 @@ router.put("/:id/cancel", protect, bookingCtrl.cancelBooking);
 // Check-in / Check-out
 router.patch("/:id/checkin", protect, bookingCtrl.checkIn);
 router.patch("/:id/checkout", protect, bookingCtrl.checkOut);
+//Modification of booking
+router.patch(
+  "/:id/request-modification",
+  protect,
+  bookingCtrl.requestModification
+);
+router.patch(
+  "/:id/respond-modification",
+  protect,
+  bookingCtrl.respondModification
+);
 
 // ✅ Download invoice
 router.get("/:id/invoice", protect, async (req, res) => {

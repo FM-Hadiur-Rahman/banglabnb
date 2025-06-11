@@ -29,7 +29,18 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
-
+    modificationRequest: {
+      status: {
+        type: String,
+        enum: ["none", "requested", "accepted", "rejected"],
+        default: "none",
+      },
+      requestedDates: {
+        from: Date,
+        to: Date,
+      },
+      requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
     // 🔄 NEW FIELDS FOR PAYMENT
     paymentStatus: {
       type: String,

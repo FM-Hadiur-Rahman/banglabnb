@@ -1,9 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BookingCard from "../components/BookingCard";
+import { authHeader } from "../utils/authHeader";
+import { toast } from "react-toastify";
 
 const DashboardBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const handleRequestModification = async (id, from, to) => {
+    try {
+      await axios.patch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/bookings/${id}/request-modification`,
+        { from, to },
+        authHeader()
+      );
+      toast.success("📅 Modification request sent");
+      fetchBookings(); // refresh state
+    } catch (err) {
+      toast.error("❌ Failed to send request");
+    }
+  };
 
   const fetchBookings = () => {
     axios
@@ -59,6 +76,7 @@ const DashboardBookings = () => {
               onCheckIn={handleCheckIn}
               onCheckOut={handleCheckOut}
               onLeaveReview={handleLeaveReview}
+              onRequestModification={handleRequestModification}
             />
           ))}
         </div>
