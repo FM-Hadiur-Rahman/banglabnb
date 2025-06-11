@@ -57,6 +57,7 @@ import AdminFlagged from "./pages/AdminFlagged";
 import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
 import AdminRefundsPage from "./pages/AdminRefundsPage";
+import ReviewPage from "./pages/ReviewPage";
 
 function App() {
   return (
@@ -115,6 +116,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/dashboard/reviews"
+            element={
+              <ProtectedRoute>
+                <ReviewPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="profile"
             element={

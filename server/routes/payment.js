@@ -13,6 +13,7 @@ const Notification = require("../models/Notification");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const Payout = require("../models/Payout");
+const protect = require("../middleware/protect");
 
 router.post("/initiate", async (req, res) => {
   const { amount, bookingId, customer } = req.body;
@@ -336,7 +337,7 @@ router.post("/extra-success", async (req, res) => {
     "https://banglabnb.com/payment-success?status=extra-paid"
   );
 });
-router.post("/claim-refund", async (req, res) => {
+router.post("/claim-refund", protect, async (req, res) => {
   const { bookingId } = req.body;
   const userId = req.user._id;
 

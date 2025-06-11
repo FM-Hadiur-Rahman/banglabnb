@@ -3,9 +3,12 @@ import axios from "axios";
 import BookingCard from "../components/BookingCard";
 import { authHeader } from "../utils/authHeader";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const DashboardBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const navigate = useNavigate();
+
   const handleRequestModification = async (id, from, to) => {
     try {
       await axios.patch(
@@ -58,8 +61,9 @@ const DashboardBookings = () => {
   };
 
   const handleLeaveReview = (booking) => {
-    // e.g. open modal or navigate to /review page
-    console.log("Leave review for:", booking);
+    navigate(
+      `/dashboard/reviews?booking=${booking._id}&listing=${booking.listingId._id}`
+    );
   };
 
   return (
