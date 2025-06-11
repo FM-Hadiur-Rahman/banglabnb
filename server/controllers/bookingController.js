@@ -321,13 +321,37 @@ exports.requestModification = async (req, res) => {
   const booking = await Booking.findById(req.params.id);
 
   if (!booking) return res.status(404).json({ message: "Booking not found" });
-
-  if (booking.status !== "pending") {
+  if (booking.status !== "confirmed" || booking.paymentStatus !== "paid") {
     return res
       .status(400)
-      .json({ message: "Only pending bookings can be modified" });
+      .json({ message: "Only paid bookings can be modified before check-in" });
   }
 
+  // ✅ 1. Validate date range
+  if (!from || !to || new Date(from) >= new Date(to)) {
+    return res.status(400).json({ message: "Invalid modification date range" });
+  }
+
+  // ✅ 2. Check for conflicting bookings
+  const conflict = await Booking.findOne({
+    _id: { $ne: booking._id }, // exclude current booking
+    listingId: booking.listingId,
+    status: { $ne: "cancelled" },
+    $or: [
+      {
+        dateFrom: { $lte: new Date(to) },
+        dateTo: { $gte: new Date(from) },
+      },
+    ],
+  });
+
+  if (conflict) {
+    return res
+      .status(409)
+      .json({ message: "New dates overlap with another booking" });
+  }
+
+  // ✅ 3. Save modification request
   booking.modificationRequest = {
     status: "requested",
     requestedDates: { from, to },
@@ -337,6 +361,7 @@ exports.requestModification = async (req, res) => {
   await booking.save();
   res.json({ message: "Modification requested", booking });
 };
+
 exports.respondModification = async (req, res) => {
   const { action } = req.body; // "accepted" or "rejected"
   const booking = await Booking.findById(req.params.id);

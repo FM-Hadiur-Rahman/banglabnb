@@ -19,7 +19,8 @@ const BookingCard = ({
   const canCheckOut = now >= dateTo && booking.checkInAt && !booking.checkOutAt;
   const canReview = booking.checkOutAt && !booking.hasReviewed;
   const canModify =
-    booking.status === "pending" &&
+    (booking.status === "pending" || booking.status === "confirmed") &&
+    !booking.checkInAt &&
     booking.modificationRequest?.status !== "requested";
 
   return (
