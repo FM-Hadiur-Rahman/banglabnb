@@ -42,12 +42,15 @@ const MyAccountPage = () => {
         </div>
         <div>
           <strong>Phone Verified:</strong>{" "}
-          <span
-            className={user.phoneVerified ? "text-green-600" : "text-red-600"}
-          >
-            {user.phoneVerified ? "✅ Yes" : "❌ No"}
-          </span>
+          {user.phoneVerified ? (
+            <span className="text-green-600">✅ Verified</span>
+          ) : (
+            <Link to="/verify-phone" className="text-blue-600 underline">
+              🔴 Not Verified – Verify Now
+            </Link>
+          )}
         </div>
+
         <div>
           <strong>Identity Verified:</strong>{" "}
           <span

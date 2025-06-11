@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import MapboxAutocomplete from "../components/MapboxAutocomplete";
 import { divisions } from "../data/districts";
+import { toast } from "react-toastify";
 
 const CreateListingPage = () => {
   const [form, setForm] = useState({
@@ -17,6 +18,7 @@ const CreateListingPage = () => {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -78,7 +80,12 @@ const CreateListingPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user.phoneVerified) {
+      toast.warn("📱 Mobile verification required to create listing.");
+      navigate("/verify-phone");
+      return;
+    }
 
     const formData = new FormData();
     images.forEach((img) => formData.append("images", img));
@@ -121,6 +128,16 @@ const CreateListingPage = () => {
       className="max-w-3xl mx-auto p-4 bg-white shadow rounded space-y-4"
     >
       <h2 className="text-2xl font-bold text-center">🏠 Create New Listing</h2>
+      {user.phoneVerified ? (
+        <div className="text-green-600 text-sm mb-2">✅ Mobile Verified</div>
+      ) : (
+        <div className="text-red-600 text-sm mb-2">
+          🔒 Mobile not verified —{" "}
+          <Link to="/verify-phone" className="text-blue-600 underline">
+            Verify now
+          </Link>
+        </div>
+      )}
 
       <input
         name="title"

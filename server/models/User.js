@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  otpCode: String,
+  otpExpires: Date,
   idDocumentUrl: String,
   idBackUrl: String,
   livePhotoUrl: String,

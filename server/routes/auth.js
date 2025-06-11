@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require("../middleware/cloudinaryUpload");
 const protect = require("../middleware/protect");
 const checkSignupStep = require("../middleware/checkSignupStep");
+const { sendOTP, verifyOTP } = require("../controllers/otpController");
 
 const {
   loginUser,
@@ -40,5 +41,7 @@ router.patch("/switch-role", protect, switchRole);
 
 router.get("/verify-token", getUserIdFromToken);
 router.post("/resend-verification", resendVerificationEmail);
+router.post("/send-otp", protect, sendOTP);
+router.post("/verify-otp", protect, verifyOTP);
 
 module.exports = router;
