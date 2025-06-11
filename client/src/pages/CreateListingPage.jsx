@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import MapboxAutocomplete from "../components/MapboxAutocomplete";
 import { divisions } from "../data/districts";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 const CreateListingPage = () => {
   const [form, setForm] = useState({
@@ -129,7 +129,7 @@ const CreateListingPage = () => {
       className="max-w-3xl mx-auto p-4 bg-white shadow rounded space-y-4"
     >
       <h2 className="text-2xl font-bold text-center">🏠 Create New Listing</h2>
-      {user.phoneVerified ? (
+      {/* {user.phoneVerified ? (
         <div className="text-green-600 text-sm mb-2">✅ Mobile Verified</div>
       ) : (
         <div className="text-red-600 text-sm mb-2">
@@ -138,7 +138,7 @@ const CreateListingPage = () => {
             Verify now
           </Link>
         </div>
-      )}
+      )} */}
 
       <input
         name="title"
