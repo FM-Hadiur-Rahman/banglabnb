@@ -22,6 +22,7 @@ import ResetPassword from "./pages/ResetPassword";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import MyWishlistPage from "./pages/MyWishlistPage";
+import VerifyPhonePage from "./pages/VerifyPhone";
 
 // User Dashboard
 import DashboardPage from "./pages/DashboardPage";
@@ -55,7 +56,6 @@ import AdminUserBreakdown from "./pages/AdminUserBreakdown";
 import AdminFlagged from "./pages/AdminFlagged";
 import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
-import VerifyPhonePage from "./pages/VerifyPhone";
 
 function App() {
   return (
