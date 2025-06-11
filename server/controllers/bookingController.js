@@ -379,7 +379,7 @@ exports.respondModification = async (req, res) => {
   if (action === "accepted") {
     const { from, to } = booking.modificationRequest.requestedDates;
 
-    // 🛡 Double-check conflicts
+    // 🔐 Conflict check again
     const conflict = await Booking.findOne({
       _id: { $ne: booking._id },
       listingId: booking.listingId,
@@ -399,13 +399,32 @@ exports.respondModification = async (req, res) => {
     booking.dateFrom = from;
     booking.dateTo = to;
 
-    // 🧮 Calculate new total
+    // 🔢 Calculate new total
     const nights = (new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24);
     const newTotal = nights * booking.listingId.price;
 
-    if (booking.paidAmount && booking.paidAmount < newTotal) {
-      // Mark for future payment
+    // 💰 Compare paid vs total
+    if (booking.paidAmount < newTotal) {
+      const extraAmount = newTotal - booking.paidAmount;
       booking.paymentStatus = "partial";
+      booking.extraPayment = {
+        required: true,
+        amount: extraAmount,
+        status: "pending",
+      };
+    } else if (booking.paidAmount > newTotal) {
+      const refundAmount = booking.paidAmount - newTotal;
+      booking.extraPayment = {
+        required: false,
+        amount: -refundAmount,
+        status: "refund_pending",
+      };
+    } else {
+      booking.extraPayment = {
+        required: false,
+        amount: 0,
+        status: "not_required",
+      };
     }
   }
 
@@ -436,13 +455,17 @@ exports.respondModification = async (req, res) => {
                 ).toLocaleDateString()} → ${new Date(
                   booking.dateTo
                 ).toLocaleDateString()}</p>
-                 <p><strong>New Total (Est.):</strong> ৳${total.toFixed(2)}</p>`
+                 <p><strong>New Total (Est.):</strong> ৳${total.toFixed(2)}</p>
+                 ${
+                   booking.extraPayment?.status === "pending"
+                     ? `<p style="color:#d97706;"><strong>🧾 Payment due:</strong> ৳${booking.extraPayment.amount}</p>`
+                     : booking.extraPayment?.status === "refund_pending"
+                     ? `<p style="color:#15803d;"><strong>💸 Refund due:</strong> ৳${Math.abs(
+                         booking.extraPayment.amount
+                       )}</p>`
+                     : ""
+                 }`
               : `<p>Host could not accommodate your requested dates.</p>`
-          }
-          ${
-            booking.paymentStatus === "partial"
-              ? `<p style="color:#d97706;"><strong>🧾 Payment due:</strong> Additional payment required for extended stay.</p>`
-              : ""
           }
         </div>
       `,

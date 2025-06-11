@@ -135,6 +135,12 @@ const BookingCard = ({
             </button>
           </div>
         )}
+      {booking.extraPayment?.status === "refund_pending" && (
+        <div className="bg-green-100 text-green-700 p-3 rounded text-sm mt-2">
+          💸 You will be refunded ৳{Math.abs(booking.extraPayment.amount)} due
+          to the reduced booking duration.
+        </div>
+      )}
 
       <div className="flex gap-2 mt-3 flex-wrap">
         {canModify && (
