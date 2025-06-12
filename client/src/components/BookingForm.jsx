@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DateRange } from "react-date-range";
 import { addDays } from "date-fns";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const BookingForm = ({ listingId, price, maxGuests }) => {
+const BookingForm = ({ listingId, price, maxGuests, blockedDates }) => {
   const [range, setRange] = useState([
     {
       startDate: new Date(),
@@ -18,14 +20,10 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
   const [serviceFee, setServiceFee] = useState(0);
   const [tax, setTax] = useState(0);
   const [total, setTotal] = useState(0);
-
   const [bookedRanges, setBookedRanges] = useState([]);
 
-  const isDateBooked = (date) => {
-    return bookedRanges.some((range) => {
-      return date >= range.startDate && date <= range.endDate;
-    });
-  };
+  const isDateBooked = (date) =>
+    bookedRanges.some((r) => date >= r.startDate && date <= r.endDate);
 
   useEffect(() => {
     const { startDate, endDate } = range[0];
@@ -40,30 +38,40 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
     setTax(t);
     setTotal(subtotal + sFee + t);
   }, [range, price]);
+
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/bookings/listing/${listingId}`)
       .then((res) => {
-        const blocked = res.data.map((b) => ({
+        const booked = res.data.map((b) => ({
           startDate: new Date(b.dateFrom),
           endDate: new Date(b.dateTo),
-          key: "blocked", // key is required by react-date-range
-          color: "#ccc",
+          key: "booked",
+          color: "#9ca3af", // gray
           disabled: true,
         }));
-        setBookedRanges(blocked);
+
+        const blocked = blockedDates.map((r) => ({
+          startDate: new Date(r.from),
+          endDate: new Date(r.to),
+          key: "blocked",
+          color: "#9333ea", // purple
+          disabled: true,
+        }));
+
+        setBookedRanges([...booked, ...blocked]);
       })
       .catch((err) => {
-        console.error("❌ Failed to load booking dates", err);
+        toast.error("❌ Failed to load unavailable dates");
+        console.error(err);
       });
-  }, [listingId]);
+  }, [listingId, blockedDates]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
     try {
-      // Step 1: Create booking
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/bookings`,
         {
@@ -77,9 +85,9 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         }
       );
 
-      const booking = res.data; // 🟢 booking._id, booking.total, etc.
+      const booking = res.data;
       const user = JSON.parse(localStorage.getItem("user"));
-      // Step 2: Trigger payment
+
       const paymentRes = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payment/initiate`,
         {
@@ -92,27 +100,22 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
             phone: user.phone,
           },
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (paymentRes.data?.url) {
-        window.location.href = paymentRes.data.url; // Redirect to SSLCOMMERZ
+        toast.success("✅ Redirecting to payment gateway...");
+        window.location.href = paymentRes.data.url;
       } else {
-        alert("⚠️ Payment gateway URL missing.");
+        toast.error("❌ Payment URL not received.");
       }
     } catch (err) {
-      console.error("❌ Booking error:", err?.response?.data || err.message);
-
-      if (err.response?.status === 409) {
-        alert(
-          "❌ These dates are already booked. Please choose different ones."
-        );
-      } else {
-        alert("❌ Booking or payment failed.");
-      }
-      console.error("❌ Booking error:", err);
+      const msg =
+        err?.response?.status === 409
+          ? "These dates are unavailable. Try another range."
+          : "Something went wrong. Please try again.";
+      toast.error(msg);
+      console.error(err);
     }
   };
 
@@ -121,19 +124,31 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
       onSubmit={handleSubmit}
       className="bg-white shadow p-4 rounded space-y-4"
     >
+      <ToastContainer />
       <div className="text-2xl font-semibold">
         ৳{price} <span className="text-sm">night</span>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <div className="max-w-full">
-          <DateRange
-            ranges={range}
-            onChange={(item) => setRange([item.selection])}
-            minDate={new Date()}
-            rangeColors={["#f43f5e"]}
-            disabledDay={isDateBooked}
-          />
+      <DateRange
+        ranges={range}
+        onChange={(item) => setRange([item.selection])}
+        minDate={new Date()}
+        rangeColors={["#f43f5e"]}
+        disabledDay={isDateBooked}
+        editableDateInputs={true}
+        months={1}
+        direction="vertical"
+      />
+
+      {/* Legend */}
+      <div className="flex gap-4 text-sm mt-2">
+        <div className="flex items-center gap-1">
+          <div className="w-4 h-4 bg-[#f43f5e] rounded"></div>{" "}
+          <span>Selected</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-4 h-4 bg-[#9333ea] rounded"></div>{" "}
+          <span>Unavailable</span>
         </div>
       </div>
 
@@ -149,7 +164,7 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
           className="w-full border px-3 py-2 rounded"
         />
         <p className="text-sm text-gray-500">
-          Maximum {maxGuests} {maxGuests === 1 ? "guest" : "guests"} allowed
+          Maximum {maxGuests} guest{maxGuests > 1 && "s"} allowed
         </p>
       </div>
 
@@ -160,15 +175,11 @@ const BookingForm = ({ listingId, price, maxGuests }) => {
         Reserve
       </button>
 
-      <p className="text-center text-gray-500 text-sm">
-        You won’t be charged yet
-      </p>
-
       {nights > 0 && (
         <div className="border-t pt-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <span>
-              ৳{price} x {nights} nights
+              ৳{price} x {nights} night{nights > 1 && "s"}
             </span>
             <span>৳{price * nights}</span>
           </div>

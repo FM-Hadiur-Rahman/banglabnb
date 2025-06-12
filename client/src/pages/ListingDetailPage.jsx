@@ -61,6 +61,7 @@ const ListingDetailPage = () => {
           listingId={listing._id}
           price={listing.price}
           maxGuests={listing.maxGuests}
+          blockedDates={listing.blockedDates || []}
         />
       </div>
 

@@ -54,9 +54,21 @@ exports.getAllListings = async (req, res) => {
 
 // GET single listing
 exports.getListingById = async (req, res) => {
-  const listing = await Listing.findById(req.params.id);
-  if (!listing) return res.status(404).json({ message: "Listing not found" });
-  res.json(listing);
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.json({
+      ...listing.toObject(),
+      blockedDates: listing.blockedDates || [],
+    });
+  } catch (err) {
+    console.error("❌ Error in getListingById:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 // GET listings by host
