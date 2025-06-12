@@ -56,6 +56,12 @@ const listingSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    blockedDates: [
+      {
+        from: { type: Date, required: true },
+        to: { type: Date, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

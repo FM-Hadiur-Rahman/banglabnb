@@ -177,12 +177,21 @@ const HostDashboard = () => {
                     >
                       Edit
                     </Link>
+
                     <Link
                       to={`/host/listings/${listing._id}/bookings`}
                       className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
                     >
                       View Bookings
                     </Link>
+
+                    <Link
+                      to={`/host/listings/${listing._id}/blocked-dates`}
+                      className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+                    >
+                      Manage Availability
+                    </Link>
+
                     <button
                       onClick={() => handleDelete(listing._id)}
                       className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"

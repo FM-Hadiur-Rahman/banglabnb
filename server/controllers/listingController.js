@@ -141,3 +141,40 @@ exports.deleteListing = async (req, res) => {
     res.status(500).json({ message: "Server error while deleting listing." });
   }
 };
+// controllers/listingController.js
+
+exports.blockDates = async (req, res) => {
+  const { from, to } = req.body;
+  const listing = await Listing.findById(req.params.id);
+
+  if (!listing || listing.hostId.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  listing.blockedDates.push({ from, to });
+  await listing.save();
+  res.json({ message: "Dates blocked", blockedDates: listing.blockedDates });
+};
+
+exports.unblockDates = async (req, res) => {
+  const { from, to } = req.body;
+  const listing = await Listing.findById(req.params.id);
+
+  if (!listing || listing.hostId.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  listing.blockedDates = listing.blockedDates.filter(
+    (range) =>
+      !(
+        new Date(range.from).getTime() === new Date(from).getTime() &&
+        new Date(range.to).getTime() === new Date(to).getTime()
+      )
+  );
+
+  await listing.save();
+  res.json({
+    message: "Blocked dates removed",
+    blockedDates: listing.blockedDates,
+  });
+};

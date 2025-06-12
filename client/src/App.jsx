@@ -43,6 +43,7 @@ import HostDashboard from "./pages/HostDashboard";
 import CreateListingPage from "./pages/CreateListingPage";
 import EditListingPage from "./pages/EditListingPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
+import HostBlockedDates from "./components/HostBlockDates";
 
 // Booking Pages
 import MyBookingsPage from "./pages/MyBookingsPage";
@@ -215,6 +216,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="host">
                 <HostListingBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/host/listings/:id/blocked-dates"
+            element={
+              <ProtectedRoute requiredRole="host">
+                <HostBlockedDates />
               </ProtectedRoute>
             }
           />

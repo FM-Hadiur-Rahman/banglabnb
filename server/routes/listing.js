@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const listingCtrl = require("../controllers/listingController");
 const protect = require("../middleware/protect");
+const authorize = require("../middleware/authorize");
 
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
@@ -22,6 +23,18 @@ router.post(
 
 router.put("/:id", protect, listingCtrl.updateListing);
 router.delete("/:id", protect, listingCtrl.deleteListing);
+router.post(
+  "/:id/block-dates",
+  protect,
+  authorize("host"),
+  listingCtrl.blockDates
+);
+router.delete(
+  "/:id/block-dates",
+  protect,
+  authorize("host"),
+  listingCtrl.unblockDates
+);
 
 // ✅ Upload image to Cloudinary
 router.post("/upload", upload.single("image"), (req, res) => {

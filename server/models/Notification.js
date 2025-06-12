@@ -8,20 +8,17 @@ const notificationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Booking", // ✅ Add this line
+    },
     message: { type: String, required: true },
     type: {
       type: String,
-      enum: [
-        "booking",
-        "payment",
-        "system",
-        "modification-request",
-        "kyc",
-        "review",
-      ],
+      enum: ["booking", "payment", "system", "modification-request"],
       default: "system",
     },
-    link: { type: String }, // frontend link to view details
+    link: { type: String }, // ✅ optional but recommended to keep
     read: { type: Boolean, default: false },
   },
   { timestamps: true }

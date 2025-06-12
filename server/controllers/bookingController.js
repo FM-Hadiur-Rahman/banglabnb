@@ -22,6 +22,22 @@ exports.createBooking = async (req, res) => {
         .json({ message: "Invalid booking dates. Cannot book in the past." });
     }
 
+    const listing = await Listing.findById(listingId);
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // ❌ Check against blocked date ranges
+    const isBlocked = listing.blockedDates?.some(
+      (range) => new Date(range.from) <= to && new Date(range.to) >= from
+    );
+
+    if (isBlocked) {
+      return res.status(409).json({
+        message: "Listing is temporarily unavailable for those dates.",
+      });
+    }
+
     // ❌ Prevent overlapping bookings
     const overlapping = await Booking.findOne({
       listingId,
@@ -322,7 +338,8 @@ exports.requestModification = async (req, res) => {
   const { from, to } = req.body;
   const booking = await Booking.findById(req.params.id)
     .populate("listingId")
-    .populate("guestId");
+    .populate("guestId")
+    .populate("hostId");
 
   if (!booking) return res.status(404).json({ message: "Booking not found" });
 
@@ -375,7 +392,8 @@ exports.requestModification = async (req, res) => {
     userId: host._id,
     type: "modification-request",
     message: `📅 ${guest.name} requested to change booking dates.`,
-    link: `/host/listings/${booking.listingId._id}/bookings`,
+    link: `/host/listings/${booking.listingId}/bookings`,
+    bookingId: booking._id, // ✅
   });
 
   // ✅ Send email
