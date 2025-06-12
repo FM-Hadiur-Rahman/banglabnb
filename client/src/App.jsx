@@ -58,6 +58,7 @@ import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
 import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
@@ -67,7 +68,14 @@ function App() {
         {/* Main Layout Wrapper */}
         <Route path="/" element={<MainLayout />}>
           {/* Public Routes */}
-          <Route index element={<Home />} />
+          <Route
+            index
+            element={
+              <ErrorBoundary>
+                <Home />
+              </ErrorBoundary>
+            }
+          />
           <Route path="listings" element={<ListingsPage />} />
           <Route path="listings/:id" element={<ListingDetailPage />} />
           <Route path="login" element={<LoginPage />} />
