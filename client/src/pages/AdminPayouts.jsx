@@ -15,10 +15,20 @@ const AdminPayouts = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setPayouts(res.data);
-      setLoading(false);
+
+      console.log("📦 Payouts data:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setPayouts(res.data);
+      } else {
+        console.warn("⚠️ Unexpected payout format:", res.data);
+        setPayouts([]);
+      }
     } catch (err) {
       console.error("❌ Failed to fetch payouts:", err);
+      setPayouts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,7 +61,7 @@ const AdminPayouts = () => {
 
       {loading ? (
         <p>Loading payouts...</p>
-      ) : payouts.length === 0 ? (
+      ) : Array.isArray(payouts) && payouts.length === 0 ? (
         <p className="text-gray-500">No pending payouts.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -67,34 +77,37 @@ const AdminPayouts = () => {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {payouts.map((payout) => (
-                <tr key={payout._id} className="border-t">
-                  <td className="p-3 font-semibold">
-                    {payout.hostId?.name || "N/A"}
-                  </td>
-                  <td className="p-3">
-                    <div>{payout.hostId?.email}</div>
-                    <div className="text-gray-500 text-xs">
-                      {payout.hostId?.phone}
-                    </div>
-                  </td>
-                  <td className="p-3 font-medium">
-                    {payout.amount?.toLocaleString()}
-                  </td>
-                  <td className="p-3">
-                    {new Date(payout.bookingId?.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-3 capitalize">{payout.method}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => markAsPaid(payout._id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Mark as Paid
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {Array.isArray(payouts) &&
+                payouts.map((payout) => (
+                  <tr key={payout._id} className="border-t">
+                    <td className="p-3 font-semibold">
+                      {payout.hostId?.name || "N/A"}
+                    </td>
+                    <td className="p-3">
+                      <div>{payout.hostId?.email}</div>
+                      <div className="text-gray-500 text-xs">
+                        {payout.hostId?.phone}
+                      </div>
+                    </td>
+                    <td className="p-3 font-medium">
+                      {payout.amount?.toLocaleString()}
+                    </td>
+                    <td className="p-3">
+                      {new Date(
+                        payout.bookingId?.createdAt
+                      ).toLocaleDateString()}
+                    </td>
+                    <td className="p-3 capitalize">{payout.method}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => markAsPaid(payout._id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Mark as Paid
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

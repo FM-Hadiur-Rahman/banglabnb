@@ -18,9 +18,16 @@ const ListingsPage = () => {
             params: query,
           }
         );
-        setListings(res.data);
+
+        if (Array.isArray(res.data)) {
+          setListings(res.data);
+        } else {
+          console.warn("⚠️ API did not return an array:", res.data);
+          setListings([]);
+        }
       } catch (err) {
         console.error("❌ Failed to fetch listings:", err);
+        setListings([]);
       }
     };
 
@@ -28,10 +35,10 @@ const ListingsPage = () => {
   }, [searchParams]);
 
   return (
-    <div>
-      <SearchBar /> {/* no need to pass onSearch anymore */}
+    <div className="max-w-7xl mx-auto p-6">
+      <SearchBar />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        {listings.length > 0 ? (
+        {Array.isArray(listings) && listings.length > 0 ? (
           listings.map((listing) => (
             <ListingCard key={listing._id} listing={listing} />
           ))

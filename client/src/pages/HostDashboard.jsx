@@ -17,7 +17,12 @@ const HostDashboard = () => {
       const listingsRes = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/listings/host/${user._id}`
       );
-      setListings(listingsRes.data);
+      if (Array.isArray(listingsRes.data)) {
+        setListings(listingsRes.data);
+      } else {
+        console.warn("⚠️ Listings response not an array:", listingsRes.data);
+        setListings([]);
+      }
 
       const bookingsRes = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/bookings/host`,
@@ -25,14 +30,19 @@ const HostDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const future = bookingsRes.data.filter(
-        (b) => new Date(b.dateFrom) >= new Date()
-      );
-      setCheckIns(future);
+      if (Array.isArray(bookingsRes.data)) {
+        const future = bookingsRes.data.filter(
+          (b) => new Date(b.dateFrom) >= new Date()
+        );
+        setCheckIns(future);
+      } else {
+        console.warn("⚠️ Bookings response not an array:", bookingsRes.data);
+        setCheckIns([]);
+      }
 
       // Calculate reviews
       let reviewCount = 0;
-      listingsRes.data.forEach((listing) => {
+      listingsRes.data?.forEach((listing) => {
         if (listing.reviews) {
           reviewCount += listing.reviews.length;
         }
@@ -113,22 +123,23 @@ const HostDashboard = () => {
       {/* Upcoming Check-ins */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-2">🛎 Upcoming Check-Ins</h3>
-        {checkIns.length === 0 ? (
+        {Array.isArray(checkIns) && checkIns.length === 0 ? (
           <p className="text-gray-500">No upcoming check-ins.</p>
         ) : (
           <ul className="space-y-2">
-            {checkIns.map((b) => (
-              <li key={b._id} className="border p-3 rounded bg-white shadow">
-                <div className="font-semibold">{b.listingId?.title}</div>
-                <div className="text-sm text-gray-600">
-                  📅 {new Date(b.dateFrom).toLocaleDateString()} →{" "}
-                  {new Date(b.dateTo).toLocaleDateString()}
-                </div>
-                <div className="text-sm">
-                  👤 Guest ID: {b.guestId._id || "Unknown"}
-                </div>
-              </li>
-            ))}
+            {Array.isArray(checkIns) &&
+              checkIns.map((b) => (
+                <li key={b._id} className="border p-3 rounded bg-white shadow">
+                  <div className="font-semibold">{b.listingId?.title}</div>
+                  <div className="text-sm text-gray-600">
+                    📅 {new Date(b.dateFrom).toLocaleDateString()} →{" "}
+                    {new Date(b.dateTo).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm">
+                    👤 Guest ID: {b.guestId._id || "Unknown"}
+                  </div>
+                </li>
+              ))}
           </ul>
         )}
       </div>
@@ -136,50 +147,51 @@ const HostDashboard = () => {
       {/* Listings */}
       <div>
         <h3 className="text-xl font-semibold mb-2">🏡 Your Listings</h3>
-        {listings.length === 0 ? (
+        {Array.isArray(listings) && listings.length === 0 ? (
           <p className="text-gray-500">You have no listings yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {listings.map((listing) => (
-              <div
-                key={listing._id}
-                className="border p-4 rounded shadow bg-white flex flex-col"
-              >
-                <img
-                  src={listing.images?.[0]}
-                  alt={listing.title}
-                  className="w-full h-40 object-cover rounded mb-3"
-                />
-                <h3 className="text-lg font-bold mb-1">{listing.title}</h3>
-                <p className="text-gray-500 mb-1">
-                  📍 {listing.location?.address}
-                </p>
-                <p className="text-green-600 font-semibold mb-3">
-                  ৳{listing.price}/night
-                </p>
+            {Array.isArray(listings) &&
+              listings.map((listing) => (
+                <div
+                  key={listing._id}
+                  className="border p-4 rounded shadow bg-white flex flex-col"
+                >
+                  <img
+                    src={listing.images?.[0]}
+                    alt={listing.title}
+                    className="w-full h-40 object-cover rounded mb-3"
+                  />
+                  <h3 className="text-lg font-bold mb-1">{listing.title}</h3>
+                  <p className="text-gray-500 mb-1">
+                    📍 {listing.location?.address}
+                  </p>
+                  <p className="text-green-600 font-semibold mb-3">
+                    ৳{listing.price}/night
+                  </p>
 
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  <Link
-                    to={`/host/edit/${listing._id}`}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                  >
-                    Edit
-                  </Link>
-                  <Link
-                    to={`/host/listings/${listing._id}/bookings`}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    View Bookings
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(listing._id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    <Link
+                      to={`/host/edit/${listing._id}`}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    >
+                      Edit
+                    </Link>
+                    <Link
+                      to={`/host/listings/${listing._id}/bookings`}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
+                      View Bookings
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(listing._id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>

@@ -7,7 +7,33 @@ import { useNavigate } from "react-router-dom";
 
 const DashboardBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const fetchBookings = () => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/bookings/user`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((res) => {
+        console.log("📦 User bookings:", res.data);
+        if (Array.isArray(res.data)) {
+          setBookings(res.data);
+        } else {
+          console.warn("⚠️ Unexpected bookings response:", res.data);
+          setBookings([]);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Failed to load bookings", err);
+        setBookings([]);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   const handleRequestModification = async (id, from, to) => {
     try {
@@ -19,24 +45,11 @@ const DashboardBookings = () => {
         authHeader()
       );
       toast.success("📅 Modification request sent");
-      fetchBookings(); // refresh state
+      fetchBookings();
     } catch (err) {
       toast.error("❌ Failed to send request");
     }
   };
-
-  const fetchBookings = () => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/bookings/user`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
-      .then((res) => setBookings(res.data))
-      .catch((err) => console.error("❌ Failed to load bookings", err));
-  };
-
-  useEffect(() => {
-    fetchBookings();
-  }, []);
 
   const handleCheckIn = async (id) => {
     await axios.patch(
@@ -69,20 +82,24 @@ const DashboardBookings = () => {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold text-center">📋 My Bookings</h1>
-      {bookings.length === 0 ? (
+
+      {loading ? (
+        <p className="text-center text-gray-500">Loading bookings...</p>
+      ) : Array.isArray(bookings) && bookings.length === 0 ? (
         <p className="text-center text-gray-500">You have no bookings yet.</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2">
-          {bookings.map((booking) => (
-            <BookingCard
-              key={booking._id}
-              booking={booking}
-              onCheckIn={handleCheckIn}
-              onCheckOut={handleCheckOut}
-              onLeaveReview={handleLeaveReview}
-              onRequestModification={handleRequestModification}
-            />
-          ))}
+          {Array.isArray(bookings) &&
+            bookings.map((booking) => (
+              <BookingCard
+                key={booking._id}
+                booking={booking}
+                onCheckIn={handleCheckIn}
+                onCheckOut={handleCheckOut}
+                onLeaveReview={handleLeaveReview}
+                onRequestModification={handleRequestModification}
+              />
+            ))}
         </div>
       )}
     </div>

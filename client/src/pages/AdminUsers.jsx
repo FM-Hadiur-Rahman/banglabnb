@@ -1,31 +1,50 @@
-// pages/AdminUsers.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
+
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
     const token = localStorage.getItem("token");
-    const res = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/admin/users`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/users`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("📦 Fetched users:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setUsers(res.data);
+      } else {
+        console.warn("⚠️ Unexpected user response:", res.data);
+        setUsers([]);
       }
-    );
-    setUsers(res.data);
+    } catch (err) {
+      console.error("❌ Failed to load users:", err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteUser = async (id) => {
     if (!confirm("Are you sure?")) return;
     const token = localStorage.getItem("token");
-    await axios.delete(
-      `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    fetchUsers();
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      fetchUsers(); // refresh list
+    } catch (err) {
+      console.error("❌ Failed to delete user:", err);
+    }
   };
 
   useEffect(() => {
@@ -35,35 +54,43 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <h2 className="text-2xl font-bold mb-4">All Users</h2>
-      <table className="w-full table-auto border">
-        <thead>
-          <tr className="bg-gray-200">
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Verified</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u._id} className="border-t">
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.isVerified ? "✅" : "❌"}</td>
-              <td>
-                <button
-                  onClick={() => deleteUser(u._id)}
-                  className="text-red-500 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
+
+      {loading ? (
+        <p>Loading users...</p>
+      ) : Array.isArray(users) && users.length === 0 ? (
+        <p className="text-gray-500">No users found.</p>
+      ) : (
+        <table className="w-full table-auto border">
+          <thead>
+            <tr className="bg-gray-200">
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Verified</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Array.isArray(users) &&
+              users.map((u) => (
+                <tr key={u._id} className="border-t">
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>{u.role}</td>
+                  <td>{u.isVerified ? "✅" : "❌"}</td>
+                  <td>
+                    <button
+                      onClick={() => deleteUser(u._id)}
+                      className="text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      )}
     </AdminLayout>
   );
 };

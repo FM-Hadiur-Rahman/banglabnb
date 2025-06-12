@@ -15,9 +15,16 @@ const MyWishlistPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setWishlist(res.data);
+
+      if (Array.isArray(res.data)) {
+        setWishlist(res.data);
+      } else {
+        console.warn("⚠️ Unexpected response:", res.data);
+        setWishlist([]);
+      }
     } catch (err) {
       console.error("❌ Failed to fetch wishlist:", err);
+      setWishlist([]); // Fallback to empty array
     } finally {
       setLoading(false);
     }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../components/AdminLayout"; // ✅ your shared admin layout
+import AdminLayout from "../components/AdminLayout";
 
 const AdminRefundsPage = () => {
   const [refunds, setRefunds] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
@@ -12,8 +13,20 @@ const AdminRefundsPage = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       })
-      .then((res) => setRefunds(res.data))
-      .catch((err) => console.error("❌ Failed to load refunds", err));
+      .then((res) => {
+        console.log("📦 Refund requests:", res.data);
+        if (Array.isArray(res.data)) {
+          setRefunds(res.data);
+        } else {
+          console.warn("⚠️ Unexpected refund response:", res.data);
+          setRefunds([]);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Failed to load refunds", err);
+        setRefunds([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const markAsRefunded = async (bookingId) => {
@@ -36,34 +49,42 @@ const AdminRefundsPage = () => {
   return (
     <AdminLayout>
       <h1 className="text-2xl font-bold mb-4">💸 Pending Refund Requests</h1>
-      {refunds.length === 0 ? (
+
+      {loading ? (
+        <p>Loading refunds...</p>
+      ) : Array.isArray(refunds) && refunds.length === 0 ? (
         <p>No refund requests found.</p>
       ) : (
         <div className="grid gap-4">
-          {refunds.map((booking) => (
-            <div key={booking._id} className="p-4 border rounded bg-white">
-              <p>
-                <strong>Guest:</strong> {booking.guestId?.name} (
-                {booking.guestId?.email})
-              </p>
-              <p>
-                <strong>Listing:</strong> {booking.listingId?.title}
-              </p>
-              <p>
-                <strong>Refund Amount:</strong> ৳
-                {Math.abs(booking.extraPayment.amount)}
-              </p>
-              <p>
-                <strong>Status:</strong> {booking.extraPayment.status}
-              </p>
-              <button
-                onClick={() => markAsRefunded(booking._id)}
-                className="mt-2 px-3 py-1 bg-green-600 text-white rounded"
+          {Array.isArray(refunds) &&
+            refunds.map((booking) => (
+              <div
+                key={booking._id}
+                className="p-4 border rounded bg-white shadow"
               >
-                ✅ Mark as Refunded
-              </button>
-            </div>
-          ))}
+                <p>
+                  <strong>Guest:</strong> {booking.guestId?.name} (
+                  {booking.guestId?.email})
+                </p>
+                <p>
+                  <strong>Listing:</strong> {booking.listingId?.title}
+                </p>
+                <p>
+                  <strong>Refund Amount:</strong> ৳
+                  {Math.abs(booking.extraPayment?.amount ?? 0)}
+                </p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  {booking.extraPayment?.status ?? "N/A"}
+                </p>
+                <button
+                  onClick={() => markAsRefunded(booking._id)}
+                  className="mt-2 px-3 py-1 bg-green-600 text-white rounded"
+                >
+                  ✅ Mark as Refunded
+                </button>
+              </div>
+            ))}
         </div>
       )}
     </AdminLayout>

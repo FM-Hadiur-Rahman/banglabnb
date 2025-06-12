@@ -18,7 +18,9 @@ const HostListingBookingsPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const filtered = res.data.filter((b) => b.listingId._id === id);
+      const filtered = Array.isArray(res.data)
+        ? res.data.filter((b) => b?.listingId?._id === id)
+        : [];
       setBookings(filtered);
     } catch (err) {
       console.error("❌ Error loading bookings:", err);
@@ -63,35 +65,38 @@ const HostListingBookingsPage = () => {
         <ul className="space-y-4">
           {bookings.map((b) => (
             <li
-              key={b._id}
+              key={b?._id}
               className="p-4 border rounded bg-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center"
             >
               <div className="flex-1">
                 <p>
-                  <strong>Guest:</strong> {b.guestId.name}
+                  <strong>Guest:</strong> {b?.guestId?.name}
                 </p>
                 <p>
                   <strong>📅 Dates:</strong>{" "}
-                  {new Date(b.dateFrom).toLocaleDateString("en-GB")} →{" "}
-                  {new Date(b.dateTo).toLocaleDateString("en-GB")}
+                  {b?.dateFrom && b?.dateTo
+                    ? `${new Date(b.dateFrom).toLocaleDateString(
+                        "en-GB"
+                      )} → ${new Date(b.dateTo).toLocaleDateString("en-GB")}`
+                    : "N/A"}
                 </p>
                 <p className="mt-1">
                   <strong>Status:</strong>{" "}
-                  <BookingStatusBadge status={b.status} />
+                  <BookingStatusBadge status={b?.status} />
                 </p>
 
-                {b.modificationRequest?.status === "requested" && (
+                {b?.modificationRequest?.status === "requested" && (
                   <div className="mt-3 text-sm bg-yellow-100 p-2 rounded text-yellow-800">
                     🔄 <strong>Modification requested:</strong>
                     <br />
                     New Dates:{" "}
                     <strong>
                       {new Date(
-                        b.modificationRequest.requestedDates.from
+                        b.modificationRequest?.requestedDates?.from
                       ).toLocaleDateString("en-GB")}{" "}
                       →{" "}
                       {new Date(
-                        b.modificationRequest.requestedDates.to
+                        b.modificationRequest?.requestedDates?.to
                       ).toLocaleDateString("en-GB")}
                     </strong>
                     <div className="mt-2 flex gap-2">
@@ -112,7 +117,7 @@ const HostListingBookingsPage = () => {
                 )}
               </div>
 
-              {b.status === "pending" && (
+              {b?.status === "pending" && (
                 <HostBookingActions bookingId={b._id} refresh={fetchBookings} />
               )}
             </li>

@@ -1,3 +1,4 @@
+// ListingDetailPage.safe.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -7,7 +8,7 @@ import ReviewList from "../components/ReviewList";
 const ListingDetailPage = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null); // ✅ Modal state
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     axios
@@ -24,15 +25,16 @@ const ListingDetailPage = () => {
       <div className="lg:col-span-2 space-y-6">
         {/* 🖼 Image Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {listing.images?.map((url, idx) => (
-            <img
-              key={idx}
-              src={url}
-              alt={`Image ${idx + 1}`}
-              className="w-full h-52 object-cover rounded cursor-pointer hover:opacity-90 transition-transform hover:scale-105"
-              onClick={() => setSelectedImage(url)}
-            />
-          ))}
+          {Array.isArray(listing.images) &&
+            listing.images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`Image ${idx + 1}`}
+                className="w-full h-52 object-cover rounded cursor-pointer hover:opacity-90 transition-transform hover:scale-105"
+                onClick={() => setSelectedImage(url)}
+              />
+            ))}
         </div>
 
         {/* 🧾 Listing Details */}
@@ -70,7 +72,7 @@ const ListingDetailPage = () => {
         >
           <div
             className="relative max-w-3xl w-full p-4"
-            onClick={(e) => e.stopPropagation()} // Prevent click from closing
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               className="absolute top-2 right-2 text-white text-3xl font-bold"
