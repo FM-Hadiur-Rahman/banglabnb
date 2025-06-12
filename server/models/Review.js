@@ -30,7 +30,11 @@ const reviewSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // you can set to false if you want moderation
     },
-    tags: [String], // e.g., ['clean', 'friendly', 'peaceful']
+    tags: {
+      type: [String],
+      enum: ["clean", "friendly", "quiet", "safe", "affordable", "luxury"], // example
+    },
+    // e.g., ['clean', 'friendly', 'peaceful']
     emoji: String, // optional emoji representing experience
 
     text: String,

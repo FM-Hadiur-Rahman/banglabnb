@@ -24,13 +24,18 @@ const createReview = async (req, res) => {
 
   res.status(201).json(review);
 };
-
 const getListingReviews = async (req, res) => {
-  const reviews = await Review.find({ listingId: req.params.listingId })
-    .populate("guestId", "name")
-    .sort({ createdAt: -1 });
+  try {
+    const reviews = await Review.find({ listingId: req.params.listingId })
+      .populate("guestId", "name")
+      .sort({ createdAt: -1 });
 
-  res.json(reviews);
+    // Always return an array (even empty)
+    res.json(Array.isArray(reviews) ? reviews : []);
+  } catch (err) {
+    console.error("Review fetch failed:", err.message);
+    res.status(500).json([]); // return empty array on failure
+  }
 };
 
 const respondToReview = async (req, res) => {
