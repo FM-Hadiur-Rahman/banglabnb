@@ -30,10 +30,15 @@ const HostCharts = () => {
           }),
         ]);
 
-        setEarnings(earningsRes.data); // array of { month, total }
-        setReviews(reviewsRes.data); // array of { month, count }
+        // ✅ Add a check here: Ensure res.data is an array for earnings
+        setEarnings(Array.isArray(earningsRes.data) ? earningsRes.data : []);
+        // ✅ Add a check here: Ensure res.data is an array for reviews
+        setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
       } catch (err) {
         console.error("Error loading chart data:", err);
+        // ✅ On error, also ensure states are reset to empty arrays
+        setEarnings([]);
+        setReviews([]);
       }
     };
 
