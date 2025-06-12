@@ -51,13 +51,13 @@ const ReviewsChart = () => {
     <div className="bg-white p-4 rounded shadow">
       <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={Array.isArray(reviews) ? reviews : []}>
+        {/* <BarChart data={Array.isArray(reviews) ? reviews : []}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
           <Bar dataKey="count" fill="#f59e0b" />
-        </BarChart>
+        </BarChart> */}
       </ResponsiveContainer>
     </div>
   );
