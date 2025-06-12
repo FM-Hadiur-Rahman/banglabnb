@@ -49,7 +49,7 @@ const ReviewsChart = () => {
         <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
         <ResponsiveContainer width="100%" height={300}>
           {Array.isArray(reviews) && reviews.length > 0 ? (
-            <BarChart data={reviews}>
+            <BarChart data={Array.isArray(reviews) ? reviews : []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
