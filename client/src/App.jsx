@@ -31,6 +31,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import MyAccountPage from "./pages/MyAccoountPage";
 import GuestChatsRoute from "./routes/GuestChatsRoute";
 import HostChatsRoute from "./routes/HostChatsRoute";
+import Notifications from "./components/Notifications";
 
 // Payment Pages
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
@@ -147,6 +148,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyAccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             }
           />
