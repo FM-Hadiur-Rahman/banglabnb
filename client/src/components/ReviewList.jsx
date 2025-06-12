@@ -9,16 +9,11 @@ const ReviewList = ({ listingId }) => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/reviews/listing/${listingId}`)
       .then((res) => {
-        if (!Array.isArray(reviews)) {
-          console.error("Invalid review data:", reviews);
-          return (
-            <p className="text-red-600 italic">
-              ⚠️ Failed to load reviews properly.
-            </p>
-          );
+        if (Array.isArray(res.data)) {
+          setReviews(res.data);
         } else {
-          console.warn("⚠️ Expected reviews to be an array but got:", res.data);
-          setReviews([]);
+          console.warn("⚠️ Expected reviews array but got:", res.data);
+          setReviews([]); // fallback to empty
         }
       })
       .catch((err) => {
