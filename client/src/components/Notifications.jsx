@@ -77,7 +77,7 @@ const Notifications = () => {
               }`}
               onClick={() => {
                 if (note.link) {
-                  window.location.href = note.link;
+                  navigate(note.link);
                 }
               }}
             >
