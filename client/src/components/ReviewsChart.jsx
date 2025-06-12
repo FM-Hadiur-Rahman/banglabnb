@@ -44,7 +44,7 @@ const ReviewsChart = () => {
       {/* Reviews */}
       <div className="bg-white p-4 rounded shadow">
         <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
-        {Array.isArray(reviews) && reviews.length > 0 && (
+        {Array.isArray(reviews) ? (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={reviews}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -54,6 +54,8 @@ const ReviewsChart = () => {
               <Bar dataKey="count" fill="#f59e0b" />
             </BarChart>
           </ResponsiveContainer>
+        ) : (
+          <p className="text-gray-500 italic">No data to show.</p>
         )}
       </div>
     </>
