@@ -144,7 +144,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold mb-6">All Listings</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.length > 0 ? (
+            {Array.isArray(filtered) && filtered.length > 0 ? (
               filtered.map((listing) => (
                 <div
                   key={listing._id}
@@ -156,7 +156,7 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              <p className="text-gray-600">No listings found.</p>
+              <p className="text-gray-600 col-span-full">No listings found.</p>
             )}
           </div>
         </div>
