@@ -24,18 +24,13 @@ const createReview = async (req, res) => {
 
   res.status(201).json(review);
 };
-const getListingReviews = async (req, res) => {
-  try {
-    const reviews = await Review.find({ listingId: req.params.listingId })
-      .populate("guestId", "name")
-      .sort({ createdAt: -1 });
 
-    // Always return an array (even empty)
-    res.json(Array.isArray(reviews) ? reviews : []);
-  } catch (err) {
-    console.error("Review fetch failed:", err.message);
-    res.status(500).json([]); // return empty array on failure
-  }
+const getListingReviews = async (req, res) => {
+  const reviews = await Review.find({ listingId: req.params.listingId })
+    .populate("guestId", "name")
+    .sort({ createdAt: -1 });
+
+  res.json(reviews);
 };
 
 const respondToReview = async (req, res) => {
@@ -45,7 +40,7 @@ const respondToReview = async (req, res) => {
   const review = await Review.findById(reviewId).populate("listingId");
   if (!review) return res.status(404).json({ message: "Review not found" });
 
-  if (review.listingId.hostId.toString() !== req.user.id.toString())
+  if (review.listingId.hostId.toString() !== req.user.id)
     return res.status(403).json({ message: "Only host can respond" });
 
   review.response = response;

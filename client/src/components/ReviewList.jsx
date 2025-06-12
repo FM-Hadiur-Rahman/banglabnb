@@ -8,25 +8,17 @@ const ReviewList = ({ listingId }) => {
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/reviews/listing/${listingId}`)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setReviews(res.data);
-        } else {
-          console.warn("⚠️ Expected reviews array but got:", res.data);
-          setReviews([]); // fallback to empty
-        }
-      })
+      .then((res) => setReviews(res.data))
       .catch((err) => {
         console.error("❌ Failed to load reviews:", err);
-        setReviews([]);
+        setReviews([]); // fallback to empty
       })
       .finally(() => setLoading(false));
   }, [listingId]);
 
-  if (loading)
-    return <p className="text-gray-500 italic">Loading reviews...</p>;
+  if (loading) return <p>Loading reviews...</p>;
 
-  if (!Array.isArray(reviews) || reviews.length === 0)
+  if (reviews.length === 0)
     return (
       <p className="text-gray-600 italic">
         No reviews yet. Be the first to review!
@@ -36,16 +28,12 @@ const ReviewList = ({ listingId }) => {
   return (
     <div className="space-y-4">
       {reviews.map((r) => (
-        <div key={r._id} className="border p-3 rounded shadow-sm">
+        <div key={r._id} className="border p-3 rounded">
           <div className="font-semibold">{r.guestId?.name || "Anonymous"}</div>
-          <div className="text-yellow-600 font-medium">
-            Rating: {r.rating} ★
-          </div>
-          <p className="text-gray-800">{r.text}</p>
+          <div>Rating: {r.rating} ★</div>
+          <p>{r.text}</p>
           {r.response && (
-            <p className="text-sm text-gray-600 mt-1">
-              💬 Host reply: <em>{r.response}</em>
-            </p>
+            <p className="text-sm text-gray-600">💬 Host reply: {r.response}</p>
           )}
         </div>
       ))}
