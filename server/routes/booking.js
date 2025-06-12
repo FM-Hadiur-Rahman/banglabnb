@@ -10,6 +10,12 @@ router.post("/", protect, bookingCtrl.createBooking);
 
 // Get bookings for a guest
 router.get("/user", protect, bookingCtrl.getBookingsByGuest);
+// Get booking by SSLCOMMERZ transaction ID
+router.get(
+  "/transaction/:tran_id",
+  protect,
+  bookingCtrl.getBookingByTransactionId
+);
 
 // Get bookings for host's listings
 router.get("/host", protect, bookingCtrl.getBookingsByHost);

@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import {
   LineChart,
   Line,
@@ -8,44 +7,16 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts";
 
-const EarningsChart = () => {
-  const [earnings, setEarnings] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("token");
-
-      try {
-        const earningsRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/stats/earnings`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        // ✅ Add a check here: Ensure res.data is an array
-        setEarnings(Array.isArray(earningsRes.data) ? earningsRes.data : []);
-      } catch (err) {
-        console.error("Error loading chart data:", err);
-        // ✅ On error, also ensure earnings is an empty array
-        setEarnings([]);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+const EarningsChart = ({ data }) => {
   return (
-    <>
-      {/* Earnings */}
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="text-lg font-semibold mb-2">📈 Monthly Earnings</h3>
+    <div className="bg-white p-4 rounded shadow">
+      <h3 className="text-lg font-semibold mb-2">📈 Monthly Earnings</h3>
+
+      {Array.isArray(data) && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={earnings}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
@@ -53,8 +24,10 @@ const EarningsChart = () => {
             <Line type="monotone" dataKey="amount" stroke="#10b981" />
           </LineChart>
         </ResponsiveContainer>
-      </div>
-    </>
+      ) : (
+        <p className="text-gray-500 italic">No earnings data available.</p>
+      )}
+    </div>
   );
 };
 

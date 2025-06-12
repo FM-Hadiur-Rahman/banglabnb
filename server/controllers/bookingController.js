@@ -532,3 +532,19 @@ exports.respondModification = async (req, res) => {
 
   res.json({ message: `Modification ${action}`, booking });
 };
+exports.getBookingByTransactionId = async (req, res) => {
+  try {
+    const booking = await Booking.findOne({ transactionId: req.params.tran_id })
+      .populate("listingId", "title")
+      .populate("guestId", "name");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.json(booking);
+  } catch (err) {
+    console.error("❌ Error fetching booking by tran_id:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

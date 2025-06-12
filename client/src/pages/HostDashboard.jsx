@@ -9,11 +9,14 @@ const HostDashboard = () => {
   const [listings, setListings] = useState([]);
   const [checkIns, setCheckIns] = useState([]);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [earningsData, setEarningsData] = useState([]);
+  const [reviewsData, setReviewsData] = useState([]);
 
   const fetchData = async () => {
     const token = localStorage.getItem("token");
 
     try {
+      // 1. Fetch listings
       const listingsRes = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/listings/host/${user._id}`
       );
@@ -24,6 +27,7 @@ const HostDashboard = () => {
         setListings([]);
       }
 
+      // 2. Fetch bookings
       const bookingsRes = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/bookings/host`,
         {
@@ -40,7 +44,7 @@ const HostDashboard = () => {
         setCheckIns([]);
       }
 
-      // Calculate reviews
+      // 3. Count reviews
       let reviewCount = 0;
       listingsRes.data?.forEach((listing) => {
         if (listing.reviews) {
@@ -48,6 +52,24 @@ const HostDashboard = () => {
         }
       });
       setTotalReviews(reviewCount);
+
+      // 4. Fetch earnings chart data
+      const earningsRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/stats/earnings`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setEarningsData(Array.isArray(earningsRes.data) ? earningsRes.data : []);
+
+      // 5. Fetch reviews chart data
+      const reviewsRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/stats/reviews`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setReviewsData(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
     } catch (err) {
       console.error("❌ Error loading dashboard data:", err);
     }
@@ -116,8 +138,8 @@ const HostDashboard = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <EarningsChart />
-        <ReviewsChart />
+        <EarningsChart data={earningsData} />
+        <ReviewsChart data={reviewsData} />
       </div>
 
       {/* Upcoming Check-ins */}

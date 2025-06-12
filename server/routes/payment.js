@@ -214,7 +214,9 @@ router.post("/success", async (req, res) => {
       console.warn("Payout creation failed:", e.message);
     }
 
-    res.redirect("https://banglabnb.com/payment-success?status=paid");
+    res.redirect(
+      `https://banglabnb.com/payment-success?status=paid&tran_id=${tran_id}`
+    );
   } catch (err) {
     console.error("Payment success error:", err.message);
     res.status(500).send("Server error");
