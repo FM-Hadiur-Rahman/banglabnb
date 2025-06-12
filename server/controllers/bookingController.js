@@ -375,7 +375,7 @@ exports.requestModification = async (req, res) => {
     userId: host._id,
     type: "modification-request",
     message: `📅 ${guest.name} requested to change booking dates.`,
-    link: "/dashboard/requests",
+    link: `/host/listings/${booking.listingId._id}/bookings`,
   });
 
   // ✅ Send email
