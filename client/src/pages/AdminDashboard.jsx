@@ -20,6 +20,7 @@ const AdminDashboard = () => {
             },
           }
         );
+        console.log("📊 Admin stats response:", res.data);
         setStats(res.data);
       } catch (err) {
         console.error("❌ Failed to load admin stats:", err);
@@ -57,17 +58,17 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-xl font-bold">👥 Total Users</h2>
-            <p className="text-3xl">{stats.users}</p>
+            <p className="text-3xl">{stats.users ?? 0}</p>
           </div>
 
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-xl font-bold">🏡 Total Listings</h2>
-            <p className="text-3xl">{stats.listings}</p>
+            <p className="text-3xl">{stats.listings ?? 0}</p>
           </div>
 
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-xl font-bold">📆 Total Bookings</h2>
-            <p className="text-3xl">{stats.bookings}</p>
+            <p className="text-3xl">{stats.bookings ?? 0}</p>
           </div>
         </div>
       </main>
