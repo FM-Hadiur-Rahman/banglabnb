@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
@@ -75,7 +77,7 @@ const Notifications = () => {
               }`}
               onClick={() => {
                 if (note.link) {
-                  window.location.href = note.link;
+                  navigate(note.link);
                 }
               }}
             >
