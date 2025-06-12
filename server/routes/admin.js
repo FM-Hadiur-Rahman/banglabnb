@@ -389,3 +389,29 @@ router.patch(
 );
 
 // === Other ===
+// === Monthly Reviews Stats ===
+router.get("/stats/reviews", protect, authorize("admin"), async (req, res) => {
+  try {
+    const data = await Review.aggregate([
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m", date: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const result = data.map((item) => ({
+      month: item._id,
+      count: item.count,
+    }));
+
+    res.json(result); // ✅ always returns an array
+  } catch (err) {
+    console.error("❌ Failed to get review stats:", err);
+    res.status(500).json([]); // fallback: return empty array
+  }
+});
