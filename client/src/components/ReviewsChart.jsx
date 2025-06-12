@@ -36,10 +36,7 @@ const ReviewsChart = () => {
         }
       } catch (err) {
         console.error("Error loading chart data:", err);
-        setReviews([
-          { month: "2025-04", count: 2 },
-          { month: "2025-05", count: 5 },
-        ]);
+        setReviews([]);
       }
     };
 
