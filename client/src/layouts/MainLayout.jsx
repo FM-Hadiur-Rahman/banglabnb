@@ -35,11 +35,12 @@ const MainLayout = () => {
             }`}
           />
           <span
-            className={`text-green-700 font-bold transition-all duration-300 ${
+            className={`font-bold transition-all duration-300 ${
               isScrolled ? "text-base" : "text-xl"
             }`}
           >
-            BanglaBnB
+            <span className="text-green-700">Bangla</span>
+            <span className="text-red-600">BnB</span>
           </span>
         </Link>
         <Navbar />
