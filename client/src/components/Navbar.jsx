@@ -93,10 +93,6 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="font-bold text-xl text-green-600">
-          🏠 BanglaBnB
-        </Link>
-
         {/* Desktop Nav */}
         <nav className="hidden sm:flex items-center space-x-6 text-gray-700">
           {isLoggedIn && (
