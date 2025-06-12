@@ -1,4 +1,3 @@
-// src/components/ReviewsChart.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -6,8 +5,8 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
+  CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
 
@@ -15,50 +14,51 @@ const ReviewsChart = () => {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("token");
+    const fetchReviews = async () => {
       try {
+        const token = localStorage.getItem("token");
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/stats/reviews`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("✅ API returned:", res.data);
 
-        // Safely extract reviews array
         const incoming = res.data;
+        console.log("✅ Incoming reviews data =", incoming);
+
         if (Array.isArray(incoming)) {
           setReviews(incoming);
-        } else if (Array.isArray(incoming.reviews)) {
-          setReviews(incoming.reviews);
-        } else if (Array.isArray(incoming.data)) {
-          setReviews(incoming.data);
         } else {
-          console.error("❌ Unexpected response shape:", incoming);
+          console.warn("⚠️ Invalid reviews data. Fallback to empty array.");
           setReviews([]);
         }
       } catch (err) {
-        console.error("❌ Error loading reviews chart:", err);
+        console.error("❌ Failed to fetch reviews data:", err);
         setReviews([]);
       }
     };
 
-    fetchData();
+    fetchReviews();
   }, []);
 
   return (
     <div className="bg-white p-4 rounded shadow">
       <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        {/* <BarChart data={Array.isArray(reviews) ? reviews : []}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="count" fill="#f59e0b" />
-        </BarChart> */}
-      </ResponsiveContainer>
+
+      {Array.isArray(reviews) && reviews.length > 0 ? (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={reviews}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="count" fill="#f59e0b" />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <p className="text-gray-500 italic">No reviews data available.</p>
+      )}
     </div>
   );
 };
