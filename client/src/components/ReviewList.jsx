@@ -8,10 +8,17 @@ const ReviewList = ({ listingId }) => {
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/reviews/listing/${listingId}`)
-      .then((res) => setReviews(res.data))
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setReviews(res.data);
+        } else {
+          console.warn("Expected array but got:", res.data);
+          setReviews([]);
+        }
+      })
       .catch((err) => {
         console.error("❌ Failed to load reviews:", err);
-        setReviews([]); // fallback to empty
+        setReviews([]);
       })
       .finally(() => setLoading(false));
   }, [listingId]);
