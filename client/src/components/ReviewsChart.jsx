@@ -13,7 +13,6 @@ import {
 } from "recharts";
 const ReviewsChart = () => {
   const [reviews, setReviews] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
@@ -26,9 +25,17 @@ const ReviewsChart = () => {
           }
         );
 
-        setReviews(reviewsRes.data); // array of { month, count }
+        const data = reviewsRes.data;
+
+        if (Array.isArray(data)) {
+          setReviews(data);
+        } else {
+          console.warn("⚠️ Expected array, got:", data);
+          setReviews([]); // fallback to avoid crash
+        }
       } catch (err) {
-        console.error("Error loading chart data:", err);
+        console.error("❌ Error loading chart data:", err);
+        setReviews([]); // fallback
       }
     };
 
