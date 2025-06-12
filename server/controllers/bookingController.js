@@ -3,6 +3,7 @@ const sendEmail = require("../utils/sendEmail");
 const Booking = require("../models/Booking");
 const Listing = require("../models/Listing");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 
 // ✅ Create a new booking (guest)
 
@@ -316,13 +317,16 @@ exports.checkOut = async (req, res) => {
 
   res.json({ message: "Checked out", booking });
 };
+
 exports.requestModification = async (req, res) => {
   const { from, to } = req.body;
-  const booking = await Booking.findById(req.params.id);
+  const booking = await Booking.findById(req.params.id)
+    .populate("listingId")
+    .populate("guestId");
 
   if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-  // 🔐 Allow only confirmed + paid + not checked-in
+  // 🔒 Only allow modification if booking is confirmed, paid/partial, and not yet checked in
   if (
     booking.status !== "confirmed" ||
     !["paid", "partial"].includes(booking.paymentStatus) ||
@@ -334,15 +338,14 @@ exports.requestModification = async (req, res) => {
     });
   }
 
-  // ✅ Validate date range
   if (!from || !to || new Date(from) >= new Date(to)) {
     return res.status(400).json({ message: "Invalid modification date range" });
   }
 
-  // ✅ Conflict check
+  // 🔁 Conflict check with other bookings
   const conflict = await Booking.findOne({
     _id: { $ne: booking._id },
-    listingId: booking.listingId,
+    listingId: booking.listingId._id,
     status: { $ne: "cancelled" },
     $or: [
       { dateFrom: { $lte: new Date(to) }, dateTo: { $gte: new Date(from) } },
@@ -355,7 +358,7 @@ exports.requestModification = async (req, res) => {
       .json({ message: "New dates overlap with another booking" });
   }
 
-  // 💾 Save modification request
+  // 💾 Save request
   booking.modificationRequest = {
     status: "requested",
     requestedDates: { from, to },
@@ -363,9 +366,44 @@ exports.requestModification = async (req, res) => {
   };
 
   await booking.save();
+
+  const guest = booking.guestId;
+  const host = await User.findById(booking.listingId.hostId);
+
+  // ✅ Create Notification in DB
+  await Notification.create({
+    userId: host._id,
+    type: "modification-request",
+    message: `📅 ${guest.name} requested to change booking dates.`,
+    link: "/dashboard/requests",
+  });
+
+  // ✅ Send email
+  if (host?.email) {
+    await sendEmail({
+      to: host.email,
+      subject: `📅 Modification Request for Booking ${booking._id}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #1a202c; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px;">
+          <h2 style="color: #2563eb;">Booking Modification Requested</h2>
+          <p>Hello <strong>${host.name}</strong>,</p>
+          <p>Your guest <strong>${
+            guest.name
+          }</strong> has requested to change the booking dates for your listing: <strong>${
+        booking.listingId.title
+      }</strong>.</p>
+          <p><strong>Current Dates:</strong> ${booking.dateFrom.toDateString()} to ${booking.dateTo.toDateString()}</p>
+          <p><strong>Requested Dates:</strong> ${new Date(
+            from
+          ).toDateString()} to ${new Date(to).toDateString()}</p>
+          <p>Please <a href="https://banglabnb.com/dashboard/requests" style="color:#2563eb;">log in</a> to approve or reject this request.</p>
+        </div>
+      `,
+    });
+  }
+
   res.json({ message: "Modification request sent", booking });
 };
-
 exports.respondModification = async (req, res) => {
   const { action } = req.body; // accepted or rejected
   const booking = await Booking.findById(req.params.id)

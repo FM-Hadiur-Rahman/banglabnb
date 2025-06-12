@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import logo from "/banglabnb-logo.png"; // adjust path if needed
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -10,6 +9,7 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
@@ -69,6 +69,23 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUnreadCount(res.data.unread || 0);
+      } catch (err) {
+        console.error("🔔 Failed to fetch unread count", err);
+      }
+    };
+    if (isLoggedIn) fetchUnread();
+  }, [isLoggedIn]);
+
   return (
     <header
       className={`sticky top-0 z-50 px-4 py-3 transition-all duration-300 backdrop-blur-md ${
@@ -76,8 +93,23 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <Link to="/" className="font-bold text-xl text-green-600">
+          🏠 BanglaBnB
+        </Link>
+
         {/* Desktop Nav */}
         <nav className="hidden sm:flex items-center space-x-6 text-gray-700">
+          {isLoggedIn && (
+            <Link to="/notifications" className="relative group">
+              <span className="text-xl">🔔</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full px-1.5 py-0.5">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {isLoggedIn ? (
             <div className="relative" ref={menuRef}>
               <button
@@ -89,8 +121,7 @@ const Navbar = () => {
                   alt="Profile"
                   className="w-8 h-8 rounded-full object-cover"
                 />
-                <span className="ml-2">{user.name}</span>
-
+                <span>{user.name}</span>
                 <svg
                   className="w-4 h-4 ml-1"
                   fill="none"
@@ -121,20 +152,20 @@ const Navbar = () => {
                   )}
                   <Link
                     to={getDashboardPath()}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     Dashboard
                   </Link>
                   <Link
                     to="/my-account"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     👤 My Account
                   </Link>
                   {user.role === "host" && (
                     <Link
                       to="/host/create"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
                       ➕ Create Listing
                     </Link>
@@ -142,29 +173,26 @@ const Navbar = () => {
                   {user.role === "user" && (
                     <Link
                       to="/my-bookings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      My Bookings
+                      📅 My Bookings
                     </Link>
                   )}
                   <Link
                     to="/wishlist"
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     ❤️ My Wishlist
                   </Link>
-
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-sm text-blue-600 hover:underline"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     🙍 Edit Profile
                   </Link>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("user");
-                      localStorage.removeItem("token");
-                      setDropdownOpen(false);
+                      localStorage.clear();
                       navigate("/login");
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
@@ -194,9 +222,9 @@ const Navbar = () => {
             }`}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            <span className="w-6 h-0.5 bg-gray-700 transition-all origin-center" />
-            <span className="w-6 h-0.5 bg-gray-700 transition-all origin-center" />
-            <span className="w-6 h-0.5 bg-gray-700 transition-all origin-center" />
+            <span className="w-6 h-0.5 bg-gray-700" />
+            <span className="w-6 h-0.5 bg-gray-700" />
+            <span className="w-6 h-0.5 bg-gray-700" />
           </button>
         </div>
       </div>
@@ -228,6 +256,14 @@ const Navbar = () => {
               <Link to="/my-account" className="block">
                 My Account
               </Link>
+              <Link to="/notifications" className="block">
+                🔔 Notifications{" "}
+                {unreadCount > 0 && (
+                  <span className="ml-2 text-xs text-red-600 font-semibold">
+                    ({unreadCount})
+                  </span>
+                )}
+              </Link>
               {user.role === "host" && (
                 <Link to="/host/create" className="block">
                   ➕ Create Listing
@@ -235,7 +271,7 @@ const Navbar = () => {
               )}
               {user.role === "user" && (
                 <Link to="/my-bookings" className="block">
-                  My Bookings
+                  📅 My Bookings
                 </Link>
               )}
               <button
