@@ -48,13 +48,19 @@ const ReviewsChart = () => {
       <div className="bg-white p-4 rounded shadow">
         <h3 className="text-lg font-semibold mb-2">🌟 Monthly Reviews</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={reviews}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="count" fill="#f59e0b" />
-          </BarChart>
+          {Array.isArray(reviews) && reviews.length > 0 ? (
+            <BarChart data={reviews}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#f59e0b" />
+            </BarChart>
+          ) : (
+            <div className="text-gray-500 text-sm p-4">
+              No data available for chart.
+            </div>
+          )}
         </ResponsiveContainer>
       </div>
     </>
