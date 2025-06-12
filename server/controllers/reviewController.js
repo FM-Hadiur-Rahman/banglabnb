@@ -40,7 +40,7 @@ const respondToReview = async (req, res) => {
   const review = await Review.findById(reviewId).populate("listingId");
   if (!review) return res.status(404).json({ message: "Review not found" });
 
-  if (review.listingId.hostId.toString() !== req.user.id)
+  if (review.listingId.hostId.toString() !== req.user.id.toString())
     return res.status(403).json({ message: "Only host can respond" });
 
   review.response = response;

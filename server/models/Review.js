@@ -18,6 +18,7 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Listing",
       required: true,
+      index: true,
     },
     rating: {
       type: Number,
@@ -25,6 +26,13 @@ const reviewSchema = new mongoose.Schema(
       max: 5,
       required: true,
     },
+    verified: {
+      type: Boolean,
+      default: true, // you can set to false if you want moderation
+    },
+    tags: [String], // e.g., ['clean', 'friendly', 'peaceful']
+    emoji: String, // optional emoji representing experience
+
     text: String,
     response: String, // 📝 Host reply
   },

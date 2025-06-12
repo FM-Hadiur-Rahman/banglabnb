@@ -12,7 +12,7 @@ const ReviewList = ({ listingId }) => {
         if (Array.isArray(res.data)) {
           setReviews(res.data);
         } else {
-          console.warn("Expected array but got:", res.data);
+          console.warn("⚠️ Expected reviews to be an array but got:", res.data);
           setReviews([]);
         }
       })
@@ -23,9 +23,10 @@ const ReviewList = ({ listingId }) => {
       .finally(() => setLoading(false));
   }, [listingId]);
 
-  if (loading) return <p>Loading reviews...</p>;
+  if (loading)
+    return <p className="text-gray-500 italic">Loading reviews...</p>;
 
-  if (reviews.length === 0)
+  if (!Array.isArray(reviews) || reviews.length === 0)
     return (
       <p className="text-gray-600 italic">
         No reviews yet. Be the first to review!
@@ -35,12 +36,16 @@ const ReviewList = ({ listingId }) => {
   return (
     <div className="space-y-4">
       {reviews.map((r) => (
-        <div key={r._id} className="border p-3 rounded">
+        <div key={r._id} className="border p-3 rounded shadow-sm">
           <div className="font-semibold">{r.guestId?.name || "Anonymous"}</div>
-          <div>Rating: {r.rating} ★</div>
-          <p>{r.text}</p>
+          <div className="text-yellow-600 font-medium">
+            Rating: {r.rating} ★
+          </div>
+          <p className="text-gray-800">{r.text}</p>
           {r.response && (
-            <p className="text-sm text-gray-600">💬 Host reply: {r.response}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              💬 Host reply: <em>{r.response}</em>
+            </p>
           )}
         </div>
       ))}
