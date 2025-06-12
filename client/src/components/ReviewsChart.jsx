@@ -23,13 +23,14 @@ const ReviewsChart = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        console.log("🔍 reviewsRes.data =", reviewsRes.data); // ADD THIS
 
         const incoming = reviewsRes.data;
 
         if (Array.isArray(incoming)) {
           setReviews(incoming);
         } else if (Array.isArray(incoming.reviews)) {
-          setReviews(incoming.reviews); // ← 🛠 Safe fallback
+          setReviews(incoming.reviews);
         } else {
           console.error("❌ Unexpected response shape:", incoming);
           setReviews([]);

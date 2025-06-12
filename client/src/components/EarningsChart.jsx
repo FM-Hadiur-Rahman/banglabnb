@@ -11,6 +11,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+
 const EarningsChart = () => {
   const [earnings, setEarnings] = useState([]);
 
@@ -26,9 +27,12 @@ const EarningsChart = () => {
           }
         );
 
-        setEarnings(earningsRes.data); // array of { month, total }
+        // ✅ Add a check here: Ensure res.data is an array
+        setEarnings(Array.isArray(earningsRes.data) ? earningsRes.data : []);
       } catch (err) {
         console.error("Error loading chart data:", err);
+        // ✅ On error, also ensure earnings is an empty array
+        setEarnings([]);
       }
     };
 
