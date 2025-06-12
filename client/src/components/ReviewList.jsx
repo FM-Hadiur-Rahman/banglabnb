@@ -8,17 +8,10 @@ const ReviewList = ({ listingId }) => {
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/reviews/listing/${listingId}`)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setReviews(res.data);
-        } else {
-          console.warn("⚠️ Expected reviews to be array but got:", res.data);
-          setReviews([]);
-        }
-      })
+      .then((res) => setReviews(res.data))
       .catch((err) => {
         console.error("❌ Failed to load reviews:", err);
-        setReviews([]);
+        setReviews([]); // fallback to empty
       })
       .finally(() => setLoading(false));
   }, [listingId]);
@@ -34,7 +27,7 @@ const ReviewList = ({ listingId }) => {
 
   return (
     <div className="space-y-4">
-      {reviews.map((r) => (
+      {/* {reviews.map((r) => (
         <div key={r._id} className="border p-3 rounded">
           <div className="font-semibold">{r.guestId?.name || "Anonymous"}</div>
           <div>Rating: {r.rating} ★</div>
@@ -43,7 +36,7 @@ const ReviewList = ({ listingId }) => {
             <p className="text-sm text-gray-600">💬 Host reply: {r.response}</p>
           )}
         </div>
-      ))}
+      ))} */}
     </div>
   );
 };
