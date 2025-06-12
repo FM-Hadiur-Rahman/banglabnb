@@ -1,4 +1,3 @@
-// pages/AdminRevenue.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
@@ -32,6 +31,7 @@ const AdminRevenue = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        console.log("📊 Revenue data received:", res.data);
         setStats(res.data);
       } catch (err) {
         console.error("❌ Revenue fetch failed:", err);
@@ -41,12 +41,12 @@ const AdminRevenue = () => {
     fetchRevenue();
   }, []);
 
-  const monthlyData = Object.entries(stats.monthly || {}).map(
-    ([month, value]) => ({
-      month,
-      revenue: value,
-    })
-  );
+  const monthlyData = Array.isArray(stats.monthly)
+    ? stats.monthly
+    : Object.entries(stats.monthly || {}).map(([month, value]) => ({
+        month,
+        revenue: value,
+      }));
 
   return (
     <AdminLayout>
@@ -76,7 +76,7 @@ const AdminRevenue = () => {
       <div className="bg-white p-6 rounded shadow mb-6">
         <h3 className="text-lg font-semibold mb-4">📈 Monthly Revenue</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={monthlyData}>
+          <LineChart data={Array.isArray(monthlyData) ? monthlyData : []}>
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
@@ -89,12 +89,12 @@ const AdminRevenue = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TableCard
           title="🏆 Top Listings"
-          data={stats.topListings ?? []}
+          data={Array.isArray(stats.topListings) ? stats.topListings : []}
           type="listing"
         />
         <TableCard
           title="💼 Top Hosts"
-          data={stats.topHosts ?? []}
+          data={Array.isArray(stats.topHosts) ? stats.topHosts : []}
           type="host"
         />
       </div>
@@ -110,22 +110,25 @@ const StatCard = ({ title, value }) => (
   </div>
 );
 
-// Reusable Table Card
+// Reusable Table Card with map guard
 const TableCard = ({ title, data, type }) => (
   <div className="bg-white p-4 rounded shadow">
     <h4 className="text-lg font-semibold mb-4">{title}</h4>
     <ul className="space-y-2">
-      {data.length === 0 ? (
-        <li className="text-gray-500 text-sm">No data available</li>
-      ) : (
+      {Array.isArray(data) && data.length > 0 ? (
         data.map((item) => (
-          <li key={item.id} className="flex justify-between text-sm">
+          <li
+            key={item.id || item._id}
+            className="flex justify-between text-sm"
+          >
             <span>{type === "listing" ? item.title : item.name}</span>
             <span className="font-semibold">
               ৳ {(item.total ?? 0).toLocaleString()}
             </span>
           </li>
         ))
+      ) : (
+        <li className="text-gray-500 text-sm">No data available</li>
       )}
     </ul>
   </div>
