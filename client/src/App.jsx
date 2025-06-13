@@ -60,7 +60,7 @@ import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
 import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
-import AdminOverduePayouts from "./pages/admin/AdminOverduePayouts";
+import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 
 import ErrorBoundary from "./components/ErrorBoundary";
 
