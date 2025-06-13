@@ -238,6 +238,8 @@ exports.checkIn = async (req, res) => {
     return res.status(400).json({ message: "Too early to check in" });
 
   booking.checkInAt = now;
+  booking.checkedInAt = new Date();
+
   await booking.save();
 
   const host = await User.findById(booking.listingId.hostId).select(

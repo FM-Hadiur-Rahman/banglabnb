@@ -46,6 +46,12 @@ const AdminLayout = ({ children }) => {
           >
             💸 Refunds
           </Link>
+          <Link
+            to="/admin/payouts/overdue"
+            className="block hover:text-yellow-400 font-semibold"
+          >
+            ⏰ Overdue Payouts
+          </Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

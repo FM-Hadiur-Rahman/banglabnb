@@ -20,9 +20,12 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    checkInAt: Date,
-    checkOutAt: Date,
+    checkInAt: { type: Date },
+    checkOutAt: { type: Date },
     invoiceUrl: String,
+    checkedInAt: { type: Date }, // ✅ when guest checks in
+    checkOutAt: { type: Date },
+    payoutIssued: { type: Boolean, default: false }, // ✅ to track if host payout already scheduled
 
     status: {
       type: String,
