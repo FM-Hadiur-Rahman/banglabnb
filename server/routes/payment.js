@@ -315,7 +315,7 @@ router.post("/extra-success", async (req, res) => {
 
   const booking = await Booking.findOne({
     "extraPayment.transactionId": tran_id,
-  });
+  }).populate("guestId");
 
   if (!booking) return res.status(404).send("Booking not found");
 
@@ -336,7 +336,7 @@ router.post("/extra-success", async (req, res) => {
   }
 
   return res.redirect(
-    "https://banglabnb.com/payment-success?status=extra-paid"
+    "https://banglabnb.com/payment-success?tran_id=${tran_id}&status=extra-paid"
   );
 });
 router.post("/claim-refund", protect, async (req, res) => {

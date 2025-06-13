@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const PaymentSuccessPage = () => {
   const [params] = useSearchParams();
   const tranId = params.get("tran_id");
+  const status = params.get("status"); // 'paid' or 'extra-paid'
   const [booking, setBooking] = useState(null);
 
   useEffect(() => {
@@ -38,9 +39,16 @@ const PaymentSuccessPage = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white border p-6 rounded shadow max-w-lg w-full space-y-4">
         <h1 className="text-2xl font-bold text-green-600">
-          ✅ Booking Confirmed
+          ✅{" "}
+          {status === "extra-paid"
+            ? "Extra Payment Received"
+            : "Booking Confirmed"}
         </h1>
-        <p className="text-gray-600">Thank you for your reservation!</p>
+        <p className="text-gray-600">
+          {status === "extra-paid"
+            ? "Thank you! We've received your additional payment. Your booking is now fully confirmed."
+            : "Thank you for your reservation!"}
+        </p>
 
         <div className="border-t pt-4 space-y-2 text-sm">
           <div>
