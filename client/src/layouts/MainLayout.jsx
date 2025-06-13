@@ -19,7 +19,7 @@ const MainLayout = () => {
       {/* Header with shrinking effect */}
       <header
         className={`sticky top-0 z-40 px-6 flex justify-between items-center shadow-md backdrop-blur-md transition-all duration-300 ${
-          isScrolled ? "bg-white/80 py-2" : "bg-white py-6"
+          isScrolled ? "bg-green-600 bg-opacity-95 py-2" : "bg-white-600 py-6"
         }`}
       >
         <Link
@@ -39,7 +39,7 @@ const MainLayout = () => {
               isScrolled ? "text-base" : "text-xl"
             }`}
           >
-            <span className="text-green-700">Bangla</span>
+            <span className="text-green-600">Bangla</span>
             <span className="text-red-600">BnB</span>
           </span>
         </Link>
