@@ -60,6 +60,8 @@ import AdminRevenue from "./pages/AdminRevenue";
 import AdminPayouts from "./pages/AdminPayouts";
 import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
+import AdminOverduePayouts from "./pages/admin/AdminOverduePayouts";
+
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
@@ -294,8 +296,30 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/admin/payouts" element={<AdminPayouts />} />
-          <Route path="/admin/refunds" element={<AdminRefundsPage />} />
+          <Route
+            path="/admin/payouts"
+            element={
+              <ProtectedRoute requiredRoleedRoles="admin">
+                <AdminPayouts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/refunds"
+            element={
+              <ProtectedRoute requiredRoleedRoles="admin">
+                <AdminRefundsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/payouts/overdue"
+            element={
+              <ProtectedRoute requiredRoleedRoles="admin">
+                <AdminOverduePayouts />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>
