@@ -35,6 +35,28 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "host", "admin"],
     default: "user",
   },
+  location: {
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      index: "2dsphere", // enables geospatial queries
+    },
+    address: { type: String },
+    division: {
+      type: String,
+      enum: Object.keys(require("../data/districts").divisions), // optional: validate only known divisions
+    },
+    district: {
+      type: String,
+      validate: {
+        validator: function (value) {
+          const { divisions } = require("../data/districts");
+          return Object.values(divisions).flat().includes(value);
+        },
+        message: (props) => `${props.value} is not a valid district.`,
+      },
+    },
+  },
+
   isVerified: {
     type: Boolean,
     default: false,

@@ -19,7 +19,12 @@ const SignupFormStep1 = () => {
     role: "user",
     division: "",
     district: "",
+    location: {
+      coordinates: [],
+      address: "",
+    },
   });
+
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
@@ -128,7 +133,17 @@ const SignupFormStep1 = () => {
         </select>
 
         <LocationSelector onChange={handleLocationChange} />
-        <MapboxAutocomplete onSelect={(place) => console.log(place)} />
+        <MapboxAutocomplete
+          onSelectLocation={({ coordinates, address }) =>
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                coordinates,
+                address,
+              },
+            }))
+          }
+        />
 
         <button
           type="submit"
