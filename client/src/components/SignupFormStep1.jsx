@@ -28,6 +28,50 @@ const SignupFormStep1 = () => {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
+  const extractAdminFromMapbox = async (lon, lat) => {
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?types=place,region&access_token=${
+          import.meta.env.VITE_MAPBOX_TOKEN
+        }`
+      );
+      const data = await res.json();
+      const features = data.features || [];
+
+      const district = features.find((f) => f.place_type.includes("place"));
+      const division = features.find((f) => f.place_type.includes("region"));
+
+      setFormData((prev) => ({
+        ...prev,
+        division: division?.text || "",
+        district: district?.text || "",
+      }));
+    } catch (err) {
+      console.warn("❌ Reverse geocoding failed", err);
+    }
+  };
+  const handleAutoDetect = () => {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${
+          import.meta.env.VITE_MAPBOX_TOKEN
+        }`
+      );
+      const data = await res.json();
+      const address = data.features[0]?.place_name || "";
+
+      setFormData((prev) => ({
+        ...prev,
+        location: { coordinates: [lon, lat], address },
+      }));
+
+      await extractAdminFromMapbox(lon, lat);
+    });
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -134,16 +178,21 @@ const SignupFormStep1 = () => {
 
         <LocationSelector onChange={handleLocationChange} />
         <MapboxAutocomplete
-          onSelectLocation={({ coordinates, address }) =>
+          onSelectLocation={({ coordinates, address }) => {
             setFormData((prev) => ({
               ...prev,
-              location: {
-                coordinates,
-                address,
-              },
-            }))
-          }
+              location: { coordinates, address },
+            }));
+            extractAdminFromMapbox(coordinates[0], coordinates[1]);
+          }}
         />
+        <button
+          type="button"
+          onClick={handleAutoDetect}
+          className="text-sm text-blue-600 underline"
+        >
+          📍 Use My Current Location
+        </button>
 
         <button
           type="submit"
