@@ -538,7 +538,14 @@ exports.respondModification = async (req, res) => {
 };
 exports.getBookingByTransactionId = async (req, res) => {
   try {
-    const booking = await Booking.findOne({ transactionId: req.params.tran_id })
+    const { tran_id } = req.params;
+
+    const booking = await Booking.findOne({
+      $or: [
+        { transactionId: tran_id },
+        { "extraPayment.transactionId": tran_id },
+      ],
+    })
       .populate("listingId", "title")
       .populate("guestId", "name");
 

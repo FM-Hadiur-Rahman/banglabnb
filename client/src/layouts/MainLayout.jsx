@@ -19,7 +19,7 @@ const MainLayout = () => {
       {/* Header with shrinking effect */}
       <header
         className={`sticky top-0 z-40 px-6 flex justify-between items-center shadow-md backdrop-blur-md transition-all duration-300 ${
-          isScrolled ? "bg-green-600 bg-opacity-95 py-2" : "bg-white-600 py-6"
+          isScrolled ? "bg-white bg-opacity-95 py-2" : "bg-white-600 py-6"
         }`}
       >
         <Link
@@ -28,16 +28,16 @@ const MainLayout = () => {
           title="Go to Home"
         >
           <img
-            src="/banglabnb-logo.png"
+            src="src/assets/banglabnb-logo2.png"
             alt="BanglaBnB Logo"
             className={`object-contain transition-all duration-300 ${
-              isScrolled ? "w-6 h-6" : "w-10 h-10"
+              isScrolled ? "w-10 h-10" : "w-18 h-16"
             }`}
           />
           <span
             className={`font-bold transition-all duration-300 ${
               isScrolled ? "text-base" : "text-xl"
-            }`}
+            } hidden sm:inline-block`}
           >
             <span className="text-green-600">Bangla</span>
             <span className="text-red-600">BnB</span>

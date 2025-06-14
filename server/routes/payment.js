@@ -336,7 +336,7 @@ router.post("/extra-success", async (req, res) => {
   }
 
   return res.redirect(
-    "https://banglabnb.com/payment-success?tran_id=${tran_id}&status=extra-paid"
+    `https://banglabnb.com/payment-success?tran_id=${tran_id}&status=extra-paid`
   );
 });
 router.post("/claim-refund", protect, async (req, res) => {
