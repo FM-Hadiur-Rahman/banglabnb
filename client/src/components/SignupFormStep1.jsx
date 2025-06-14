@@ -193,6 +193,11 @@ const SignupFormStep1 = () => {
         >
           📍 Use My Current Location
         </button>
+        {formData.location.address && (
+          <p className="text-sm text-gray-600 mt-2">
+            📍 Selected: {formData.location.address}
+          </p>
+        )}
 
         <button
           type="submit"

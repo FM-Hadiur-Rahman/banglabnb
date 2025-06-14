@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import logo from "../assets/banglabnb-logo2.png";
 
 const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,7 +29,7 @@ const MainLayout = () => {
           title="Go to Home"
         >
           <img
-            src="src/assets/banglabnb-logo2.png"
+            src={logo}
             alt="BanglaBnB Logo"
             className={`object-contain transition-all duration-300 ${
               isScrolled ? "w-10 h-10" : "w-18 h-16"
