@@ -6,6 +6,7 @@ const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState("Verifying...");
   const navigate = useNavigate();
+  const role = localStorage.getItem("signupRole");
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -30,7 +31,7 @@ const VerifyEmail = () => {
         localStorage.setItem("signupUserId", userId);
 
         setTimeout(() => {
-          navigate(`/register/step2?userId=${userId}`);
+          navigate(`/register/step2?userId=${userId}&role=${role}`);
         }, 3000);
       })
       .catch(() => {

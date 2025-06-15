@@ -26,6 +26,7 @@ router.post(
     { name: "idDocument", maxCount: 1 },
     { name: "idBack", maxCount: 1 }, // ✅ You must add this
     { name: "livePhoto", maxCount: 1 },
+    { name: "drivingLicense", maxCount: 1 },
   ]),
   checkSignupStep,
   verifyIdentityHandler

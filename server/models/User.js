@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["user", "host", "admin"],
+    enum: ["user", "host", "driver", "admin"],
     default: "user",
   },
   location: {
@@ -65,6 +65,13 @@ const userSchema = new mongoose.Schema({
   verificationTokenExpires: {
     type: Date,
   },
+  driver: {
+    licenseNumber: { type: String },
+    vehicleType: { type: String, enum: ["car", "bike"] },
+    vehicleModel: { type: String },
+    seats: { type: Number }, // default available seats
+    approved: { type: Boolean, default: false }, // for KYC
+  },
 
   avatar: { type: String, default: "" },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],
@@ -76,6 +83,8 @@ const userSchema = new mongoose.Schema({
     },
     nidUrl: String,
     selfieUrl: String,
+    drivingLicenseUrl: { type: String },
+
     reason: {
       type: String,
       default: "",

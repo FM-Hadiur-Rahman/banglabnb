@@ -16,6 +16,8 @@ const SignupFormStep2 = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("userId");
+  const [drivingLicense, setDrivingLicense] = useState(null);
+  const role = searchParams.get("role");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +26,9 @@ const SignupFormStep2 = () => {
     formData.append("userId", userId);
     formData.append("idDocument", idDocument);
     formData.append("idBack", idBack); // ✅ NEW
+    if (drivingLicense) {
+      formData.append("drivingLicense", drivingLicense);
+    }
 
     if (livePhotoFile) {
       formData.append("livePhoto", livePhotoFile);
@@ -84,6 +89,17 @@ const SignupFormStep2 = () => {
           setLivePhotoFile(e.target.files[0]);
         }}
       />
+      {role === "driver" && (
+        <>
+          <label className="block">Upload Driving License</label>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => setDrivingLicense(e.target.files[0])}
+            required
+          />
+        </>
+      )}
 
       <p className="text-sm text-gray-500">OR take a live selfie</p>
       <SelfieCapture

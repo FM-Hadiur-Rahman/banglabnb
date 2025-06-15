@@ -6,11 +6,26 @@ const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
 const { cloudinary } = require("../config/cloudinary"); // adjust the path if needed
 
+const crypto = require("crypto");
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
+
 exports.registerStep1 = async (req, res) => {
   try {
-    const { name, email, password, phone, role, division, district } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      role,
+      division,
+      district,
+      drivingLicense,
+      vehicleType,
+      seatsOffered,
+    } = req.body;
 
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password || !phone || !division || !district) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -19,38 +34,47 @@ exports.registerStep1 = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // ✅ Generate token
     const rawToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto
       .createHash("sha256")
       .update(rawToken)
       .digest("hex");
 
+    // 👤 Create new user
     const user = await User.create({
       name,
       email,
       password,
       phone,
       role,
-      division,
-      district,
+      location: {
+        division,
+        district,
+      },
       isVerified: false,
-      verificationToken: hashedToken, // ✅ save hashed token
-      verificationTokenExpires: Date.now() + 60 * 60 * 1000, // 🔐 1 hour from now
+      verificationToken: hashedToken,
+      verificationTokenExpires: Date.now() + 60 * 60 * 1000, // 1 hour
       identityVerified: false,
       signupStep: 1,
+      ...(role === "driver" && {
+        driverInfo: {
+          drivingLicense,
+          vehicleType,
+          seatsOffered,
+        },
+      }),
     });
 
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`; // ✅ send raw token in URL
+    const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`;
 
     await sendEmail({
       to: email,
       subject: "Verify your BanglaBnB account",
       html: `<h2>Hi ${name},</h2>
-      <p>Thanks for signing up as a ${role}.</p>
+        <p>Thanks for signing up as a ${role}.</p>
         <p>Please verify your email:</p>
-  <a href="${verifyUrl}">🌐 Verify via Web</a><br/>
-  <a href="banglabnbmobile://verify-email?token=${rawToken}">📱 Open in App</a>`,
+        <a href="${verifyUrl}">🌐 Verify via Web</a><br/>
+        <a href="banglabnbmobile://verify-email?token=${rawToken}">📱 Open in App</a>`,
     });
 
     res.status(201).json({
@@ -65,7 +89,7 @@ exports.registerStep1 = async (req, res) => {
 
 exports.verifyIdentityHandler = async (req, res) => {
   const { userId, livePhotoBase64 } = req.body;
-  const { idDocument, idBack, livePhoto } = req.files || {};
+  const { idDocument, idBack, livePhoto, drivingLicense } = req.files || {};
 
   if (!userId || !idDocument || !idBack) {
     return res
@@ -79,6 +103,10 @@ exports.verifyIdentityHandler = async (req, res) => {
   // ✅ ID Front & Back via multer (already handled by Cloudinary)
   user.idDocumentUrl = idDocument[0].path; // Front side
   user.idBackUrl = idBack[0].path; // ✅ Back side (NEW)
+  // ✅ NEW: Driving license
+  if (drivingLicense && drivingLicense[0]) {
+    user.drivingLicenseUrl = drivingLicense[0].path;
+  }
 
   // ✅ Live photo via file or base64
   if (livePhoto && livePhoto[0]) {

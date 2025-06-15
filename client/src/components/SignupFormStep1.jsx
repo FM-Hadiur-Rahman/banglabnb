@@ -23,6 +23,9 @@ const SignupFormStep1 = () => {
       coordinates: [],
       address: "",
     },
+    licenseNumber: "",
+    vehicleType: "",
+    seats: "",
   });
 
   const [phone, setPhone] = useState("");
@@ -50,6 +53,7 @@ const SignupFormStep1 = () => {
       console.warn("❌ Reverse geocoding failed", err);
     }
   };
+
   const handleAutoDetect = () => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const lat = pos.coords.latitude;
@@ -101,7 +105,8 @@ const SignupFormStep1 = () => {
       localStorage.setItem("signupUserId", res.data.userId);
       setMessage("✅ Step 1 complete! Check your email to verify.");
 
-      // Redirect to email verification page (optional)
+      localStorage.setItem("signupUserId", res.data.userId);
+      localStorage.setItem("signupRole", formData.role); // ✅ Add this
       navigate("/verify");
     } catch (err) {
       console.error(err);
@@ -140,10 +145,7 @@ const SignupFormStep1 = () => {
           country={"bd"}
           value={phone}
           onChange={setPhone}
-          inputProps={{
-            name: "phone",
-            required: true,
-          }}
+          inputProps={{ name: "phone", required: true }}
         />
 
         <input
@@ -174,7 +176,44 @@ const SignupFormStep1 = () => {
         >
           <option value="user">User</option>
           <option value="host">Host</option>
+          <option value="driver">Driver</option>
         </select>
+
+        {formData.role === "driver" && (
+          <>
+            <input
+              type="text"
+              name="licenseNumber"
+              placeholder="Driving License Number"
+              className="w-full px-4 py-2 border rounded"
+              value={formData.licenseNumber}
+              onChange={handleChange}
+              required
+            />
+
+            <select
+              name="vehicleType"
+              className="w-full px-4 py-2 border rounded"
+              value={formData.vehicleType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Vehicle Type</option>
+              <option value="car">Car</option>
+              <option value="bike">Bike</option>
+            </select>
+
+            <input
+              type="number"
+              name="seats"
+              placeholder="Number of Seats"
+              className="w-full px-4 py-2 border rounded"
+              value={formData.seats}
+              onChange={handleChange}
+              required
+            />
+          </>
+        )}
 
         <LocationSelector onChange={handleLocationChange} />
         <MapboxAutocomplete
@@ -186,6 +225,7 @@ const SignupFormStep1 = () => {
             extractAdminFromMapbox(coordinates[0], coordinates[1]);
           }}
         />
+
         <button
           type="button"
           onClick={handleAutoDetect}
