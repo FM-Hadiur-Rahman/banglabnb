@@ -42,7 +42,15 @@ const TripSearchPage = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">🚗 Available Rides</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">🚗 Available Rides</h2>
+        <button
+          onClick={() => (window.location.href = "/ride-search")}
+          className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+        >
+          🔄 Reset Filters
+        </button>
+      </div>
       {trips.length === 0 ? (
         <p>No trips found</p>
       ) : (
