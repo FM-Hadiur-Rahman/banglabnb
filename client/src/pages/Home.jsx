@@ -365,7 +365,7 @@ const Home = () => {
               className={`px-4 py-2 rounded-full text-sm sm:text-base ${
                 activeTab === "stay"
                   ? "bg-green-600 text-white"
-                  : "bg-white border"
+                  : "bg-white border text-green-600"
               }`}
               onClick={() => setActiveTab("stay")}
             >
@@ -375,7 +375,7 @@ const Home = () => {
               className={`px-4 py-2 rounded-full text-sm sm:text-base ${
                 activeTab === "ride"
                   ? "bg-green-600 text-white"
-                  : "bg-white border"
+                  : "bg-white border text-green-600"
               }`}
               onClick={() => setActiveTab("ride")}
             >

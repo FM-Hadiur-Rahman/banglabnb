@@ -16,18 +16,26 @@ const TripSearchPage = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/trips`
         );
-        const filtered = res.data.filter((trip) => {
-          return (
-            (!from || trip.from.toLowerCase().includes(from.toLowerCase())) &&
-            (!to || trip.to.toLowerCase().includes(to.toLowerCase())) &&
-            (!date || trip.date.startsWith(date))
-          );
-        });
-        setTrips(filtered);
+        const allTrips = res.data;
+
+        // If no search filters, show all
+        if (!from && !to && !date) {
+          setTrips(allTrips);
+        } else {
+          const filtered = allTrips.filter((trip) => {
+            return (
+              (!from || trip.from.toLowerCase().includes(from.toLowerCase())) &&
+              (!to || trip.to.toLowerCase().includes(to.toLowerCase())) &&
+              (!date || trip.date.startsWith(date))
+            );
+          });
+          setTrips(filtered);
+        }
       } catch (err) {
         console.error("❌ Failed to fetch trips", err);
       }
     };
+
     fetchTrips();
   }, [from, to, date]);
 
