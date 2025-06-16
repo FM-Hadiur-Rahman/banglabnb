@@ -6,10 +6,6 @@ const TripSearchPage = () => {
   const [trips, setTrips] = useState([]);
   const [searchParams] = useSearchParams();
 
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
-  const date = searchParams.get("date");
-
   useEffect(() => {
     const fetchTrips = async () => {
       try {
@@ -18,7 +14,12 @@ const TripSearchPage = () => {
         );
         const allTrips = res.data;
 
-        // If no search filters, show all
+        // Get values from URL
+        const from = searchParams.get("from");
+        const to = searchParams.get("to");
+        const date = searchParams.get("date");
+
+        // If no filters, show all trips
         if (!from && !to && !date) {
           setTrips(allTrips);
         } else {
@@ -37,7 +38,7 @@ const TripSearchPage = () => {
     };
 
     fetchTrips();
-  }, [from, to, date]);
+  }, [searchParams]);
 
   return (
     <div className="p-4">
