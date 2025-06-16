@@ -1,4 +1,3 @@
-// === models/Trip.js ===
 const mongoose = require("mongoose");
 
 const tripSchema = new mongoose.Schema(
@@ -13,9 +12,15 @@ const tripSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     time: { type: String, required: true },
     vehicleType: { type: String, enum: ["car", "bike"], required: true },
+
+    vehicleModel: { type: String, required: true },
+    licensePlate: { type: String, required: true },
+    image: { type: String }, // optional image URL
+
     seatsAvailable: { type: Number, required: true },
     farePerSeat: { type: Number, required: true },
     bookedSeats: { type: Number, default: 0 },
+
     status: {
       type: String,
       enum: ["available", "booked", "cancelled"],
@@ -24,5 +29,3 @@ const tripSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-module.exports = mongoose.model("Trip", tripSchema);

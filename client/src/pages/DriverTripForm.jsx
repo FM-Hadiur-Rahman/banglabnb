@@ -15,13 +15,12 @@ const DriverTripForm = () => {
     farePerSeat: 0,
     image: null,
   });
-  const [message, setMessage] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-
     if (name === "image") {
       const file = files[0];
       setForm((prev) => ({ ...prev, image: file }));
@@ -45,120 +44,161 @@ const DriverTripForm = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      setMessage("✅ Trip created successfully!");
+      setMessage("✅ Trip created!");
       navigate("/dashboard/driver");
     } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to create trip. Try again.");
+      console.error("❌ Trip creation failed", err);
+      setMessage("❌ Something went wrong.");
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow mt-6">
-      <h2 className="text-2xl font-bold mb-4">🚗 Publish Your Ride</h2>
+    <div className="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg">
+      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+        🚗 Publish a Trip
+      </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <input
-            name="from"
-            placeholder="From (e.g. Dhaka)"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
-          <input
-            name="to"
-            placeholder="To (e.g. Cox’s Bazar)"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
-
-          <input
-            type="date"
-            name="date"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
-          <input
-            type="time"
-            name="time"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
-
-          <select
-            name="vehicleType"
-            onChange={handleChange}
-            className="input-field"
-          >
-            <option value="car">🚗 Car</option>
-            <option value="bike">🏍️ Bike</option>
-          </select>
-          <input
-            name="vehicleModel"
-            placeholder="Vehicle Model (e.g. Toyota Axio)"
-            onChange={handleChange}
-            className="input-field"
-          />
-
-          <input
-            name="licensePlate"
-            placeholder="License Plate Number"
-            onChange={handleChange}
-            className="input-field"
-          />
-
-          <input
-            type="number"
-            name="seatsAvailable"
-            min="1"
-            placeholder="Seats Available"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
-          <input
-            type="number"
-            name="farePerSeat"
-            placeholder="Fare per seat (৳)"
-            onChange={handleChange}
-            required
-            className="input-field"
-          />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Trip Info */}
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            🧭 Trip Information
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input
+              name="from"
+              placeholder="From (e.g. Dhaka)"
+              onChange={handleChange}
+              required
+              className="input border px-4 py-2 rounded w-full"
+            />
+            <input
+              name="to"
+              placeholder="To (e.g. Cox’s Bazar)"
+              onChange={handleChange}
+              required
+              className="input border px-4 py-2 rounded w-full"
+            />
+            <input
+              type="date"
+              name="date"
+              onChange={handleChange}
+              required
+              className="border px-4 py-2 rounded w-full"
+            />
+            <input
+              type="time"
+              name="time"
+              onChange={handleChange}
+              required
+              className="border px-4 py-2 rounded w-full"
+            />
+          </div>
         </div>
 
-        {/* 📸 Vehicle Image Upload */}
+        {/* Vehicle Type */}
         <div>
-          <label className="block font-medium">
-            Upload Vehicle Image (optional)
-          </label>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            🚘 Vehicle Type
+          </h3>
+          <div className="flex gap-4">
+            {["car", "bike"].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setForm({ ...form, vehicleType: type })}
+                className={`flex-1 px-4 py-2 rounded border flex items-center justify-center gap-2 ${
+                  form.vehicleType === type
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                {type === "car" ? "🚗" : "🏍️"}{" "}
+                <span className="capitalize">{type}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Vehicle Details */}
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            🚙 Vehicle Details
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input
+              name="vehicleModel"
+              placeholder="Vehicle Model (e.g. Toyota Axio)"
+              onChange={handleChange}
+              className="border px-4 py-2 rounded w-full"
+            />
+            <input
+              name="licensePlate"
+              placeholder="License Plate"
+              onChange={handleChange}
+              className="border px-4 py-2 rounded w-full"
+            />
+          </div>
+        </div>
+
+        {/* Fare & Seats */}
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            💸 Fare & Seats
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input
+              type="number"
+              name="seatsAvailable"
+              min="1"
+              placeholder="Seats Available"
+              onChange={handleChange}
+              required
+              className="border px-4 py-2 rounded w-full"
+            />
+            <input
+              type="number"
+              name="farePerSeat"
+              placeholder="Fare per seat (৳)"
+              onChange={handleChange}
+              required
+              className="border px-4 py-2 rounded w-full"
+            />
+          </div>
+        </div>
+
+        {/* Upload Image */}
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            🖼 Vehicle Image (optional)
+          </h3>
           <input
             type="file"
             name="image"
             accept="image/*"
             onChange={handleChange}
-            className="mt-1"
+            className="block w-full text-sm text-gray-600"
           />
           {previewUrl && (
             <img
               src={previewUrl}
               alt="Preview"
-              className="mt-2 w-32 h-20 object-cover rounded"
+              className="mt-3 w-48 h-32 object-cover rounded border"
             />
           )}
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded font-medium text-lg"
         >
           🚀 Publish Trip
         </button>
 
-        {message && <p className="text-red-500">{message}</p>}
+        {message && (
+          <p className="text-center text-red-600 mt-2 font-medium">{message}</p>
+        )}
       </form>
     </div>
   );
