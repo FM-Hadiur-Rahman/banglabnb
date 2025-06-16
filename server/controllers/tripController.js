@@ -1,12 +1,24 @@
 // === controllers/tripController.js ===
 const Trip = require("../models/Trip");
 
+// controllers/tripController.js
 exports.createTrip = async (req, res) => {
   try {
-    const trip = await Trip.create({ ...req.body, driverId: req.user._id });
+    const tripData = {
+      ...req.body,
+      driverId: req.user._id,
+    };
+
+    // ✅ If image was uploaded, store URL
+    if (req.file && req.file.path) {
+      tripData.image = req.file.path;
+    }
+
+    const trip = await Trip.create(tripData);
     res.status(201).json(trip);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("❌ Trip creation failed:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
