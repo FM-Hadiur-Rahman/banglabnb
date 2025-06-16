@@ -18,3 +18,15 @@ exports.getTrips = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// Get all trips for the logged-in driver
+exports.getMyTrips = async (req, res) => {
+  try {
+    const trips = await Trip.find({ driverId: req.user._id }).sort({
+      createdAt: -1,
+    });
+    res.json(trips);
+  } catch (err) {
+    console.error("❌ Error fetching driver's trips:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

@@ -50,6 +50,8 @@ const LoginForm = () => {
           ? "/admin/dashboard"
           : userRole === "host"
           ? "/host/dashboard"
+          : userRole === "driver"
+          ? "/dashboard/driver"
           : "/dashboard"
       );
     } catch (err) {

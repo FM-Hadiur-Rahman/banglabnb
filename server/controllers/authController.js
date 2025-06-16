@@ -6,10 +6,6 @@ const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
 const { cloudinary } = require("../config/cloudinary"); // adjust the path if needed
 
-const crypto = require("crypto");
-const User = require("../models/User");
-const sendEmail = require("../utils/sendEmail");
-
 exports.registerStep1 = async (req, res) => {
   try {
     const {
@@ -162,6 +158,7 @@ exports.verifyEmail = async (req, res) => {
   res.json({
     message: "✅ Email verified successfully!",
     userId: user._id,
+    role: user.role,
   });
 };
 // POST /api/auth/resend-verification

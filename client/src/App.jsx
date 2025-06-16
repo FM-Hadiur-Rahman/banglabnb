@@ -45,6 +45,11 @@ import EditListingPage from "./pages/EditListingPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
 import HostBlockedDates from "./components/HostBlockDates";
 
+//Driver Pages
+import DriverTripForm from "./pages/DriverTripForm";
+import TripSearchPage from "./pages/TripSearchPage";
+import DriverDashboard from "./pages/DriverDashboard";
+
 // Booking Pages
 import MyBookingsPage from "./pages/MyBookingsPage";
 
@@ -91,18 +96,15 @@ function App() {
             path="/resend-verification"
             element={<ResendVerificationPage />}
           />
-
           <Route path="verify" element={<VerifyNotice />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="help" element={<HelpCenterPage />} />
           <Route path="contact" element={<ContactUsPage />} />
-
           {/* Payment Results */}
           <Route path="payment-success" element={<PaymentSuccessPage />} />
           <Route path="payment-fail" element={<PaymentFailPage />} />
           <Route path="payment-cancel" element={<PaymentCancelPage />} />
-
           {/* Guest/User Protected Routes */}
           <Route
             path="dashboard"
@@ -128,7 +130,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/dashboard/reviews"
             element={
@@ -137,7 +138,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="profile"
             element={
@@ -178,7 +178,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="wishlist"
             element={
@@ -187,7 +186,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* Host Protected Routes */}
           <Route
             path="host/dashboard"
@@ -229,7 +227,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* Admin Protected Routes */}
           <Route
             path="admin/dashboard"
@@ -287,7 +284,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="admin/revenue"
             element={
@@ -317,6 +313,24 @@ function App() {
             element={
               <ProtectedRoute requiredRoleedRoles="admin">
                 <AdminOverduePayouts />
+              </ProtectedRoute>
+            }
+          />
+          //Drivers Route
+          <Route
+            path="/dashboard/driver"
+            element={
+              <ProtectedRoute>
+                <DriverDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/trips" element={<TripSearchPage />} />
+          <Route
+            path="/dashboard/driver/trips/new"
+            element={
+              <ProtectedRoute>
+                <DriverTripForm />
               </ProtectedRoute>
             }
           />

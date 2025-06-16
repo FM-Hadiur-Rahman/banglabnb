@@ -16,6 +16,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const invoiceRoutes = require("./routes/invoice");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const tripRoutes = require("./routes/tripRoutes");
 
 dotenv.config();
 const app = express();
@@ -61,6 +62,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/wishlist", require("./routes/wishlist"));
 app.use("/api/chats", chatRoutes); // All chat endpoints: /api/chats
 app.use("/api/messages", messageRoutes);
+app.use("/api/trips", tripRoutes);
 
 app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://banglabnb.com");

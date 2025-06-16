@@ -20,6 +20,7 @@ const Navbar = () => {
   const getDashboardPath = () => {
     if (user.role === "admin") return "/admin/dashboard";
     if (user.role === "host") return "/host/dashboard";
+    if (user.role === "driver") return "/dashboard/driver";
     return "/dashboard";
   };
 
