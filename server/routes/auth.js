@@ -15,7 +15,10 @@ const {
   getUserIdFromToken,
   switchRole,
   resendVerificationEmail,
+  getMe,
 } = require("../controllers/authController");
+
+router.get("/me", protect, getMe);
 
 router.post("/signup/step1", registerStep1); // ✅ preferred
 

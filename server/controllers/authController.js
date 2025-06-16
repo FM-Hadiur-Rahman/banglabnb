@@ -6,6 +6,15 @@ const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
 const { cloudinary } = require("../config/cloudinary"); // adjust the path if needed
 
+exports.getMe = async (req, res) => {
+  try {
+    const user = req.user; // `protect` middleware already sets this
+    res.status(200).json({ user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.registerStep1 = async (req, res) => {
   try {
     const {
