@@ -68,6 +68,7 @@ import ReviewPage from "./pages/ReviewPage";
 import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 
 import ErrorBoundary from "./components/ErrorBoundary";
+import TripDetailPage from "./pages/TripDetailPage";
 
 function App() {
   return (
@@ -325,7 +326,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/trips" element={<TripSearchPage />} />
+          <Route path="/trip-search" element={<TripSearchPage />} />
           <Route
             path="/dashboard/driver/trips/new"
             element={
@@ -334,6 +335,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/trips/:id" element={<TripDetailPage />} />
         </Route>
       </Routes>
     </Router>

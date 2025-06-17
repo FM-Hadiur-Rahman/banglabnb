@@ -29,7 +29,7 @@ exports.createTrip = async (req, res) => {
 
 exports.getTrips = async (req, res) => {
   try {
-    const trips = await Trip.find({ status: "available" });
+    const trips = await Trip.find({ status: "available" }).populate("driverId");
     res.json(trips);
   } catch (err) {
     res.status(500).json({ message: "Server error" });

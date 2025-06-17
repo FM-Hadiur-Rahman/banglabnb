@@ -1,32 +1,32 @@
-import React, { useEffect, useState } from "react";
+// TripSearchPage.jsx (Full Version with Filters, Sorting, Map View, Pagination)
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import RideResults from "../components/RideResults";
+import mapboxgl from "mapbox-gl";
+
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const TripSearchPage = () => {
   const [trips, setTrips] = useState([]);
+  const [filteredTrips, setFilteredTrips] = useState([]);
   const [searchParams] = useSearchParams();
-  const [showModal, setShowModal] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Check login
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios
-        .get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          setIsLoggedIn(true);
-          setUser(res.data.user);
-        })
-        .catch(() => setIsLoggedIn(false));
-    }
-  }, []);
+  const [vehicleType, setVehicleType] = useState(
+    localStorage.getItem("vehicleType") || ""
+  );
+  const [minPrice, setMinPrice] = useState(
+    localStorage.getItem("minPrice") || ""
+  );
+  const [maxPrice, setMaxPrice] = useState(
+    localStorage.getItem("maxPrice") || ""
+  );
+  const [sortOption, setSortOption] = useState(
+    localStorage.getItem("sortOption") || "date"
+  );
+  const [showMap, setShowMap] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const mapRef = useRef(null);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -34,166 +34,182 @@ const TripSearchPage = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/trips`
         );
-        const allTrips = res.data;
-
-        const from = searchParams.get("from");
-        const to = searchParams.get("to");
-        const date = searchParams.get("date");
-
-        if (!from && !to && !date) {
-          setTrips(allTrips);
-        } else {
-          const filtered = allTrips.filter((trip) => {
-            return (
-              (!from || trip.from.toLowerCase().includes(from.toLowerCase())) &&
-              (!to || trip.to.toLowerCase().includes(to.toLowerCase())) &&
-              (!date || trip.date.startsWith(date))
-            );
-          });
-          setTrips(filtered);
-        }
+        setTrips(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch trips", err);
       }
     };
-
     fetchTrips();
-  }, [searchParams]);
+  }, []);
+
+  useEffect(() => {
+    let results = [...trips];
+
+    if (vehicleType)
+      results = results.filter((trip) => trip.vehicleType === vehicleType);
+    if (minPrice)
+      results = results.filter(
+        (trip) => trip.farePerSeat >= parseFloat(minPrice)
+      );
+    if (maxPrice)
+      results = results.filter(
+        (trip) => trip.farePerSeat <= parseFloat(maxPrice)
+      );
+
+    if (sortOption === "price")
+      results.sort((a, b) => a.farePerSeat - b.farePerSeat);
+    else results.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    setFilteredTrips(results);
+    setCurrentPage(1); // Reset page on filter change
+  }, [trips, vehicleType, minPrice, maxPrice, sortOption]);
+
+  useEffect(() => {
+    if (!showMap || !mapRef.current || !filteredTrips.length) return;
+    const map = new mapboxgl.Map({
+      container: mapRef.current,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [90.4125, 23.8103],
+      zoom: 6,
+    });
+
+    filteredTrips.forEach((trip) => {
+      if (trip.location?.coordinates?.length === 2) {
+        new mapboxgl.Marker()
+          .setLngLat(trip.location.coordinates)
+          .setPopup(new mapboxgl.Popup().setText(`${trip.from} → ${trip.to}`))
+          .addTo(map);
+      }
+    });
+
+    return () => map.remove();
+  }, [showMap, filteredTrips]);
+
+  const paginatedTrips = filteredTrips.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleRequestRide = (trip) => {
-    setSelectedTrip(trip);
-    setShowModal(true);
+    console.log("Requested ride:", trip);
   };
 
-  const confirmBooking = async () => {
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/notifications`,
-        {
-          type: "ride-request",
-          message: `🚗 New ride request from ${user.name}`,
-          tripId: selectedTrip._id,
-          receiverId: selectedTrip.driverId._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      alert("✅ Ride request sent to driver!");
-      setShowModal(false);
-    } catch (err) {
-      console.error("❌ Failed to send request", err);
-      alert("❌ Failed to send ride request");
-    }
+  const resetFilters = () => {
+    setVehicleType("");
+    setMinPrice("");
+    setMaxPrice("");
+    setSortOption("date");
+    localStorage.removeItem("vehicleType");
+    localStorage.removeItem("minPrice");
+    localStorage.removeItem("maxPrice");
+    localStorage.setItem("sortOption", "date");
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">🚗 Available Rides</h2>
-        <button
-          onClick={() => (window.location.href = "/ride-search")}
-          className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-        >
-          🔄 Reset Filters
-        </button>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">🔎 Filters</h2>
 
-      {trips.length === 0 ? (
-        <p>No trips found</p>
-      ) : (
-        trips.map((trip) => (
-          <div
-            key={trip._id}
-            className="border p-4 mb-4 rounded shadow bg-white"
+          <select
+            value={vehicleType}
+            onChange={(e) => {
+              setVehicleType(e.target.value);
+              localStorage.setItem("vehicleType", e.target.value);
+            }}
+            className="w-full border rounded px-2 py-1"
           >
-            {/* 👤 Driver info */}
-            <div className="flex items-center space-x-4 mb-3">
-              <img
-                src={trip.driverId?.avatar || "/default-avatar.png"}
-                alt="Driver Avatar"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-semibold">{trip.driverId?.name}</p>
-                {trip.driverId?.driver?.vehicleModel && (
-                  <p className="text-sm text-gray-500">
-                    {trip.driverId.driver.vehicleModel}
-                  </p>
-                )}
-              </div>
-            </div>
+            <option value="">All Vehicle Types</option>
+            <option value="car">🚗 Car</option>
+            <option value="bike">🏍️ Bike</option>
+          </select>
 
-            {/* 🚗 Ride details */}
-            <p>
-              <strong>From:</strong> {trip.from} → <strong>To:</strong>{" "}
-              {trip.to}
-            </p>
-            <p>
-              <strong>Date:</strong> {trip.date.slice(0, 10)} |{" "}
-              <strong>Time:</strong> {trip.time}
-            </p>
-            <p>
-              <strong>Vehicle:</strong>{" "}
-              {trip.vehicleType === "car" ? "🚗 Car" : "🏍️ Bike"}
-            </p>
-            <p>
-              <strong>Fare:</strong> ৳{trip.farePerSeat} |{" "}
-              <strong>Seats:</strong> {trip.seatsAvailable}
-            </p>
+          <input
+            type="number"
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => {
+              setMinPrice(e.target.value);
+              localStorage.setItem("minPrice", e.target.value);
+            }}
+            className="w-full border rounded px-2 py-1"
+          />
 
-            {/* Request button */}
+          <input
+            type="number"
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => {
+              setMaxPrice(e.target.value);
+              localStorage.setItem("maxPrice", e.target.value);
+            }}
+            className="w-full border rounded px-2 py-1"
+          />
+
+          <select
+            value={sortOption}
+            onChange={(e) => {
+              setSortOption(e.target.value);
+              localStorage.setItem("sortOption", e.target.value);
+            }}
+            className="w-full border rounded px-2 py-1"
+          >
+            <option value="date">Sort by Date</option>
+            <option value="price">Sort by Price</option>
+          </select>
+
+          <button
+            onClick={resetFilters}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded"
+          >
+            🔄 Reset Filters
+          </button>
+        </div>
+
+        {/* Main Content */}
+        <div className="md:col-span-3 space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">🚗 Ride Results</h2>
             <button
-              onClick={() => handleRequestRide(trip)}
-              disabled={!isLoggedIn}
-              className={`mt-3 px-4 py-2 rounded text-white ${
-                isLoggedIn
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
+              onClick={() => setShowMap(!showMap)}
+              className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm"
             >
-              📩 Request Ride
+              {showMap ? "📄 List View" : "🗺️ Map View"}
             </button>
           </div>
-        ))
-      )}
 
-      {/* Modal */}
-      {showModal && selectedTrip && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-md w-[90%] max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Confirm Ride Request</h3>
-            <p>
-              Are you sure you want to send a ride request to{" "}
-              <strong>{selectedTrip.driverId?.name}</strong>?
-            </p>
-            <p className="text-sm text-gray-600">
-              From: {selectedTrip.from} → To: {selectedTrip.to}
-              <br />
-              Date: {selectedTrip.date.slice(0, 10)} | Time: {selectedTrip.time}
-              <br />
-              Fare: ৳{selectedTrip.farePerSeat}
-            </p>
+          {showMap ? (
+            <div ref={mapRef} className="w-full h-96 border rounded" />
+          ) : (
+            <RideResults trips={paginatedTrips} onRequest={handleRequestRide} />
+          )}
 
-            <div className="mt-4 flex justify-end space-x-3">
+          {/* Pagination */}
+          {!showMap && (
+            <div className="flex justify-center items-center gap-4 mt-4">
               <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-1 border rounded"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-4 py-1 bg-gray-300 rounded disabled:opacity-50"
               >
-                Cancel
+                ◀ Previous
               </button>
+              <span className="text-sm">
+                Page {currentPage} of{" "}
+                {Math.ceil(filteredTrips.length / itemsPerPage)}
+              </span>
               <button
-                onClick={confirmBooking}
-                className="px-4 py-1 bg-green-600 text-white rounded"
+                disabled={currentPage * itemsPerPage >= filteredTrips.length}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-4 py-1 bg-gray-300 rounded disabled:opacity-50"
               >
-                Confirm
+                Next ▶
               </button>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
