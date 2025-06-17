@@ -221,6 +221,7 @@ import ListingCard from "../components/ListingCard";
 import RideSearchForm from "../components/RideSearchForm";
 import RideResults from "../components/RideResults";
 import "mapbox-gl/dist/mapbox-gl.css";
+import MapSection from "../components/MapSection";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -230,7 +231,6 @@ const Home = () => {
   const [filtered, setFiltered] = useState([]);
   const [rideResults, setRideResults] = useState([]);
   const [hoveredId, setHoveredId] = useState(null);
-  const mapRef = useRef(null);
   const listingRefs = useRef({});
 
   // Trip search filters
@@ -250,44 +250,6 @@ const Home = () => {
       });
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    const items = activeTab === "stay" ? filtered : rideResults;
-    if (!items.length) return;
-
-    const map = new mapboxgl.Map({
-      container: mapRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [90.4125, 23.8103],
-      zoom: 6,
-    });
-
-    items.forEach((item) => {
-      const { coordinates } = item.location || {};
-      if (coordinates?.length === 2) {
-        const el = document.createElement("div");
-        el.className = "marker";
-        el.style.width = "20px";
-        el.style.height = "20px";
-        el.style.borderRadius = "50%";
-        el.style.backgroundColor = activeTab === "stay" ? "#3b82f6" : "#10b981";
-        el.style.border = "2px solid white";
-
-        new mapboxgl.Marker(el)
-          .setLngLat(coordinates)
-          .setPopup(
-            new mapboxgl.Popup().setText(
-              item.title || `${item.from} → ${item.to}`
-            )
-          )
-          .addTo(map);
-      }
-    });
-
-    return () => map.remove();
-  }, [filtered, rideResults, activeTab]);
 
   const handleSearch = (query) => {
     const searchText = query.toLowerCase();
@@ -402,14 +364,12 @@ const Home = () => {
       {activeTab === "ride" && <RideResults trips={rideResults} />}
 
       {/* Map */}
-      <section className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 pb-8">
-          <div
-            ref={mapRef}
-            className="w-full h-[400px] rounded border border-gray-300"
-          />
-        </div>
-      </section>
+      <MapSection
+        items={activeTab === "stay" ? filtered : rideResults}
+        activeTab={activeTab}
+        hoveredId={hoveredId}
+        listingRefs={listingRefs}
+      />
 
       {/* Listings */}
       {activeTab === "stay" && (
