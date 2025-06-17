@@ -20,8 +20,6 @@ const DriverTripForm = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  import imageCompression from "browser-image-compression";
-
   const handleChange = async (e) => {
     const { name, value, files } = e.target;
 
