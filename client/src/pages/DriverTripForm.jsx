@@ -68,7 +68,13 @@ const DriverTripForm = () => {
     const token = localStorage.getItem("token");
 
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    Object.entries(form).forEach(([key, value]) => {
+      if (key === "location" && typeof value === "object") {
+        formData.append(key, JSON.stringify(value)); // ✅ Send as JSON string
+      } else {
+        formData.append(key, value);
+      }
+    });
 
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/trips`, formData, {
