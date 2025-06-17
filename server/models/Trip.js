@@ -9,6 +9,12 @@ const tripSchema = new mongoose.Schema(
     vehicleType: { type: String, enum: ["car", "bike"], required: true },
     vehicleModel: { type: String },
     licensePlate: { type: String },
+    status: {
+      type: String,
+      enum: ["available", "booked", "cancelled"],
+      default: "available",
+    },
+
     seatsAvailable: { type: Number, default: 1 },
     farePerSeat: { type: Number, required: true },
     image: { type: String },

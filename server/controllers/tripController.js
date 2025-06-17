@@ -52,3 +52,22 @@ exports.getMyTrips = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// controllers/tripController.js
+
+exports.getTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id).populate(
+      "driverId",
+      "name phone avatar"
+    );
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.json(trip);
+  } catch (err) {
+    console.error("❌ Error fetching trip by ID:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
