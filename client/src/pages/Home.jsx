@@ -215,15 +215,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import mapboxgl from "mapbox-gl";
+
 import SearchBar from "../components/SearchBar";
 import ListingCard from "../components/ListingCard";
 import RideSearchForm from "../components/RideSearchForm";
 import RideResults from "../components/RideResults";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapSection from "../components/MapSection";
-
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("stay");
@@ -288,7 +286,7 @@ const Home = () => {
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div className="z-10 px-4">
+        <div className="z-10 px-4 mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
             Experience Bangladesh Like Never Before
           </h1>
@@ -364,12 +362,14 @@ const Home = () => {
       {activeTab === "ride" && <RideResults trips={rideResults} />}
 
       {/* Map */}
-      <MapSection
-        items={activeTab === "stay" ? filtered : rideResults}
-        activeTab={activeTab}
-        hoveredId={hoveredId}
-        listingRefs={listingRefs}
-      />
+      {(filtered.length > 0 || rideResults.length > 0) && (
+        <MapSection
+          items={activeTab === "stay" ? filtered : rideResults}
+          activeTab={activeTab}
+          hoveredId={hoveredId}
+          listingRefs={listingRefs}
+        />
+      )}
 
       {/* Listings */}
       {activeTab === "stay" && (

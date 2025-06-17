@@ -12,18 +12,22 @@ const MapSection = ({
 }) => {
   const mapRef = useRef(null);
   const markersRef = useRef({});
+  const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || items.length === 0) return;
+    if (!mapRef.current || !items.length) return;
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: [90.4125, 23.8103], // Dhaka
+      center: [90.4125, 23.8103],
       zoom: 6,
     });
 
+    map.addControl(new mapboxgl.FullscreenControl(), "top-right");
+
     markersRef.current = {};
+    const bounds = new mapboxgl.LngLatBounds();
 
     items.forEach((item) => {
       const { coordinates } = item.location || {};
@@ -52,14 +56,19 @@ const MapSection = ({
           }
         });
 
+        bounds.extend(coordinates);
         markersRef.current[item._id] = { marker, element: el };
       }
     });
 
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, { padding: 50 });
+    }
+
+    mapInstanceRef.current = map;
     return () => map.remove();
   }, [items, activeTab]);
 
-  // Update style on hover
   useEffect(() => {
     Object.entries(markersRef.current).forEach(([id, { element }]) => {
       element.style.transform = id === hoveredId ? "scale(1.5)" : "scale(1)";
@@ -77,7 +86,7 @@ const MapSection = ({
       <div className="max-w-7xl mx-auto px-4 pb-8">
         <div
           ref={mapRef}
-          className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded border border-gray-300"
+          className="w-full h-64 sm:h-72 lg:h-96 xl:h-[32rem] rounded border border-gray-300"
         />
       </div>
     </section>
