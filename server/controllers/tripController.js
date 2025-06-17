@@ -4,16 +4,21 @@ const Trip = require("../models/Trip");
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
   try {
-    console.log("✅ File received:", req.file);
-    console.log("✅ Body received:", req.body);
-    console.log("👤 User ID:", req.user._id);
-
     const tripData = {
       ...req.body,
       driverId: req.user._id,
       seatsAvailable: Number(req.body.seatsAvailable),
       farePerSeat: Number(req.body.farePerSeat),
     };
+    // ✅ Parse location from JSON string
+    if (req.body.location) {
+      try {
+        tripData.location = JSON.parse(req.body.location); // Must be GeoJSON: { type: "Point", coordinates: [lng, lat], address: "..." }
+      } catch (error) {
+        console.warn("⚠️ Invalid location JSON:", req.body.location);
+        return res.status(400).json({ message: "Invalid location format" });
+      }
+    }
 
     if (req.file && req.file.path) {
       tripData.image = req.file.path;

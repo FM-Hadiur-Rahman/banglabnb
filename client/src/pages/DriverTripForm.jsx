@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
+import MapboxAutocomplete from "../components/MapboxAutocomplete"; // ✅ adjust path if needed
 
 const DriverTripForm = () => {
   const [form, setForm] = useState({
@@ -15,7 +16,12 @@ const DriverTripForm = () => {
     seatsAvailable: 1,
     farePerSeat: 0,
     image: null,
+    location: {
+      coordinates: [],
+      address: "",
+    },
   });
+
   const [previewUrl, setPreviewUrl] = useState(null);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -121,6 +127,23 @@ const DriverTripForm = () => {
               className="border px-4 py-2 rounded w-full"
             />
           </div>
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            📍 Pickup Location on Map
+          </h3>
+          <MapboxAutocomplete
+            onSelectLocation={(loc) =>
+              setForm((prev) => ({
+                ...prev,
+                location: {
+                  type: "Point",
+                  coordinates: loc.coordinates,
+                  address: loc.address,
+                },
+              }))
+            }
+          />
         </div>
 
         {/* Vehicle Type */}
