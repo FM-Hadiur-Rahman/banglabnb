@@ -9,7 +9,8 @@ const storage = new CloudinaryStorage({
       folder: "banglabnb/verifications",
       allowed_formats: ["jpg", "png", "jpeg", "pdf"],
       public_id: `${file.fieldname}-${Date.now()}`,
-      resource_type: file.mimetype === "application/pdf" ? "raw" : "image",
+      // resource_type: file.mimetype === "application/pdf" ? "raw" : "image",
+      resource_type: "raw",
     };
   },
 });

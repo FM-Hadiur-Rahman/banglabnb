@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import imageCompression from "browser-image-compression";
 
 const DriverTripForm = () => {
   const [form, setForm] = useState({
@@ -19,10 +20,38 @@ const DriverTripForm = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  import imageCompression from "browser-image-compression";
+
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
+
     if (name === "image") {
-      const file = files[0];
+      let file = files[0];
+      if (!file) return;
+
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+      if (!allowedTypes.includes(file.type)) {
+        // Try converting to JPG
+        try {
+          const compressedFile = await imageCompression(file, {
+            fileType: "image/jpeg", // force JPG output
+            maxWidthOrHeight: 1024,
+            maxSizeMB: 1,
+          });
+
+          file = new File([compressedFile], "converted.jpg", {
+            type: "image/jpeg",
+          });
+
+          setMessage("⚠️ Unsupported image converted to JPG.");
+        } catch (err) {
+          console.error("❌ Image conversion failed:", err);
+          setMessage("❌ Unsupported image type. Use JPG or PNG.");
+          return;
+        }
+      }
+
       setForm((prev) => ({ ...prev, image: file }));
       setPreviewUrl(URL.createObjectURL(file));
     } else {
