@@ -72,7 +72,7 @@ const RideResults = ({ trips = [], onReserve, onCancel }) => {
                 <strong>Time:</strong> {trip.time}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Seats:</strong> {trip.seatsAvailable}
+                <strong>Seats:</strong> {trip.totalSeats}
               </p>
 
               {/* Booking Controls */}
@@ -86,12 +86,12 @@ const RideResults = ({ trips = [], onReserve, onCancel }) => {
                 >
                   ❌ Cancel Reservation
                 </button>
-              ) : trip.seatsAvailable > 0 && onReserve ? (
+              ) : trip.totalSeats > 0 && onReserve ? (
                 <>
                   <input
                     type="number"
                     min="1"
-                    max={trip.seatsAvailable}
+                    max={trip.totalSeats}
                     defaultValue={1}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) =>

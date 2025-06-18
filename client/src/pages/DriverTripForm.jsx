@@ -13,7 +13,7 @@ const DriverTripForm = () => {
     vehicleType: "car",
     vehicleModel: "",
     licensePlate: "",
-    seatsAvailable: 1,
+    totalSeats: 1,
     farePerSeat: 0,
     image: null,
     location: {
