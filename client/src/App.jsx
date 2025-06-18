@@ -69,6 +69,7 @@ import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 
 import ErrorBoundary from "./components/ErrorBoundary";
 import TripDetailPage from "./pages/TripDetailPage";
+import TripPaymentSuccess from "./pages/TripPaymentSuccess";
 
 function App() {
   return (
@@ -336,6 +337,10 @@ function App() {
             }
           />
           <Route path="/trips/:id" element={<TripDetailPage />} />
+          <Route
+            path="/trip-payment-success"
+            element={<TripPaymentSuccess />}
+          />
         </Route>
       </Routes>
     </Router>
