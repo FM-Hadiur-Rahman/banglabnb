@@ -231,6 +231,11 @@ const TripDetailPage = () => {
                   onChange={(e) => setSeatsToReserve(parseInt(e.target.value))}
                   className="border px-3 py-2 rounded w-full"
                 />
+                {availableSeats === 0 && (
+                  <p className="text-red-500 font-semibold text-sm">
+                    🚫 This trip is fully booked.
+                  </p>
+                )}
 
                 <button
                   onClick={() => handleReserve(trip, seatsToReserve)}

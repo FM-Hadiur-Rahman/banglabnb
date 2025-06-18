@@ -172,3 +172,46 @@ exports.MyRides = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.SuggesionTrip = async (req, res) => {
+  const { from, to, lat, lng } = req.query;
+
+  try {
+    const textQuery = {
+      status: "active",
+      date: { $gte: new Date() }, // Only upcoming trips
+    };
+
+    if (from) textQuery.from = new RegExp(from, "i");
+    if (to) textQuery.to = new RegExp(to, "i");
+
+    let trips = [];
+
+    // ✅ Geo + Text match
+    if (lat && lng) {
+      trips = await Trip.aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [parseFloat(lng), parseFloat(lat)],
+            },
+            distanceField: "distance",
+            spherical: true,
+            maxDistance: 10000, // 10km radius
+            query: textQuery,
+          },
+        },
+        { $limit: 5 },
+      ]);
+    } else {
+      // fallback: text match only
+      trips = await Trip.find(textQuery).limit(5);
+    }
+
+    res.json(trips);
+  } catch (err) {
+    console.error("❌ Trip suggestion error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

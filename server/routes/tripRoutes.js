@@ -12,6 +12,7 @@ const {
   reserveSeat,
   MyRides,
   cancelReservation,
+  SuggesionTrip,
 } = require("../controllers/tripController");
 
 // ✅ CREATE trip (with image upload)
@@ -34,5 +35,6 @@ router.get("/", getTrips);
 router.post("/:tripId/reserve", protect, reserveSeat);
 router.post("/:tripId/cancel", protect, cancelReservation);
 router.get("/:id", getTripById);
+router.get("/suggestions", SuggesionTrip);
 
 module.exports = router;

@@ -4,11 +4,13 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import BookingForm from "../components/BookingForm";
 import ReviewList from "../components/ReviewList";
+import RideResults from "../components/RideResults";
 
 const ListingDetailPage = () => {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [suggestedTrips, setSuggestedTrips] = useState([]);
 
   useEffect(() => {
     axios
@@ -16,6 +18,25 @@ const ListingDetailPage = () => {
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
   }, [id]);
+
+  useEffect(() => {
+    if (
+      listing?.division &&
+      listing?.district &&
+      listing?.location?.coordinates
+    ) {
+      const [lng, lat] = listing.location.coordinates;
+
+      axios
+        .get(
+          `${import.meta.env.VITE_API_URL}/api/trips/suggestions?from=${
+            listing.division
+          }&to=${listing.district}&lat=${lat}&lng=${lng}`
+        )
+        .then((res) => setSuggestedTrips(res.data))
+        .catch((err) => console.error("❌ Trip suggestion fetch error", err));
+    }
+  }, [listing]);
 
   if (!listing) return <p className="text-center">Loading listing...</p>;
 
@@ -87,6 +108,14 @@ const ListingDetailPage = () => {
               className="w-full h-auto rounded shadow-2xl"
             />
           </div>
+        </div>
+      )}
+      {suggestedTrips.length > 0 && (
+        <div className="mt-10 border-t pt-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            🚗 Suggested Rides
+          </h3>
+          <RideResults trips={suggestedTrips} />
         </div>
       )}
     </div>
