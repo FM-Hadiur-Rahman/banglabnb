@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { authHeader } from "../utils/authHeader";
 
 const TripPaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -14,7 +15,8 @@ const TripPaymentSuccess = () => {
         const res = await axios.get(
           `${
             import.meta.env.VITE_API_URL
-          }/api/trip-payment/reservation/${tran_id}`
+          }/api/trip-payment/reservation/${tran_id}`,
+          authHeader()
         );
         setReservation(res.data);
       } catch (err) {

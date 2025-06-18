@@ -37,10 +37,10 @@ router.post("/trip-initiate", protect, async (req, res) => {
       total_amount: totalFare,
       currency: "BDT",
       tran_id,
-      success_url: `${process.env.CLIENT_URL}/api/trip-payment-trip-success`,
+      success_url: `${process.env.API_URL}/api/trip-payment/trip-success`,
       fail_url: `${process.env.CLIENT_URL}/trip-payment-fail`,
       cancel_url: `${process.env.CLIENT_URL}/trip-payment-cancel`,
-      ipn_url: `${process.env.API_URL}/api/trip-payment/trip-success`,
+      ipn_url: `${process.env.API_URL}/api/trip-payment/ipn`, // Optional
       cus_name: req.user.name,
       cus_email: req.user.email,
       cus_add1: req.user.address || "Dhaka",
@@ -71,35 +71,42 @@ router.post("/trip-initiate", protect, async (req, res) => {
 });
 
 // ✅ Trip Payment Success
-// ✅ Trip Payment Success
 router.post("/trip-success", async (req, res) => {
   const { tran_id, val_id, amount } = req.body;
 
   try {
     const reservation = await TripReservation.findOne({
       transactionId: tran_id,
-    });
-    if (!reservation) return res.status(404).send("Reservation not found");
+    })
+      .populate("tripId")
+      .populate("userId");
 
+    if (!reservation || !reservation.tripId || !reservation.userId) {
+      return res
+        .status(404)
+        .json({ message: "Missing reservation, trip, or user" });
+    }
+
+    // Update reservation
     reservation.status = "paid";
     reservation.valId = val_id;
     reservation.paidAt = new Date();
     await reservation.save();
 
-    // ✅ Optional: Update passengers in Trip model
-    await Trip.findByIdAndUpdate(reservation.tripId, {
+    // Push to passengers
+    await Trip.findByIdAndUpdate(reservation.tripId._id, {
       $push: {
         passengers: {
-          user: reservation.passengerId,
-          seats: reservation.seats,
+          user: reservation.userId._id,
+          seats: reservation.numberOfSeats,
           status: "reserved",
         },
       },
     });
 
-    // ✅ Generate invoice and send email to rider
-    const user = await User.findById(reservation.passengerId);
-    const trip = await Trip.findById(reservation.tripId);
+    // Generate invoice and send to rider
+    const user = reservation.userId;
+    const trip = reservation.tripId;
     const invoicePath = await generateTripInvoice(reservation, trip, user);
 
     await sendEmail({
@@ -112,7 +119,6 @@ router.post("/trip-success", async (req, res) => {
           <p>Your seat(s) for the ride from <strong>${trip.from}</strong> to <strong>${trip.to}</strong> on ${trip.date} at ${trip.time} has been confirmed.</p>
           <p><strong>Seats:</strong> ${reservation.numberOfSeats}</p>
           <p><strong>Total Paid:</strong> ৳${reservation.totalAmount}</p>
-
           <p>Attached is your booking invoice. Thank you for using BanglaBnB!</p>
         </div>
       `,
@@ -124,22 +130,22 @@ router.post("/trip-success", async (req, res) => {
         },
       ],
     });
-    // Also send invoice to driver
+
+    // Send to driver
     const driver = await User.findById(trip.driverId);
     if (driver?.email) {
       await sendEmail({
         to: driver.email,
         subject: "📢 A New Passenger Has Reserved Your Trip",
         html: `
-      <div style="font-family: Arial, sans-serif; color: #1a202c; padding: 24px;">
-        <h2 style="color: #16a34a;">🚘 New Trip Reservation</h2>
-        <p>Dear <strong>${driver.name}</strong>,</p>
-        <p><strong>${user.name}</strong> has reserved <strong>${reservation.numberOfSeats}</strong> seat(s) for your trip...</p>
-
-        <p>Trip Date: ${trip.date} at ${trip.time}</p>
-        <p>Check attached invoice for full details.</p>
-      </div>
-    `,
+        <div style="font-family: Arial, sans-serif; color: #1a202c; padding: 24px;">
+          <h2 style="color: #16a34a;">🚘 New Trip Reservation</h2>
+          <p>Dear <strong>${driver.name}</strong>,</p>
+          <p><strong>${user.name}</strong> has reserved <strong>${reservation.numberOfSeats}</strong> seat(s) for your trip.</p>
+          <p>Trip Date: ${trip.date} at ${trip.time}</p>
+          <p>Check attached invoice for full details.</p>
+        </div>
+      `,
         attachments: [
           {
             filename: `trip-invoice-${reservation._id}.pdf`,
@@ -150,7 +156,7 @@ router.post("/trip-success", async (req, res) => {
       });
     }
 
-    // ✅ Final redirect
+    // ✅ Redirect
     res.redirect(
       `${process.env.CLIENT_URL}/trip-payment-success?tran_id=${tran_id}`
     );
@@ -160,18 +166,39 @@ router.post("/trip-success", async (req, res) => {
   }
 });
 
-// 🔐 Get Trip Reservation Status by Transaction ID
+// ✅ Get Trip Reservation by Transaction ID
 router.get("/reservation/:tran_id", protect, async (req, res) => {
   try {
     const reservation = await TripReservation.findOne({
       transactionId: req.params.tran_id,
-      passengerId: req.user._id,
+      userId: req.user._id,
     })
       .populate("tripId")
-      .populate("passengerId", "name email");
+      .populate("userId", "name email");
 
     if (!reservation)
       return res.status(404).json({ message: "Reservation not found" });
+
+    res.json(reservation);
+  } catch (err) {
+    console.error("❌ Failed to fetch reservation:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ Get Trip Reservation by Transaction ID (Protected)
+router.get("/reservation/:tran_id", protect, async (req, res) => {
+  try {
+    const reservation = await TripReservation.findOne({
+      transactionId: req.params.tran_id,
+      userId: req.user._id, // Ensures users only access their own reservations
+    })
+      .populate("tripId") // populate trip details
+      .populate("userId", "name email"); // populate user details (optional)
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
 
     res.json(reservation);
   } catch (err) {
