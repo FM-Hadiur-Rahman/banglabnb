@@ -9,16 +9,26 @@ const MyRidesTab = () => {
   const fetchRides = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/trips/my-rides`,
+        `${import.meta.env.VITE_API_URL}/api/trip-payment/my-paid-reservations`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      setMyRides(res.data);
+
+      // ✅ Extract the actual trip info from each reservation
+      const paidTrips = res.data
+        .filter((r) => r.status === "paid")
+        .map((r) => ({
+          ...r.tripId,
+          reservationId: r._id, // optional: pass reservation ID if needed
+          reservedSeats: r.seats, // optional: show how many seats were reserved
+        }));
+
+      setMyRides(paidTrips);
     } catch (err) {
-      console.error("❌ Failed to fetch my rides", err);
+      console.error("❌ Failed to fetch reserved rides", err);
       toast.error("Could not load your reserved rides.");
     }
   };
@@ -52,9 +62,7 @@ const MyRidesTab = () => {
               }
             );
             toast.success("❌ Ride canceled");
-            setMyRides((prev) =>
-              prev.map((t) => (t._id === trip._id ? res.data.trip : t))
-            );
+            fetchRides(); // Refresh list after cancellation
           } catch (err) {
             console.error("❌ Cancel failed", err);
             toast.error("Could not cancel ride.");

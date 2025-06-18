@@ -166,35 +166,16 @@ router.post("/trip-success", async (req, res) => {
   }
 });
 
-// ✅ Get Trip Reservation by Transaction ID
-router.get("/reservation/:tran_id", protect, async (req, res) => {
-  try {
-    const reservation = await TripReservation.findOne({
-      transactionId: req.params.tran_id,
-      userId: req.user._id,
-    })
-      .populate("tripId")
-      .populate("userId", "name email");
-
-    if (!reservation)
-      return res.status(404).json({ message: "Reservation not found" });
-
-    res.json(reservation);
-  } catch (err) {
-    console.error("❌ Failed to fetch reservation:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
 // ✅ Get Trip Reservation by Transaction ID (Protected)
 router.get("/reservation/:tran_id", protect, async (req, res) => {
   try {
     const reservation = await TripReservation.findOne({
       transactionId: req.params.tran_id,
-      userId: req.user._id, // Ensures users only access their own reservations
+      userId: req.user._id,
+      status: "paid", // ✅ Only return if reservation is paid
     })
-      .populate("tripId") // populate trip details
-      .populate("userId", "name email"); // populate user details (optional)
+      .populate("tripId")
+      .populate("userId", "name email");
 
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
@@ -203,6 +184,19 @@ router.get("/reservation/:tran_id", protect, async (req, res) => {
     res.json(reservation);
   } catch (err) {
     console.error("❌ Failed to fetch reservation:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.get("/my-paid-reservations", protect, async (req, res) => {
+  try {
+    const reservations = await TripReservation.find({
+      userId: req.user._id,
+      status: "paid",
+    }).populate("tripId");
+
+    res.json(reservations);
+  } catch (err) {
+    console.error("❌ Failed to fetch paid reservations", err);
     res.status(500).json({ message: "Server error" });
   }
 });
