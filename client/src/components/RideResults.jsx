@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 
-const RideResults = ({ trips = [], onRequest }) => {
+const RideResults = ({ trips = [], onReserve }) => {
   if (!trips.length)
     return <p className="text-center text-gray-600 py-6">❌ No rides found.</p>;
 
@@ -68,15 +68,15 @@ const RideResults = ({ trips = [], onRequest }) => {
               </p>
 
               {/* Optional Request Button */}
-              {onRequest && (
+              {onReserve && (
                 <button
                   onClick={(e) => {
                     e.preventDefault(); // avoid redirect
-                    onRequest(trip);
+                    onReserve(trip);
                   }}
                   className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
                 >
-                  📩 Request Ride
+                  📩 Reserve Ride
                 </button>
               )}
             </div>

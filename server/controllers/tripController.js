@@ -71,3 +71,30 @@ exports.getTripById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.reserveSeat = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.tripId);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    if (trip.seatsAvailable < 1) {
+      return res.status(400).json({ message: "No seats available" });
+    }
+
+    // Check if already reserved
+    if (trip.passengers.includes(req.user._id)) {
+      return res
+        .status(400)
+        .json({ message: "You have already reserved a seat" });
+    }
+
+    // Reserve seat
+    trip.passengers.push(req.user._id);
+    trip.seatsAvailable -= 1;
+    await trip.save();
+
+    res.status(200).json({ message: "Seat reserved", trip });
+  } catch (err) {
+    console.error("❌ Reserve seat error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

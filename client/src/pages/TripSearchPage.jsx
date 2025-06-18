@@ -4,7 +4,7 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import RideResults from "../components/RideResults";
 import mapboxgl from "mapbox-gl";
-
+import { toast } from "react-toastify";
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const TripSearchPage = () => {
@@ -90,8 +90,22 @@ const TripSearchPage = () => {
     currentPage * itemsPerPage
   );
 
-  const handleRequestRide = (trip) => {
-    console.log("Requested ride:", trip);
+  const handleRequestRide = async (trip) => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("You must be logged in to request a ride");
+
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/ride-requests`,
+        { tripId: trip._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("✅ Ride requested successfully!");
+    } catch (err) {
+      console.error("❌ Ride request failed", err);
+      toast.error(err?.response?.data?.message || "Failed to request ride");
+    }
   };
 
   const resetFilters = () => {
@@ -182,7 +196,7 @@ const TripSearchPage = () => {
           {showMap ? (
             <div ref={mapRef} className="w-full h-96 border rounded" />
           ) : (
-            <RideResults trips={paginatedTrips} onRequest={handleRequestRide} />
+            <RideResults trips={paginatedTrips} onReserve={handleRequestRide} />
           )}
 
           {/* Pagination */}

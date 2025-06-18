@@ -9,6 +9,7 @@ const {
   getTrips,
   getMyTrips,
   getTripById,
+  reserveSeat,
 } = require("../controllers/tripController");
 
 // 👇 Add upload.single("image") middleware for handling vehicle image
@@ -23,5 +24,6 @@ router.post(
 router.get("/", getTrips);
 router.get("/my", protect, authorize("driver"), getMyTrips);
 router.get("/:id", getTripById);
+router.post("/:tripId/reserve", protect, reserveSeat);
 
 module.exports = router;
