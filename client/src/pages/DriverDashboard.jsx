@@ -56,7 +56,7 @@ const DriverDashboard = () => {
             </p>
             <p>
               <strong>Fare:</strong> ৳{trip.farePerSeat} |{" "}
-              <strong>Seats:</strong> {trip.seatsAvailable}
+              <strong>Seats:</strong> {trip.totalSeats}
             </p>
             <p>
               <strong>Status:</strong>{" "}
