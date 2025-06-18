@@ -1,46 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const TripDetailPage = () => {
   const { id } = useParams();
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [seatsToReserve, setSeatsToReserve] = useState(1);
+  const [hasReserved, setHasReserved] = useState(false);
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/trips/${id}`)
       .then((res) => {
         setTrip(res.data);
+        const alreadyReserved = res.data.passengers?.some(
+          (p) => p.user === user?._id || p.user?._id === user?._id
+        );
+        setHasReserved(alreadyReserved);
         setLoading(false);
       })
       .catch((err) => {
         console.error("❌ Failed to load trip", err);
         setLoading(false);
       });
-  }, [id]);
+  }, [id, user?._id]);
 
-  const handleRequestRide = async () => {
+  const handleReserve = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/rides/request`,
-        {
-          tripId: trip._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/reserve`,
+        { seats: seatsToReserve },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("✅ Ride request sent!");
+      toast.success("✅ Reserved successfully!");
+      setTrip(res.data.trip);
+      setHasReserved(true);
     } catch (err) {
-      console.error("❌ Ride request failed", err);
-      alert("❌ Ride request failed");
+      console.error("❌ Reserve failed:", err);
+      toast.error(err.response?.data?.message || "Failed to reserve");
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("❌ Reservation canceled");
+      setTrip(res.data.trip);
+      setHasReserved(false);
+    } catch (err) {
+      console.error("❌ Cancel failed:", err);
+      toast.error(err.response?.data?.message || "Cancel failed");
     }
   };
 
@@ -170,12 +189,37 @@ const TripDetailPage = () => {
 
         {/* Reserve Button */}
         {user?._id !== trip.driverId?._id && (
-          <button
-            onClick={handleRequestRide}
-            className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded font-semibold text-lg"
-          >
-            🚀 Reserve Seat
-          </button>
+          <div className="space-y-4">
+            {hasReserved ? (
+              <button
+                onClick={handleCancel}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+              >
+                ❌ Cancel Reservation
+              </button>
+            ) : (
+              <>
+                <label className="block text-sm font-medium">
+                  Seats to Reserve:
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={trip.seatsAvailable}
+                  value={seatsToReserve}
+                  onChange={(e) => setSeatsToReserve(parseInt(e.target.value))}
+                  className="border px-3 py-2 rounded w-full"
+                />
+                <button
+                  onClick={handleReserve}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+                >
+                  🚀 Reserve {seatsToReserve} Seat
+                  {seatsToReserve > 1 ? "s" : ""}
+                </button>
+              </>
+            )}
+          </div>
         )}
 
         {/* Reviews (placeholder) */}

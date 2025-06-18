@@ -80,7 +80,7 @@ exports.reserveSeat = async (req, res) => {
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
     const existing = trip.passengers.find(
-      (p) => p.user.toString() === req.user._id.toString()
+      (p) => p.user && p.user.toString() === req.user._id.toString()
     );
     if (existing) return res.status(400).json({ message: "Already reserved" });
 
