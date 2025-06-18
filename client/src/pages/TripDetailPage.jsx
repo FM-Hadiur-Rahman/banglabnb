@@ -14,6 +14,11 @@ const TripDetailPage = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
+  const reservedSeats = trip.passengers
+    ?.filter((p) => p.status !== "cancelled")
+    .reduce((sum, p) => sum + (Number(p.seats) > 0 ? Number(p.seats) : 1), 0);
+
+  const availableSeats = Math.max(trip.totalSeats - reservedSeats, 0);
 
   useEffect(() => {
     axios
@@ -108,7 +113,8 @@ const TripDetailPage = () => {
               <strong>Fare per seat:</strong> ৳{trip.farePerSeat}
             </p>
             <p>
-              <strong>Seats Available:</strong> {trip.seatsAvailable}
+              <strong>Seats Available:</strong> {availableSeats} of{" "}
+              {trip.totalSeats}
             </p>
           </div>
           <div>
@@ -215,14 +221,21 @@ const TripDetailPage = () => {
                 <input
                   type="number"
                   min="1"
-                  max={trip.seatsAvailable}
+                  max={availableSeats}
                   value={seatsToReserve}
+                  disabled={availableSeats === 0}
                   onChange={(e) => setSeatsToReserve(parseInt(e.target.value))}
                   className="border px-3 py-2 rounded w-full"
                 />
+
                 <button
-                  onClick={handleReserve}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+                  onClick={() => handleReserve(trip, seatsToReserve)}
+                  disabled={availableSeats === 0}
+                  className={`w-full py-2 rounded text-white ${
+                    availableSeats === 0
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
                   🚀 Reserve {seatsToReserve} Seat
                   {seatsToReserve > 1 ? "s" : ""}
