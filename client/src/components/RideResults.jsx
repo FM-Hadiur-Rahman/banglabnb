@@ -72,7 +72,12 @@ const RideResults = ({ trips = [], onReserve, onCancel }) => {
                 <strong>Time:</strong> {trip.time}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Seats:</strong> {trip.totalSeats}
+                <strong>Seats:</strong>{" "}
+                {trip.totalSeats -
+                  trip.passengers
+                    ?.filter((p) => p.status !== "cancelled")
+                    .reduce((sum, p) => sum + (p.seats || 1), 0)}{" "}
+                of {trip.totalSeats} available
               </p>
 
               {/* Booking Controls */}
