@@ -1,5 +1,6 @@
 // === controllers/tripController.js ===
 const Trip = require("../models/Trip");
+const mongoose = require("mongoose");
 
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
@@ -56,10 +57,9 @@ exports.getMyTrips = async (req, res) => {
 
 exports.getTripById = async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.id).populate(
-      "driverId",
-      "name phone avatar"
-    );
+    const trip = await Trip.findById(req.params.id)
+      .populate("driverId", "name phone avatar")
+      .populate("passengers.user", "name");
 
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
@@ -133,11 +133,13 @@ exports.cancelReservation = async (req, res) => {
 
 exports.MyRides = async (req, res) => {
   try {
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+
     const trips = await Trip.find({
       passengers: {
         $elemMatch: {
-          user: req.user._id,
-          status: { $ne: "cancelled" }, // ✅ skip cancelled
+          user: userId,
+          status: { $ne: "cancelled" },
         },
       },
     })
