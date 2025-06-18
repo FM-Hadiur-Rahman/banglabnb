@@ -71,42 +71,71 @@ exports.getTripById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// controllers/tripController.js
 exports.reserveSeat = async (req, res) => {
   try {
+    const { seats = 1 } = req.body;
     const trip = await Trip.findById(req.params.tripId);
+
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
-    if (trip.seatsAvailable < 1) {
-      return res.status(400).json({ message: "No seats available" });
-    }
+    const existing = trip.passengers.find(
+      (p) => p.user.toString() === req.user._id.toString()
+    );
+    if (existing) return res.status(400).json({ message: "Already reserved" });
 
-    // Check if already reserved
-    if (trip.passengers.includes(req.user._id)) {
-      return res
-        .status(400)
-        .json({ message: "You have already reserved a seat" });
-    }
+    if (trip.seatsAvailable < seats)
+      return res.status(400).json({ message: "Not enough seats available" });
 
-    // Reserve seat
-    trip.passengers.push(req.user._id);
-    trip.seatsAvailable -= 1;
+    trip.passengers.push({ user: req.user._id, seats });
+    trip.seatsAvailable -= seats;
     await trip.save();
 
-    res.status(200).json({ message: "Seat reserved", trip });
+    res.json({ message: "Reserved", trip });
   } catch (err) {
-    console.error("❌ Reserve seat error:", err);
+    console.error("❌ Reserve failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Cancel reservation
+exports.cancelReservation = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.tripId);
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    const index = trip.passengers.findIndex(
+      (p) => p.user.toString() === req.user._id.toString()
+    );
+    if (index === -1)
+      return res.status(400).json({ message: "No reservation found" });
+
+    const cancelledSeats = trip.passengers[index].seats;
+    trip.passengers.splice(index, 1);
+    trip.seatsAvailable += cancelledSeats;
+    await trip.save();
+
+    res.json({ message: "Cancelled", trip });
+  } catch (err) {
+    console.error("❌ Cancel failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.MyRides = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: No user" });
+    }
+
     const trips = await Trip.find({ passengers: req.user._id })
       .populate("driverId", "name")
       .sort({ date: -1 });
 
     res.json(trips);
   } catch (err) {
-    console.error("❌ Error fetching my rides", err);
+    console.error("❌ Error fetching my rides:", err.message, err.stack);
     res.status(500).json({ message: "Server error" });
   }
 };

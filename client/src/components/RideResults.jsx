@@ -2,7 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 
-const RideResults = ({ trips = [], onReserve }) => {
+const RideResults = ({ trips = [], onReserve, onCancel }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   if (!trips.length)
     return <p className="text-center text-gray-600 py-6">❌ No rides found.</p>;
 
@@ -12,6 +14,10 @@ const RideResults = ({ trips = [], onReserve }) => {
         const isUrgent = dayjs(trip.date).diff(dayjs(), "hour") < 24;
         const isVerified = trip.driverId?.verified;
         const vehicleEmoji = trip.vehicleType === "car" ? "🚗" : "🏍️";
+
+        const hasReserved = trip.passengers?.some(
+          (p) => p.user === user?._id || p.user?._id === user?._id
+        );
 
         return (
           <Link
@@ -67,17 +73,45 @@ const RideResults = ({ trips = [], onReserve }) => {
                 <strong>Seats:</strong> {trip.seatsAvailable}
               </p>
 
-              {/* Optional Request Button */}
-              {onReserve && (
+              {/* Booking Controls */}
+              {hasReserved ? (
                 <button
                   onClick={(e) => {
-                    e.preventDefault(); // avoid redirect
-                    onReserve(trip);
+                    e.preventDefault();
+                    if (onCancel) onCancel(trip);
                   }}
-                  className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
+                  className="mt-2 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded text-sm font-medium"
                 >
-                  📩 Reserve Ride
+                  ❌ Cancel Reservation
                 </button>
+              ) : trip.seatsAvailable > 0 && onReserve ? (
+                <>
+                  <input
+                    type="number"
+                    min="1"
+                    max={trip.seatsAvailable}
+                    defaultValue={1}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      (trip.selectedSeats = parseInt(e.target.value))
+                    }
+                    className="border mt-2 px-2 py-1 w-full rounded text-sm"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onReserve(trip, trip.selectedSeats || 1);
+                    }}
+                    className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
+                  >
+                    📩 Reserve {trip.selectedSeats || 1} Seat
+                    {(trip.selectedSeats || 1) > 1 ? "s" : ""}
+                  </button>
+                </>
+              ) : (
+                <span className="block mt-2 text-red-500 font-medium">
+                  Fully booked
+                </span>
               )}
             </div>
           </Link>

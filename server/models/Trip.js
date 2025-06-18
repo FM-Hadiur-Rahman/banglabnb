@@ -15,8 +15,12 @@ const tripSchema = new mongoose.Schema(
       default: "available",
     },
 
-    passengers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    seatsAvailable: { type: Number, required: true },
+    passengers: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        seats: { type: Number, default: 1 },
+      },
+    ],
 
     farePerSeat: { type: Number, required: true },
     image: { type: String },

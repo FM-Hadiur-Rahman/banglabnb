@@ -62,11 +62,11 @@ const Home = () => {
       console.error("❌ Failed to fetch rides", err);
     }
   };
-  const handleReserveSeat = async (trip) => {
+  const handleReserveSeat = async (trip, seats = 1) => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/reserve`,
-        {},
+        { seats }, // ✅ Send selected seat count
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -74,13 +74,31 @@ const Home = () => {
         }
       );
       toast.success("✅ Seat reserved successfully!");
-      // Optionally refresh trips
       setRideResults((prev) =>
         prev.map((t) => (t._id === trip._id ? res.data.trip : t))
       );
     } catch (err) {
       console.error("❌ Seat reservation error:", err);
       toast.error(err.response?.data?.message || "Failed to reserve seat");
+    }
+  };
+  const cancelReservation = async (tripId) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/cancel`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success("❌ Reservation cancelled");
+      // Optionally refresh
+    } catch (err) {
+      console.error("❌ Cancel failed:", err);
+      toast.error(
+        err.response?.data?.message || "Failed to cancel reservation"
+      );
     }
   };
 
@@ -161,6 +179,7 @@ const Home = () => {
               setTripDate={setTripDate}
               handleTripSearch={handleTripSearch}
               onResults={setRideResults}
+              onCancel={cancelReservation}
             />
           )}
         </div>
