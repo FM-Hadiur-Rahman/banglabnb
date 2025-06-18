@@ -200,14 +200,14 @@ const DriverTripForm = () => {
         {/* Fare & Seats */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
-            💸 Fare & Seats
+            💸 Fare & Total Seats
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               type="number"
-              name="seatsAvailable"
+              name="totalSeats"
               min="1"
-              placeholder="Seats Available"
+              placeholder="Total Seats"
               onChange={handleChange}
               required
               className="border px-4 py-2 rounded w-full"

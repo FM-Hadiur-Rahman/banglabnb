@@ -1,6 +1,5 @@
 // === controllers/tripController.js ===
 const Trip = require("../models/Trip");
-const mongoose = require("mongoose");
 
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
@@ -8,7 +7,7 @@ exports.createTrip = async (req, res) => {
     const tripData = {
       ...req.body,
       driverId: req.user._id,
-      seatsAvailable: Number(req.body.seatsAvailable),
+      totalSeats: Number(req.body.totalSeats),
       farePerSeat: Number(req.body.farePerSeat),
     };
     // ✅ Parse location from JSON string
@@ -81,18 +80,31 @@ exports.reserveSeat = async (req, res) => {
 
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
-    const existing = trip.passengers.find(
-      (p) => p.user && p.user.toString() === req.user._id.toString()
+    const alreadyReserved = trip.passengers.find(
+      (p) =>
+        p.user?.toString() === req.user._id.toString() &&
+        p.status !== "cancelled"
     );
-    if (existing) return res.status(400).json({ message: "Already reserved" });
+    if (alreadyReserved)
+      return res.status(400).json({ message: "Already reserved" });
 
-    if (trip.seatsAvailable < seats)
+    const reservedSeats = trip.passengers
+      .filter((p) => p.status !== "cancelled")
+      .reduce((sum, p) => sum + (p.seats || 1), 0);
+
+    const availableSeats = trip.totalSeats - reservedSeats;
+
+    if (availableSeats < seats)
       return res.status(400).json({ message: "Not enough seats available" });
 
     trip.passengers.push({ user: req.user._id, seats });
-    trip.seatsAvailable -= seats;
-    await trip.save();
 
+    // ✅ Mark as booked if all seats filled
+    if (reservedSeats + seats >= trip.totalSeats) {
+      trip.status = "booked";
+    }
+
+    await trip.save();
     res.json({ message: "Reserved", trip });
   } catch (err) {
     console.error("❌ Reserve failed:", err);
@@ -109,21 +121,30 @@ exports.cancelReservation = async (req, res) => {
 
     const index = trip.passengers.findIndex(
       (p) =>
-        p.user && // 👈 prevent TypeError
-        p.user.toString() === req.user._id.toString() &&
+        p.user?.toString() === req.user._id.toString() &&
         p.status !== "cancelled"
     );
 
     if (index === -1)
       return res.status(400).json({ message: "No active reservation found" });
 
-    const cancelledSeats = trip.passengers[index].seats;
     trip.passengers[index].status = "cancelled";
     trip.passengers[index].cancelledAt = new Date();
-    trip.seatsAvailable += cancelledSeats;
+
+    // ✅ Recalculate seats after cancellation
+    const reservedSeatsAfterCancel = trip.passengers
+      .filter((p) => p.status !== "cancelled")
+      .reduce((sum, p) => sum + (p.seats || 1), 0);
+
+    // ✅ Set trip back to "available" if seats now free
+    if (
+      trip.status === "booked" &&
+      reservedSeatsAfterCancel < trip.totalSeats
+    ) {
+      trip.status = "available";
+    }
 
     await trip.save();
-
     res.json({ message: "Cancelled", trip });
   } catch (err) {
     console.error("❌ Cancel failed:", err);
@@ -132,14 +153,13 @@ exports.cancelReservation = async (req, res) => {
 };
 
 exports.MyRides = async (req, res) => {
+  console.log("UserId: ", req.user.id);
   try {
-    const userId = new mongoose.Types.ObjectId(req.user._id);
-
     const trips = await Trip.find({
       passengers: {
         $elemMatch: {
-          user: userId,
-          status: { $ne: "cancelled" },
+          user: req.user._id,
+          status: { $ne: "cancelled" }, // ✅ skip cancelled
         },
       },
     })
