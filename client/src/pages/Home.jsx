@@ -9,6 +9,7 @@ import RideResults from "../components/RideResults";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapSection from "../components/MapSection";
 import { toast } from "react-toastify";
+import { initiateTripPayment } from "../utils/initiateTripPayment";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("stay");
@@ -62,24 +63,26 @@ const Home = () => {
       console.error("❌ Failed to fetch rides", err);
     }
   };
-  const handleReserveSeat = async (trip, seats = 1) => {
+  const handleReserveSeat = async (trip, seatCount = 1) => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("You must be logged in to reserve a ride");
+
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/reserve`,
-        { seats }, // ✅ Send selected seat count
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      toast.success("✅ Seat reserved successfully!");
-      setRideResults((prev) =>
-        prev.map((t) => (t._id === trip._id ? res.data.trip : t))
-      );
+      const paymentUrl = await initiateTripPayment({
+        tripId: trip._id,
+        seats: seatCount,
+        token,
+      });
+
+      if (paymentUrl) {
+        toast.success("✅ Redirecting to payment...");
+        window.location.href = paymentUrl;
+      } else {
+        toast.error("Payment initiation failed");
+      }
     } catch (err) {
-      console.error("❌ Seat reservation error:", err);
-      toast.error(err.response?.data?.message || "Failed to reserve seat");
+      console.error("❌ Payment initiation error:", err);
+      toast.error(err?.response?.data?.message || "Failed to initiate payment");
     }
   };
   const cancelReservation = async (tripId) => {

@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import RideResults from "../components/RideResults";
 import mapboxgl from "mapbox-gl";
 import { toast } from "react-toastify";
+import { initiateTripPayment } from "../utils/initiateTripPayment";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -92,21 +93,24 @@ const TripSearchPage = () => {
     if (!token) return toast.error("You must be logged in to reserve a ride");
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/reserve`,
-        { seats: seatCount },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const paymentUrl = await initiateTripPayment({
+        tripId: trip._id,
+        seats: seatCount,
+        token,
+      });
 
-      toast.success("✅ Ride reserved successfully!");
-      setTrips((prev) =>
-        prev.map((t) => (t._id === trip._id ? res.data.trip : t))
-      );
+      if (paymentUrl) {
+        toast.success("✅ Redirecting to payment...");
+        window.location.href = paymentUrl;
+      } else {
+        toast.error("Payment initiation failed");
+      }
     } catch (err) {
-      console.error("❌ Ride reservation failed", err);
-      toast.error(err?.response?.data?.message || "Failed to reserve ride");
+      console.error("❌ Payment initiation error:", err);
+      toast.error(err?.response?.data?.message || "Failed to initiate payment");
     }
   };
+
   const handleCancel = async (trip) => {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("You must be logged in to cancel a ride");

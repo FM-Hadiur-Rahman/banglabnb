@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { initiateTripPayment } from "../utils/initiateTripPayment";
 
 const TripDetailPage = () => {
   const { id } = useParams();
@@ -33,19 +34,26 @@ const TripDetailPage = () => {
       });
   }, [id, user?._id]);
 
-  const handleReserve = async () => {
+  const handleReserve = async (trip, seatCount = 1) => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("You must be logged in to reserve a ride");
+
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/reserve`,
-        { seats: seatsToReserve },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("✅ Reserved successfully!");
-      setTrip(res.data.trip);
-      setHasReserved(true);
+      const paymentUrl = await initiateTripPayment({
+        tripId: trip._id,
+        seats: seatCount,
+        token,
+      });
+
+      if (paymentUrl) {
+        toast.success("✅ Redirecting to payment...");
+        window.location.href = paymentUrl;
+      } else {
+        toast.error("Payment initiation failed");
+      }
     } catch (err) {
-      console.error("❌ Reserve failed:", err);
-      toast.error(err.response?.data?.message || "Failed to reserve");
+      console.error("❌ Payment initiation error:", err);
+      toast.error(err?.response?.data?.message || "Failed to initiate payment");
     }
   };
 
