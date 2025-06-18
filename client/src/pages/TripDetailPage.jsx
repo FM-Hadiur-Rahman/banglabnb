@@ -20,7 +20,9 @@ const TripDetailPage = () => {
       .then((res) => {
         setTrip(res.data);
         const alreadyReserved = res.data.passengers?.some(
-          (p) => p.user === user?._id || p.user?._id === user?._id
+          (p) =>
+            (p.user === user?._id || p.user?._id === user?._id) &&
+            p.status !== "cancelled"
         );
         setHasReserved(alreadyReserved);
         setLoading(false);

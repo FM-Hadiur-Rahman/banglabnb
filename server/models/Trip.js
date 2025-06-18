@@ -6,9 +6,14 @@ const tripSchema = new mongoose.Schema(
     to: { type: String, required: true },
     date: { type: String, required: true },
     time: { type: String, required: true },
-    vehicleType: { type: String, enum: ["car", "bike"], required: true },
+    vehicleType: {
+      type: String,
+      enum: ["car", "bike"],
+      required: true,
+    },
     vehicleModel: { type: String },
     licensePlate: { type: String },
+
     status: {
       type: String,
       enum: ["available", "booked", "cancelled"],
@@ -19,18 +24,25 @@ const tripSchema = new mongoose.Schema(
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         seats: { type: Number, default: 1 },
+        status: {
+          type: String,
+          enum: ["reserved", "cancelled"],
+          default: "reserved",
+        },
+        cancelledAt: { type: Date },
       },
     ],
 
     farePerSeat: { type: Number, required: true },
     image: { type: String },
+
     driverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // ✅ Location (GeoJSON + address for display)
+    // GeoJSON Location
     location: {
       type: {
         type: String,
@@ -41,13 +53,13 @@ const tripSchema = new mongoose.Schema(
         type: [Number], // [lng, lat]
         required: true,
       },
-      address: { type: String }, // ✅ Add for UI display (optional but useful)
+      address: { type: String },
     },
   },
   { timestamps: true }
 );
 
-// ✅ Create geospatial index
+// Geospatial index for location
 tripSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("Trip", tripSchema);

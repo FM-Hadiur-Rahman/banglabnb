@@ -112,7 +112,10 @@ exports.cancelReservation = async (req, res) => {
       return res.status(400).json({ message: "No reservation found" });
 
     const cancelledSeats = trip.passengers[index].seats;
-    trip.passengers.splice(index, 1);
+    trip.passengers[index].status = "cancelled";
+    trip.passengers[index].cancelledAt = new Date();
+    trip.seatsAvailable += trip.passengers[index].seats;
+
     trip.seatsAvailable += cancelledSeats;
     await trip.save();
 
