@@ -16,7 +16,9 @@ const RideResults = ({ trips = [], onReserve, onCancel }) => {
         const vehicleEmoji = trip.vehicleType === "car" ? "🚗" : "🏍️";
 
         const hasReserved = trip.passengers?.some(
-          (p) => p.user === user?._id || p.user?._id === user?._id
+          (p) =>
+            (p.user === user?._id || p.user?._id === user?._id) &&
+            p.status !== "cancelled"
         );
 
         return (
