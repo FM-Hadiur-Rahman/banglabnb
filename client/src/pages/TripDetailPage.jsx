@@ -14,11 +14,6 @@ const TripDetailPage = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
-  const reservedSeats = trip.passengers
-    ?.filter((p) => p.status !== "cancelled")
-    .reduce((sum, p) => sum + (Number(p.seats) > 0 ? Number(p.seats) : 1), 0);
-
-  const availableSeats = Math.max(trip.totalSeats - reservedSeats, 0);
 
   useEffect(() => {
     axios
@@ -82,6 +77,15 @@ const TripDetailPage = () => {
     return <p className="text-center mt-10">Loading trip details...</p>;
   if (!trip)
     return <p className="text-center mt-10 text-red-600">Trip not found.</p>;
+  let reservedSeats = 0;
+  let availableSeats = 0;
+
+  if (trip?.passengers && Array.isArray(trip.passengers)) {
+    reservedSeats = trip.passengers
+      .filter((p) => p.status !== "cancelled")
+      .reduce((sum, p) => sum + (Number(p.seats) > 0 ? Number(p.seats) : 1), 0);
+    availableSeats = Math.max((trip.totalSeats || 0) - reservedSeats, 0);
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
