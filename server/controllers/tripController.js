@@ -98,3 +98,15 @@ exports.reserveSeat = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.MyRides = async (req, res) => {
+  try {
+    const trips = await Trip.find({ passengers: req.user._id })
+      .populate("driverId", "name")
+      .sort({ date: -1 });
+
+    res.json(trips);
+  } catch (err) {
+    console.error("❌ Error fetching my rides", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
