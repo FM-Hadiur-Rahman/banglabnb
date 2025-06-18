@@ -37,7 +37,7 @@ router.post("/trip-initiate", protect, async (req, res) => {
       total_amount: totalFare,
       currency: "BDT",
       tran_id,
-      success_url: `${process.env.CLIENT_URL}/trip-payment-success?tran_id=${tran_id}`,
+      success_url: `${process.env.CLIENT_URL}/api/trip-payment-trip-success`,
       fail_url: `${process.env.CLIENT_URL}/trip-payment-fail`,
       cancel_url: `${process.env.CLIENT_URL}/trip-payment-cancel`,
       ipn_url: `${process.env.API_URL}/api/trip-payment/trip-success`,
