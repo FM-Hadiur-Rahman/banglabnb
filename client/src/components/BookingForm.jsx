@@ -243,6 +243,18 @@ const BookingForm = ({
           </div>
         </div>
       )}
+      {bookingMode === "combined" && selectedTrip && (
+        <div className="mt-4 border-t pt-4 space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Ride Fare (1 seat)</span>
+            <span>৳{selectedTrip.farePerSeat}</span>
+          </div>
+          <div className="border-t pt-2 font-semibold flex justify-between text-lg">
+            <span>Combined Total</span>
+            <span>৳{total + selectedTrip.farePerSeat}</span>
+          </div>
+        </div>
+      )}
     </form>
   );
 };
