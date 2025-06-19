@@ -25,7 +25,7 @@ const ListingDetailPage = () => {
     setLoadingTrips(true); // 🟢 START loading
 
     // 🧪 TEMPORARY HARDCODED TEST LOCATION IN BANGLADESH (Dhaka)
-    const isDev = false; // set false in production
+    const isDev = true; // set false in production
 
     if (isDev) {
       const latitude = 23.8103;
