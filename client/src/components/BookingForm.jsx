@@ -7,7 +7,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const BookingForm = ({ listingId, price, maxGuests, blockedDates }) => {
+const BookingForm = ({
+  listingId,
+  price,
+  maxGuests,
+  blockedDates,
+  bookingMode,
+}) => {
   const [range, setRange] = useState([
     {
       startDate: new Date(),

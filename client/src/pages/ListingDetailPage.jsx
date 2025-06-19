@@ -12,6 +12,7 @@ const ListingDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [suggestedTrips, setSuggestedTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(false);
+  const [bookingMode, setBookingMode] = useState("stay"); // 'stay' or 'combined'
 
   useEffect(() => {
     axios
@@ -96,6 +97,26 @@ const ListingDetailPage = () => {
             This cozy place can host up to {listing.maxGuests} guests.
           </p>
         </div>
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => setBookingMode("stay")}
+            className={`px-4 py-1 rounded border ${
+              bookingMode === "stay" ? "bg-green-600 text-white" : "bg-gray-100"
+            }`}
+          >
+            🛏️ Stay Only
+          </button>
+          <button
+            onClick={() => setBookingMode("combined")}
+            className={`px-4 py-1 rounded border ${
+              bookingMode === "combined"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100"
+            }`}
+          >
+            🛏️+🚗 Stay + Ride
+          </button>
+        </div>
 
         {/* ⭐ Reviews */}
         <div className="mt-8 space-y-4">
@@ -128,6 +149,7 @@ const ListingDetailPage = () => {
           price={listing.price}
           maxGuests={listing.maxGuests}
           blockedDates={listing.blockedDates || []}
+          bookingMode={bookingMode}
         />
       </div>
 
