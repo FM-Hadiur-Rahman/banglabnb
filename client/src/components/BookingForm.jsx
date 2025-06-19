@@ -97,13 +97,13 @@ const BookingForm = ({
         );
         console.log("✅ Combined booking created:", bookingRes.data);
 
-        const booking = bookingRes.data;
+        const { bookingId, amount } = bookingRes.data;
 
         const combinedRes = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/combined-payment/initiate`,
           {
-            bookingId: booking._id,
-            amount: total + selectedTrip.farePerSeat,
+            bookingId,
+            amount,
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
