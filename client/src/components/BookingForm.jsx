@@ -84,7 +84,7 @@ const BookingForm = ({
     if (bookingMode === "combined" && selectedTrip) {
       try {
         const bookingRes = await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/bookings`,
+          `${import.meta.env.VITE_API_URL}/api/combined-bookings`,
           {
             listingId,
             dateFrom: range[0].startDate,
