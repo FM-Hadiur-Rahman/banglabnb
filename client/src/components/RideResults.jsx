@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 
 const RideResults = ({ trips = [], onReserve, onCancel }) => {
   const user = JSON.parse(localStorage.getItem("user"));
+  console.log("Hello from RideResult: ", trips);
 
   if (!trips.length)
     return <p className="text-center text-gray-600 py-6">❌ No rides found.</p>;
