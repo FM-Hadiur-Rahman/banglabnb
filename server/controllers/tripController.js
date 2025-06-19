@@ -183,8 +183,8 @@ exports.getSuggestedTrips = async (req, res) => {
   try {
     const trips = await Trip.find({
       to: new RegExp(to, "i"),
-      status: "active",
-      "location.coordinates": {
+      status: "available",
+      location: {
         $nearSphere: {
           $geometry: {
             type: "Point",
