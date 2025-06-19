@@ -2,7 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 
-const RideResults = ({ trips = [], onReserve, onCancel }) => {
+const RideResults = ({
+  trips = [],
+  onReserve,
+  onCancel,
+  selectedTrip,
+  onSelectTrip,
+}) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (!trips.length)
@@ -119,6 +125,24 @@ const RideResults = ({ trips = [], onReserve, onCancel }) => {
                 <span className="block mt-2 text-red-500 font-medium">
                   Fully booked
                 </span>
+              )}
+              {onSelectTrip && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectTrip(trip);
+                  }}
+                  className={`mt-2 w-full ${
+                    selectedTrip?._id === trip._id
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200 text-gray-800"
+                  } py-2 rounded text-sm font-medium`}
+                >
+                  {selectedTrip?._id === trip._id
+                    ? "✅ Selected for Booking"
+                    : "Select This Ride"}
+                </button>
               )}
             </div>
           </Link>

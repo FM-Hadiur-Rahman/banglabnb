@@ -13,6 +13,7 @@ const ListingDetailPage = () => {
   const [suggestedTrips, setSuggestedTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(false);
   const [bookingMode, setBookingMode] = useState("stay"); // 'stay' or 'combined'
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
     axios
@@ -132,7 +133,11 @@ const ListingDetailPage = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-4">
                 🚗 Suggested Rides
               </h3>
-              <RideResults trips={suggestedTrips} />
+              <RideResults
+                trips={suggestedTrips}
+                selectedTrip={selectedTrip}
+                onSelectTrip={setSelectedTrip}
+              />
             </>
           ) : (
             <p className="text-center text-gray-400 mt-6 italic">
@@ -150,6 +155,7 @@ const ListingDetailPage = () => {
           maxGuests={listing.maxGuests}
           blockedDates={listing.blockedDates || []}
           bookingMode={bookingMode}
+          selectedTrip={selectedTrip}
         />
       </div>
 
