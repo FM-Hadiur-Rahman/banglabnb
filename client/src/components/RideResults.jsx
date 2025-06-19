@@ -84,7 +84,11 @@ const RideResults = ({
                 available
               </p>
 
-              {hasReserved ? (
+              {!user ? (
+                <span className="block mt-2 text-blue-500 text-sm font-medium">
+                  🔒 Login to reserve a ride
+                </span>
+              ) : hasReserved ? (
                 <button
                   onClick={(e) => {
                     e.preventDefault();
