@@ -59,7 +59,7 @@ const tripSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-tripSchema.index({ location: "2dsphere" });
+tripSchema.index({ "location.coordinates": "2dsphere" });
 
 tripSchema.virtual("seatsAvailable").get(function () {
   const reservedSeats = this.passengers

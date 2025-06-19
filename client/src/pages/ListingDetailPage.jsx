@@ -19,31 +19,50 @@ const ListingDetailPage = () => {
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
   }, [id]);
-
   useEffect(() => {
     if (!listing?.district) return;
 
     setLoadingTrips(true); // 🟢 START loading
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
+    // 🧪 TEMPORARY HARDCODED TEST LOCATION IN BANGLADESH (Dhaka)
+    const isDev = true; // set false in production
 
-        axios
-          .get(
-            `${import.meta.env.VITE_API_URL}/api/trips/suggestions?to=${
-              listing.district
-            }&lat=${latitude}&lng=${longitude}`
-          )
-          .then((res) => setSuggestedTrips(res.data))
-          .catch((err) => console.error("❌ Trip suggestion fetch error", err))
-          .finally(() => setLoadingTrips(false)); // 🔴 STOP loading
-      },
-      (err) => {
-        console.error("❌ Geolocation failed:", err);
-        setLoadingTrips(false); // 🔴 STOP loading even on error
-      }
-    );
+    if (isDev) {
+      const latitude = 23.8103;
+      const longitude = 90.4125;
+
+      axios
+        .get(
+          `${import.meta.env.VITE_API_URL}/api/trips/suggestions?to=${
+            listing.district
+          }&lat=${latitude}&lng=${longitude}`
+        )
+        .then((res) => setSuggestedTrips(res.data))
+        .catch((err) => console.error("❌ Trip suggestion fetch error", err))
+        .finally(() => setLoadingTrips(false));
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+
+          axios
+            .get(
+              `${import.meta.env.VITE_API_URL}/api/trips/suggestions?to=${
+                listing.district
+              }&lat=${latitude}&lng=${longitude}`
+            )
+            .then((res) => setSuggestedTrips(res.data))
+            .catch((err) =>
+              console.error("❌ Trip suggestion fetch error", err)
+            )
+            .finally(() => setLoadingTrips(false));
+        },
+        (err) => {
+          console.error("❌ Geolocation failed:", err);
+          setLoadingTrips(false);
+        }
+      );
+    }
   }, [listing]);
 
   if (!listing) return <p className="text-center">Loading listing...</p>;
