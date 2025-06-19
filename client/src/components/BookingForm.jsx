@@ -95,6 +95,7 @@ const BookingForm = ({
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log("✅ Combined booking created:", bookingRes.data);
 
         const booking = bookingRes.data;
 
