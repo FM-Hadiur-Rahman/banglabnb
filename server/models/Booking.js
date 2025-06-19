@@ -82,6 +82,14 @@ const bookingSchema = new mongoose.Schema(
       paidAt: Date,
       refundClaimed: { type: Boolean, default: false }, // ✅ new
     },
+    combined: {
+      type: Boolean,
+      default: false,
+    },
+    tripId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Trip",
+    },
   },
   { timestamps: true }
 );

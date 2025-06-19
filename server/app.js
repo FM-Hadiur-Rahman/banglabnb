@@ -65,6 +65,8 @@ app.use("/api/chats", chatRoutes); // All chat endpoints: /api/chats
 app.use("/api/messages", messageRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/trip-payment", tripPaymentRoutes);
+app.use("/api/combined-bookings", require("./routes/combinedBooking"));
+app.use("/api/combined-payment", require("./routes/combinedPayment"));
 
 app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://banglabnb.com");

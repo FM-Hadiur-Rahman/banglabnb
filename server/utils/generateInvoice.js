@@ -3,7 +3,13 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
 
-const generateInvoice = async (booking, listing, guest, streamTo = null) => {
+const generateInvoice = async (
+  booking,
+  listing,
+  guest,
+  streamTo = null,
+  trip = null
+) => {
   return new Promise(async (resolve, reject) => {
     const invoiceDir = path.join(__dirname, "../invoices");
     if (!fs.existsSync(invoiceDir))
@@ -105,6 +111,37 @@ const generateInvoice = async (booking, listing, guest, streamTo = null) => {
     doc.text(formatCurrency(tax), right, doc.y, { align: "right" });
     doc.font("Helvetica-Bold").text("Total Amount Paid:", left);
     doc.text(formatCurrency(total), right, doc.y, { align: "right" });
+
+    // 🚗 Ride Details (if available)
+    if (trip) {
+      const rideTotal = trip.farePerSeat * booking.guests;
+      const pickupDate = new Date(trip.date).toLocaleDateString();
+      const pickupTime = trip.time || "N/A";
+
+      doc
+        .addPage()
+        .font("Helvetica-Bold")
+        .fontSize(14)
+        .fillColor("black")
+        .text("🚗 Ride Details", { underline: true });
+
+      doc.font("Helvetica").fontSize(12);
+      doc.text(`From: ${trip.from}`);
+      doc.text(`To: ${trip.to}`);
+      doc.text(`Pickup Date: ${pickupDate}`);
+      doc.text(`Pickup Time: ${pickupTime}`);
+      doc.text(`Vehicle: ${trip.vehicleModel}`);
+      doc.text(`License Plate: ${trip.licensePlate || "N/A"}`);
+      doc.text(`Fare Per Seat: ৳${trip.farePerSeat}`);
+      doc.text(`Seats Reserved: ${booking.guests}`);
+      doc.text(`Ride Total: ৳${rideTotal}`);
+
+      // Bangla section
+      doc.moveDown();
+      doc.font("Bangla").fontSize(11);
+      doc.text(`পিকআপ: ${pickupDate} ${pickupTime}`);
+      doc.text(`ভাড়া প্রতি আসন: ৳${trip.farePerSeat}`);
+    }
 
     // 📅 Metadata
     doc.moveDown(2).font("Helvetica").fontSize(11).fillColor("gray");
