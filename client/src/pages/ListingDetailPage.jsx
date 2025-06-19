@@ -148,7 +148,11 @@ const ListingDetailPage = () => {
           </h3>
           <RideResults trips={suggestedTrips} />
         </div>
-      ) : null}
+      ) : (
+        <p className="text-center text-gray-400 mt-6 italic">
+          😔 No rides found for this destination.
+        </p>
+      )}
     </div>
   );
 };
