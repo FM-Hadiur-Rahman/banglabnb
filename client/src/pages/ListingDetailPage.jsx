@@ -11,6 +11,7 @@ const ListingDetailPage = () => {
   const [listing, setListing] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [suggestedTrips, setSuggestedTrips] = useState([]);
+  const [loadingTrips, setLoadingTrips] = useState(false);
 
   useEffect(() => {
     axios
@@ -20,22 +21,29 @@ const ListingDetailPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (
-      listing?.division &&
-      listing?.district &&
-      listing?.location?.coordinates
-    ) {
-      const [lng, lat] = listing.location.coordinates;
+    if (!listing?.district) return;
 
-      axios
-        .get(
-          `${import.meta.env.VITE_API_URL}/api/trips/suggestions?from=${
-            listing.division
-          }&to=${listing.district}&lat=${lat}&lng=${lng}`
-        )
-        .then((res) => setSuggestedTrips(res.data))
-        .catch((err) => console.error("❌ Trip suggestion fetch error", err));
-    }
+    setLoadingTrips(true); // 🟢 START loading
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        axios
+          .get(
+            `${import.meta.env.VITE_API_URL}/api/trips/suggestions?to=${
+              listing.district
+            }&lat=${latitude}&lng=${longitude}`
+          )
+          .then((res) => setSuggestedTrips(res.data))
+          .catch((err) => console.error("❌ Trip suggestion fetch error", err))
+          .finally(() => setLoadingTrips(false)); // 🔴 STOP loading
+      },
+      (err) => {
+        console.error("❌ Geolocation failed:", err);
+        setLoadingTrips(false); // 🔴 STOP loading even on error
+      }
+    );
   }, [listing]);
 
   if (!listing) return <p className="text-center">Loading listing...</p>;
@@ -110,14 +118,18 @@ const ListingDetailPage = () => {
           </div>
         </div>
       )}
-      {suggestedTrips.length > 0 && (
+      {loadingTrips ? (
+        <p className="text-center text-gray-500 mt-6">
+          🔄 Finding nearby rides...
+        </p>
+      ) : suggestedTrips.length > 0 ? (
         <div className="mt-10 border-t pt-6">
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             🚗 Suggested Rides
           </h3>
           <RideResults trips={suggestedTrips} />
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

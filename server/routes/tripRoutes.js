@@ -12,7 +12,7 @@ const {
   reserveSeat,
   MyRides,
   cancelReservation,
-  SuggesionTrip,
+  getSuggestedTrips,
 } = require("../controllers/tripController");
 
 // ✅ CREATE trip (with image upload)
@@ -27,14 +27,16 @@ router.post(
 // ✅ STATIC ROUTES — define BEFORE dynamic ones
 router.get("/my-rides", protect, MyRides); // must come before `/:id`
 router.get("/my", protect, authorize("driver"), getMyTrips);
+router.get("/suggestions", getSuggestedTrips);
 
 // ✅ PUBLIC ROUTES
 router.get("/", getTrips);
 
 // ✅ DYNAMIC ROUTES — keep at the end
+
 router.post("/:tripId/reserve", protect, reserveSeat);
 router.post("/:tripId/cancel", protect, cancelReservation);
+
 router.get("/:id", getTripById);
-router.get("/suggestions", SuggesionTrip);
 
 module.exports = router;
