@@ -119,6 +119,19 @@ exports.cancelReservation = async (req, res) => {
 
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
+    // ✅ Check if trip starts within 24 hours
+    const tripStart = new Date(`${trip.date}T${trip.time}`);
+    const now = new Date();
+    const diffHours = (tripStart - now) / (1000 * 60 * 60);
+
+    if (diffHours < 24) {
+      return res.status(400).json({
+        message:
+          "🚫 Cancellation not allowed within 24 hours of trip departure.",
+      });
+    }
+
+    // ✅ Find user’s reservation
     const index = trip.passengers.findIndex(
       (p) =>
         p.user?.toString() === req.user._id.toString() &&
@@ -128,15 +141,16 @@ exports.cancelReservation = async (req, res) => {
     if (index === -1)
       return res.status(400).json({ message: "No active reservation found" });
 
+    // ✅ Mark as cancelled
     trip.passengers[index].status = "cancelled";
     trip.passengers[index].cancelledAt = new Date();
 
-    // ✅ Recalculate seats after cancellation
+    // ✅ Recalculate seats
     const reservedSeatsAfterCancel = trip.passengers
       .filter((p) => p.status !== "cancelled")
       .reduce((sum, p) => sum + (p.seats || 1), 0);
 
-    // ✅ Set trip back to "available" if seats now free
+    // ✅ If seats now available, mark trip as 'available'
     if (
       trip.status === "booked" &&
       reservedSeatsAfterCancel < trip.totalSeats
@@ -145,7 +159,8 @@ exports.cancelReservation = async (req, res) => {
     }
 
     await trip.save();
-    res.json({ message: "Cancelled", trip });
+
+    res.json({ message: "✅ Reservation cancelled", trip });
   } catch (err) {
     console.error("❌ Cancel failed:", err);
     res.status(500).json({ message: "Server error" });

@@ -51,6 +51,17 @@ const MyRidesTab = () => {
       <RideResults
         trips={myRides}
         onCancel={async (trip) => {
+          const hoursLeft = Math.floor(
+            (new Date(trip.date) - new Date()) / (1000 * 60 * 60)
+          );
+
+          if (hoursLeft < 24) {
+            toast.warn(
+              "🚫 You can only cancel at least 24 hours before the trip."
+            );
+            return;
+          }
+
           try {
             const res = await axios.post(
               `${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/cancel`,

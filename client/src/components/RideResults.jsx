@@ -88,44 +88,38 @@ const RideResults = ({
                 <span className="block mt-2 text-blue-500 text-sm font-medium">
                   🔒 Login to reserve a ride
                 </span>
-              ) : hasReserved ? (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (onCancel) onCancel(trip);
-                  }}
-                  className="mt-2 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded text-sm font-medium"
-                >
-                  ❌ Cancel Reservation
-                </button>
-              ) : seatsLeft > 0 && onReserve ? (
-                <>
-                  <input
-                    type="number"
-                    min="1"
-                    max={seatsLeft}
-                    defaultValue={1}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      (trip.selectedSeats = parseInt(e.target.value))
-                    }
-                    className="border mt-2 px-2 py-1 w-full rounded text-sm"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onReserve(trip, trip.selectedSeats || 1);
-                    }}
-                    className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
-                  >
-                    📩 Reserve {trip.selectedSeats || 1} Seat
-                    {(trip.selectedSeats || 1) > 1 ? "s" : ""}
-                  </button>
-                </>
+              ) : onReserve ? (
+                seatsLeft > 0 ? (
+                  <>
+                    <input
+                      type="number"
+                      min="1"
+                      max={seatsLeft}
+                      defaultValue={1}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) =>
+                        (trip.selectedSeats = parseInt(e.target.value))
+                      }
+                      className="border mt-2 px-2 py-1 w-full rounded text-sm"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onReserve(trip, trip.selectedSeats || 1);
+                      }}
+                      className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
+                    >
+                      📩 Reserve {trip.selectedSeats || 1} Seat
+                      {(trip.selectedSeats || 1) > 1 ? "s" : ""}
+                    </button>
+                  </>
+                ) : (
+                  <span className="block mt-2 text-red-500 font-medium">
+                    Fully booked
+                  </span>
+                )
               ) : (
-                <span className="block mt-2 text-red-500 font-medium">
-                  Fully booked
-                </span>
+                <></> // no cancel/reserve shown if not passed
               )}
 
               {onSelectTrip && (
