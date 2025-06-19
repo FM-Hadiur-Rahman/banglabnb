@@ -32,12 +32,18 @@ const RideResults = ({
               (p.user === user?._id || p.user?._id === user?._id) &&
               p.status !== "cancelled"
           );
+          const isCancelled = trip.status === "cancelled";
 
           return (
             <Link
               key={trip._id}
-              to={`/trips/${trip._id}`}
-              className="block border rounded-lg shadow hover:shadow-lg hover:border-green-500 transition-all bg-white overflow-hidden group relative"
+              to={isCancelled ? "#" : `/trips/${trip._id}`}
+              onClick={(e) => isCancelled && e.preventDefault()}
+              className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative ${
+                isCancelled
+                  ? "opacity-50 pointer-events-none cursor-not-allowed"
+                  : "hover:shadow-lg hover:border-green-500"
+              }`}
             >
               {trip.location?.coordinates && (
                 <iframe
@@ -45,6 +51,13 @@ const RideResults = ({
                   className="w-full h-32 object-cover"
                   src={`https://maps.google.com/maps?q=${trip.location.coordinates[1]},${trip.location.coordinates[0]}&z=12&output=embed`}
                 ></iframe>
+              )}
+
+              {/* Cancelled ribbon */}
+              {isCancelled && (
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded shadow-md z-10">
+                  🚫 Cancelled
+                </div>
               )}
 
               <div className="p-4 space-y-2">
@@ -95,6 +108,11 @@ const RideResults = ({
                 <p className="text-sm text-gray-600">
                   <strong>Status:</strong>{" "}
                   <span
+                    title={
+                      trip.status === "cancelled"
+                        ? "This trip has been cancelled and is no longer active"
+                        : ""
+                    }
                     className={`font-medium ${
                       trip.status === "cancelled"
                         ? "text-red-500"
