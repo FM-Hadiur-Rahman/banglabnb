@@ -101,6 +101,24 @@ const ListingDetailPage = () => {
         <div className="mt-8 space-y-4">
           <ReviewList listingId={listing._id} />
         </div>
+        <div className="mt-10 border-t pt-6">
+          {loadingTrips ? (
+            <p className="text-center text-gray-500 mt-6">
+              🔄 Finding nearby rides...
+            </p>
+          ) : suggestedTrips.length > 0 ? (
+            <>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                🚗 Suggested Rides
+              </h3>
+              <RideResults trips={suggestedTrips} />
+            </>
+          ) : (
+            <p className="text-center text-gray-400 mt-6 italic">
+              😔 No rides found for this destination.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Right: Booking Form */}
@@ -136,22 +154,6 @@ const ListingDetailPage = () => {
             />
           </div>
         </div>
-      )}
-      {loadingTrips ? (
-        <p className="text-center text-gray-500 mt-6">
-          🔄 Finding nearby rides...
-        </p>
-      ) : suggestedTrips.length > 0 ? (
-        <div className="mt-10 border-t pt-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
-            🚗 Suggested Rides
-          </h3>
-          <RideResults trips={suggestedTrips} />
-        </div>
-      ) : (
-        <p className="text-center text-gray-400 mt-6 italic">
-          😔 No rides found for this destination.
-        </p>
       )}
     </div>
   );
