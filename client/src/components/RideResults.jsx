@@ -79,6 +79,13 @@ const RideResults = ({
               <p className="text-sm text-gray-600">
                 <strong>Time:</strong> {trip.time}
               </p>
+              {trip.reservedSeats && (
+                <p className="text-sm text-gray-600">
+                  <strong>Reserved:</strong> {trip.reservedSeats} seat
+                  {trip.reservedSeats > 1 ? "s" : ""}
+                </p>
+              )}
+
               <p className="text-sm text-gray-600">
                 <strong>Seats:</strong> {seatsLeft} of {trip.totalSeats}{" "}
                 available
