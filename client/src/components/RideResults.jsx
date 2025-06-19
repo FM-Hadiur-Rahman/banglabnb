@@ -21,6 +21,12 @@ const RideResults = ({
         const isVerified = trip.driverId?.verified;
         const vehicleEmoji = trip.vehicleType === "car" ? "🚗" : "🏍️";
 
+        const reservedSeats = trip.passengers?.reduce(
+          (sum, p) => sum + (p.status !== "cancelled" ? p.seats || 1 : 0),
+          0
+        );
+        const seatsLeft = (trip.totalSeats || 0) - reservedSeats;
+
         const hasReserved = trip.passengers?.some(
           (p) =>
             (p.user === user?._id || p.user?._id === user?._id) &&
@@ -33,7 +39,6 @@ const RideResults = ({
             to={`/trips/${trip._id}`}
             className="block border rounded-lg shadow hover:shadow-lg hover:border-green-500 transition-all bg-white overflow-hidden group"
           >
-            {/* Map preview */}
             {trip.location?.coordinates && (
               <iframe
                 title="Mini Map"
@@ -43,7 +48,6 @@ const RideResults = ({
             )}
 
             <div className="p-4 space-y-2">
-              {/* Header row */}
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-gray-800">
                   {trip.from} ➡ {trip.to}
@@ -53,7 +57,6 @@ const RideResults = ({
                 </span>
               </div>
 
-              {/* Vehicle badge */}
               <div className="flex gap-2 flex-wrap text-sm">
                 <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
                   {vehicleEmoji} {trip.vehicleType.toUpperCase()}
@@ -70,7 +73,6 @@ const RideResults = ({
                 )}
               </div>
 
-              {/* Basic info */}
               <p className="text-sm text-gray-600">
                 <strong>Date:</strong> {trip.date.slice(0, 10)}
               </p>
@@ -78,15 +80,10 @@ const RideResults = ({
                 <strong>Time:</strong> {trip.time}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Seats:</strong>{" "}
-                {trip.totalSeats -
-                  trip.passengers
-                    ?.filter((p) => p.status !== "cancelled")
-                    .reduce((sum, p) => sum + (p.seats || 1), 0)}{" "}
-                of {trip.totalSeats} available
+                <strong>Seats:</strong> {seatsLeft} of {trip.totalSeats}{" "}
+                available
               </p>
 
-              {/* Booking Controls */}
               {hasReserved ? (
                 <button
                   onClick={(e) => {
@@ -97,12 +94,12 @@ const RideResults = ({
                 >
                   ❌ Cancel Reservation
                 </button>
-              ) : trip.totalSeats > 0 && onReserve ? (
+              ) : seatsLeft > 0 && onReserve ? (
                 <>
                   <input
                     type="number"
                     min="1"
-                    max={trip.totalSeats}
+                    max={seatsLeft}
                     defaultValue={1}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) =>
@@ -126,6 +123,7 @@ const RideResults = ({
                   Fully booked
                 </span>
               )}
+
               {onSelectTrip && (
                 <button
                   onClick={(e) => {

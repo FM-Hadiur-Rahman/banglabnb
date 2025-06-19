@@ -5,7 +5,7 @@ const Booking = require("../models/Booking");
 const sendEmail = require("../utils/sendEmail");
 
 exports.createCombinedBooking = async (req, res) => {
-  const { listingId, dateFrom, dateTo, guests, selectedTripId } = req.body;
+  const { listingId, dateFrom, dateTo, guests, tripId } = req.body;
 
   try {
     // ❗ Get the listing first (after destructuring)
@@ -22,8 +22,8 @@ exports.createCombinedBooking = async (req, res) => {
       price: 0,
       paymentStatus: "pending",
       status: "pending",
-      combined: !!selectedTripId,
-      tripId: selectedTripId || null,
+      tripId: tripId || null,
+      combined: !!tripId,
     });
     await booking.save();
 
@@ -31,8 +31,8 @@ exports.createCombinedBooking = async (req, res) => {
     let tripFare = 0;
 
     // 2. Optional: Trip Reservation
-    if (selectedTripId) {
-      trip = await Trip.findById(selectedTripId);
+    if (tripId) {
+      trip = await Trip.findById(tripId);
       if (!trip) return res.status(404).json({ message: "Trip not found" });
 
       const reservedSeats = trip.passengers.reduce(
@@ -66,7 +66,7 @@ exports.createCombinedBooking = async (req, res) => {
     // 4. Return data for payment initiation
     res.json({
       bookingId: booking._id,
-      tripId: selectedTripId || null,
+      tripId: tripId || null,
       amount: totalAmount,
       breakdown: {
         staySubtotal,
