@@ -18,6 +18,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const tripPaymentRoutes = require("./routes/tripPayment");
+const bannerRoutes = require("./routes/banner");
 
 dotenv.config();
 const app = express();
@@ -67,6 +68,8 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/trip-payment", tripPaymentRoutes);
 app.use("/api/combined-bookings", require("./routes/combinedBooking"));
 app.use("/api/combined-payment", require("./routes/combinedPayment"));
+app.use("/api/banners", bannerRoutes);
+app.use("/api/upload", require("./routes/upload"));
 
 app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://banglabnb.com");

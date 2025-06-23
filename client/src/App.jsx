@@ -70,6 +70,7 @@ import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 import ErrorBoundary from "./components/ErrorBoundary";
 import TripDetailPage from "./pages/TripDetailPage";
 import TripPaymentSuccess from "./pages/TripPaymentSuccess";
+import AdminBanners from "./pages/AdminBanners";
 
 function App() {
   return (
@@ -341,6 +342,7 @@ function App() {
             path="/trip-payment-success"
             element={<TripPaymentSuccess />}
           />
+          <Route path="/admin/banners" element={<AdminBanners />} />
         </Route>
       </Routes>
     </Router>

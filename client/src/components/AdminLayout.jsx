@@ -52,6 +52,7 @@ const AdminLayout = ({ children }) => {
           >
             ⏰ Overdue Payouts
           </Link>
+          <Link to="/admin/banners">🖼 Banners</Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>
