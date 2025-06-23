@@ -32,12 +32,12 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
       {bannerImages.map((img, index) => (
         <div key={index}>
           <div
-            className="h-[70vh] bg-cover bg-center flex flex-col items-center justify-center text-white text-center relative"
+            className="min-h-[60vh] md:h-[80vh] bg-cover bg-center flex flex-col items-center justify-center text-white text-center relative px-4 sm:px-6 md:px-12"
             style={{ backgroundImage: `url(${img})` }}
           >
             <div className="absolute inset-0 bg-black bg-opacity-50" />
             <div className="z-10 px-4">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <h1 className="text-base sm:text-lg md:text-xl mb-6">
                 Experience Bangladesh Like Never Before
               </h1>
               <p className="text-lg md:text-xl mb-6">
@@ -61,7 +61,7 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
               </div>
 
               {/* Stay/Ride Toggle */}
-              <div className="flex justify-center gap-4 mt-4">
+              <div className="flex justify-center gap-4 mt-4 mb-4">
                 <button
                   onClick={() => setActiveTab("stay")}
                   className={`px-4 py-2 rounded-full ${
