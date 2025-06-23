@@ -37,7 +37,7 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
           >
             <div className="absolute inset-0 bg-black bg-opacity-50" />
             <div className="z-10 px-4">
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4">
+              <h1 className="text-3xl sm:text-xl md:text-4xl font-bold mb-4">
                 Experience Bangladesh Like Never Before
               </h1>
               <p className="text-lg md:text-xl mb-6">
