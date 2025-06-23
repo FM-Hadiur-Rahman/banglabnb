@@ -8,7 +8,7 @@ export default function AdminBanners() {
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get("/api/upload");
+      const res = await axios.get("/api/banners");
       setBanners(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch banners:", err);
