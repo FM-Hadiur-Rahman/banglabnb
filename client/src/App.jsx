@@ -342,7 +342,14 @@ function App() {
             path="/trip-payment-success"
             element={<TripPaymentSuccess />}
           />
-          <Route path="/admin/banners" element={<AdminBanners />} />
+          <Route
+            path="/admin/banners"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminBanners />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>
