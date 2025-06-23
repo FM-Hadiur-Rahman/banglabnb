@@ -109,35 +109,8 @@ const Home = () => {
   return (
     <div>
       {/* Hero */}
-      <HeroBanner />
 
-      {/* Tabs */}
-      <section className="bg-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => setActiveTab("stay")}
-              className={`px-4 py-2 rounded-full ${
-                activeTab === "stay"
-                  ? "bg-green-600 text-white"
-                  : "bg-white border"
-              }`}
-            >
-              🛏️ Stay
-            </button>
-            <button
-              onClick={() => setActiveTab("ride")}
-              className={`px-4 py-2 rounded-full ${
-                activeTab === "ride"
-                  ? "bg-green-600 text-white"
-                  : "bg-white border"
-              }`}
-            >
-              🚗 Ride
-            </button>
-          </div>
-        </div>
-      </section>
+      <HeroBanner activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Search Section */}
       <section className="py-8 bg-gray-100">
