@@ -1,5 +1,13 @@
-// controllers/bannerController.js
 const Banner = require("../models/Banner");
+
+exports.getBanners = async (req, res) => {
+  try {
+    const banners = await Banner.find().sort({ _id: -1 });
+    res.json(banners); // ✅ Must return an array
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.addBanner = async (req, res) => {
   const { imageUrl, caption, link } = req.body;

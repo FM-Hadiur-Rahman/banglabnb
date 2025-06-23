@@ -1,7 +1,7 @@
 // routes/upload.js
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/cloudinaryMulter"); // uses multer-storage-cloudinary
+const upload = require("../middleware/cloudinaryUpload"); // uses multer-storage-cloudinary
 
 router.post("/banner", upload.single("file"), (req, res) => {
   try {

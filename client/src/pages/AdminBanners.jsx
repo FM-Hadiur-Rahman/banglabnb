@@ -7,13 +7,18 @@ export default function AdminBanners() {
   const [form, setForm] = useState({ imageUrl: "", caption: "", link: "" });
 
   useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await axios.get("/api/banners");
+        setBanners(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("❌ Failed to fetch banners:", err);
+        toast.error("Could not load banners");
+      }
+    };
     fetchBanners();
   }, []);
 
-  const fetchBanners = async () => {
-    const res = await axios.get("/api/banners");
-    setBanners(res.data);
-  };
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
