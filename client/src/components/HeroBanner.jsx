@@ -12,7 +12,7 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
 
   useEffect(() => {
     axios
-      .get("/api/banners")
+      .get(`${import.meta.env.VITE_API_URL}/api/banners`)
       .then((res) => setBanners(res.data))
       .catch((err) => console.error("❌ Failed to fetch banners", err));
   }, []);

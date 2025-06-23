@@ -8,7 +8,9 @@ export default function AdminBanners() {
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get("/api/banners");
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/banners`
+      );
       setBanners(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch banners:", err);
@@ -28,12 +30,16 @@ export default function AdminBanners() {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("/api/upload/banner", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/banners`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setForm((prev) => ({ ...prev, imageUrl: res.data.imageUrl }));
       toast.success("✅ Image uploaded");
     } catch (err) {
@@ -44,7 +50,7 @@ export default function AdminBanners() {
 
   const handleAdd = async () => {
     try {
-      await axios.post("/api/banners", form, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/banners`, form, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       toast.success("✅ Banner added");
@@ -57,7 +63,7 @@ export default function AdminBanners() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/banners/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/banners/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       toast.success("🗑 Deleted");
