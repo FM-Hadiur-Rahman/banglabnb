@@ -5,9 +5,13 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const bannerImages = [
-  "/images/beach.jpg",
-  "/images/forest.jpg",
-  "/images/boats.jpg",
+  "/banner1.jpg",
+  "/banner2.jpg",
+  "/banner3.jpg",
+  "/banner4.jpg",
+  "/banner5.jpg",
+  "/banner6.jpg",
+  "/banner7.jpg",
 ];
 
 const HeroBanner = ({ activeTab, setActiveTab }) => {
