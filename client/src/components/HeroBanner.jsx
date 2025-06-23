@@ -36,13 +36,13 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
           <img
             src={banner.imageUrl}
             alt={banner.caption}
-            className="w-full h-[60vh] md:h-[70vh] object-cover"
+            className="w-full h sm:h-60 md:h-70 lg:h-75 xl:h-80 object-cover"
           />
 
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white text-center px-4 sm:px-6 md:px-12">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
               {banner.caption || "Experience Bangladesh Like Never Before"}
             </h1>
 
