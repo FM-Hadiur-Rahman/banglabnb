@@ -33,7 +33,12 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
         <div key={index}>
           <div
             className="min-h-[60vh] md:h-[70vh] bg-cover bg-center flex flex-col items-center justify-center text-white text-center relative px-4 sm:px-6 md:px-12"
-            style={{ backgroundImage: `url(${img})` }}
+            style={{
+              backgroundImage: `url(${img})`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
           >
             <div className="absolute inset-0 bg-black bg-opacity-50" />
             <div className="z-10 px-4">
