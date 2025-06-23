@@ -31,7 +31,7 @@ export default function AdminBanners() {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/banners`,
+        `${import.meta.env.VITE_API_URL}/api/upload/banner`,
         formData,
         {
           headers: {
