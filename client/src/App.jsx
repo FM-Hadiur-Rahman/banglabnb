@@ -71,6 +71,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import TripDetailPage from "./pages/TripDetailPage";
 import TripPaymentSuccess from "./pages/TripPaymentSuccess";
 import AdminBanners from "./pages/AdminBanners";
+import TermsPage from "./components/TermsPage";
 
 function App() {
   return (
@@ -350,6 +351,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/terms" element={<TermsPage />} />
         </Route>
       </Routes>
     </Router>
