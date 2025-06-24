@@ -74,13 +74,9 @@ const Footer = () => {
 
           {/* 📱 App Badges */}
           <div className="flex gap-2 mt-4">
+            <img src="/icon.png" alt="Get it on Google Play" className="h-10" />
             <img
-              src="/playstore-badge.png"
-              alt="Get it on Google Play"
-              className="h-10"
-            />
-            <img
-              src="/appstore-badge.png"
+              src="/icon.png"
               alt="Download on the App Store"
               className="h-10"
             />
