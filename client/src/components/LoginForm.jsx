@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { logError } from "../utils/logError";
 
 import axios from "axios";
 
@@ -58,7 +59,7 @@ const LoginForm = () => {
       );
     } catch (err) {
       toast.error("❌ Login failed. Please check your credentials.");
-      console.error(err);
+      logError(err, "LoginForm.submit", formData.email);
     } finally {
       setIsLoading(false);
     }

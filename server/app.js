@@ -4,6 +4,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db.js");
 
+const logRoute = require("./routes/log");
+
 const authRoutes = require("./routes/auth");
 const listingRoutes = require("./routes/listing");
 const bookingRoutes = require("./routes/booking");
@@ -51,6 +53,8 @@ app.get("/", (req, res) => {
 });
 
 // ✅ Mount routes
+app.use("/api/logs", logRoute);
+
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/bookings", bookingRoutes);

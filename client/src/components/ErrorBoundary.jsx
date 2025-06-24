@@ -1,22 +1,27 @@
-// ErrorBoundary.jsx
+// src/components/ErrorBoundary.jsx
 import React from "react";
+import { logError } from "../utils/logError";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, errorInfo: null };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, errorInfo: error };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    logError(error, "Global React Error");
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="bg-red-100 text-red-800 p-4 rounded">
-          <h2>Something went wrong.</h2>
-          <pre>{this.state.errorInfo?.toString()}</pre>
+        <div className="p-10 text-center text-red-600">
+          <h1 className="text-2xl font-bold">⚠️ Something went wrong.</h1>
+          <p>Please refresh the page or try again later.</p>
         </div>
       );
     }
