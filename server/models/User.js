@@ -91,6 +91,10 @@ const userSchema = new mongoose.Schema({
     },
     timestamp: Date,
   },
+  agreedToTerms: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Hash password before saving

@@ -68,6 +68,7 @@ exports.registerStep1 = async (req, res) => {
           seatsOffered,
         },
       }),
+      agreedToTerms: req.body.agreedToTerms || false,
     });
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`;

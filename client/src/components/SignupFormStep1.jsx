@@ -26,6 +26,7 @@ const SignupFormStep1 = () => {
     licenseNumber: "",
     vehicleType: "",
     seats: "",
+    agreedToTerms: false,
   });
 
   const [phone, setPhone] = useState("");
@@ -89,6 +90,10 @@ const SignupFormStep1 = () => {
 
     if (formData.password !== formData.confirmPassword) {
       setMessage("❌ Passwords do not match.");
+      return;
+    }
+    if (!formData.agreedToTerms) {
+      setMessage("❌ You must agree to the Terms and Policies to continue.");
       return;
     }
 
@@ -238,6 +243,36 @@ const SignupFormStep1 = () => {
             📍 Selected: {formData.location.address}
           </p>
         )}
+        <div className="flex items-start gap-2 mt-4">
+          <input
+            type="checkbox"
+            id="terms"
+            required
+            className="mt-1"
+            checked={formData.agreedToTerms}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                agreedToTerms: e.target.checked,
+              }))
+            }
+          />
+          <label htmlFor="terms" className="text-sm text-gray-700">
+            I agree to the{" "}
+            <Link to="/terms" className="text-blue-600 underline">
+              Terms & Conditions
+            </Link>
+            ,{" "}
+            <Link to="/privacy" className="text-blue-600 underline">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link to="/refund-policy" className="text-blue-600 underline">
+              Refund Policy
+            </Link>
+            .
+          </label>
+        </div>
 
         <button
           type="submit"
