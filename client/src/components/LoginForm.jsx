@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import axios from "axios";
 
@@ -40,7 +41,8 @@ const LoginForm = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      setMessage("✅ Logged in successfully!");
+      toast.success("✅ Logged in successfully!");
+
       setFormData({ email: "", password: "" });
 
       // ✅ Redirect based on role
@@ -55,12 +57,29 @@ const LoginForm = () => {
           : "/dashboard"
       );
     } catch (err) {
-      alert("❌ Login failed. Please check your credentials.");
+      toast.error("❌ Login failed. Please check your credentials.");
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (token && user?.isVerified) {
+      const role = user.role || "user";
+      navigate(
+        role === "admin"
+          ? "/admin/dashboard"
+          : role === "host"
+          ? "/host/dashboard"
+          : role === "driver"
+          ? "/dashboard/driver"
+          : "/dashboard"
+      );
+    }
+  }, []);
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
