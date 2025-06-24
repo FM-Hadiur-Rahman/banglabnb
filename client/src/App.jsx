@@ -72,6 +72,8 @@ import TripDetailPage from "./pages/TripDetailPage";
 import TripPaymentSuccess from "./pages/TripPaymentSuccess";
 import AdminBanners from "./pages/AdminBanners";
 import TermsPage from "./components/TermsPage";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import RefundPolicy from "./components/RefundPolicy";
 
 function App() {
   return (
@@ -352,6 +354,8 @@ function App() {
             }
           />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
         </Route>
       </Routes>
     </Router>
