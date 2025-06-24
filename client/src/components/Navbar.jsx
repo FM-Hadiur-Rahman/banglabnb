@@ -228,7 +228,7 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {mobileOpen && (
-        <div className="absolute top-full left-4 right-4 mt-2 z-50 bg-white rounded-lg shadow-lg p-4 sm:hidden space-y-2 text-gray-700">
+        <div className="absolute top-full left-4 right-4 mt-2 z-50 bg-white rounded-lg shadow-lg p-4 sm:hidden space-y-2 text-gray-700 max-h-[80vh] overflow-y-auto">
           {isLoggedIn ? (
             <>
               <div className="flex items-center space-x-2 border-b pb-2 mb-2">
