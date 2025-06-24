@@ -74,6 +74,7 @@ import AdminBanners from "./pages/AdminBanners";
 import TermsPage from "./components/TermsPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import RefundPolicy from "./components/RefundPolicy";
+import AdminLogs from "./pages/adminLogs";
 
 function App() {
   return (
@@ -331,6 +332,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/admin/logs" element={<AdminLogs />} />
           <Route path="/trip-search" element={<TripSearchPage />} />
           <Route
             path="/dashboard/driver/trips/new"
