@@ -67,7 +67,6 @@ import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
 import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 
-import ErrorBoundary from "./components/ErrorBoundary";
 import TripDetailPage from "./pages/TripDetailPage";
 import TripPaymentSuccess from "./pages/TripPaymentSuccess";
 import AdminBanners from "./pages/AdminBanners";
@@ -84,14 +83,7 @@ function App() {
         {/* Main Layout Wrapper */}
         <Route path="/" element={<MainLayout />}>
           {/* Public Routes */}
-          <Route
-            index
-            element={
-              <ErrorBoundary>
-                <Home />
-              </ErrorBoundary>
-            }
-          />
+          <Route index element={<Home />} />
           <Route path="listings" element={<ListingsPage />} />
           <Route path="listings/:id" element={<ListingDetailPage />} />
           <Route path="login" element={<LoginPage />} />
