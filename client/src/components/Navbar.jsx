@@ -228,10 +228,10 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {mobileOpen && (
-        <div className="sm:hidden mt-2 px-4 pb-3 space-y-2 text-gray-700">
+        <div className="absolute top-full left-4 right-4 mt-2 z-50 bg-white rounded-lg shadow-lg p-4 sm:hidden space-y-2 text-gray-700">
           {isLoggedIn ? (
             <>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 border-b pb-2 mb-2">
                 <img
                   src={user.avatar || "/default-avatar.png"}
                   alt="Avatar"
@@ -247,13 +247,16 @@ const Navbar = () => {
                 </div>
               </div>
 
-              <Link to={getDashboardPath()} className="block">
+              <Link
+                to={getDashboardPath()}
+                className="block hover:text-green-600"
+              >
                 Dashboard
               </Link>
-              <Link to="/my-account" className="block">
+              <Link to="/my-account" className="block hover:text-green-600">
                 My Account
               </Link>
-              <Link to="/notifications" className="block">
+              <Link to="/notifications" className="block hover:text-green-600">
                 🔔 Notifications{" "}
                 {unreadCount > 0 && (
                   <span className="ml-2 text-xs text-red-600 font-semibold">
@@ -262,18 +265,18 @@ const Navbar = () => {
                 )}
               </Link>
               {user.role === "host" && (
-                <Link to="/host/create" className="block">
+                <Link to="/host/create" className="block hover:text-green-600">
                   ➕ Create Listing
                 </Link>
               )}
               {user.role === "user" && (
-                <Link to="/my-bookings" className="block">
+                <Link to="/my-bookings" className="block hover:text-green-600">
                   📅 My Bookings
                 </Link>
               )}
               <button
                 onClick={handleRoleSwitch}
-                className="block text-blue-600"
+                className="block text-left w-full text-blue-600"
               >
                 🔄 Switch Role
               </button>
@@ -282,17 +285,17 @@ const Navbar = () => {
                   localStorage.clear();
                   navigate("/login");
                 }}
-                className="block text-red-600"
+                className="block text-left w-full text-red-600"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block">
+              <Link to="/login" className="block hover:text-green-600">
                 Login
               </Link>
-              <Link to="/register" className="block">
+              <Link to="/register" className="block hover:text-green-600">
                 Register
               </Link>
             </>
