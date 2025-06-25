@@ -85,8 +85,12 @@ const ListingDetailPage = () => {
                 onClick={() => setSelectedImage(url)}
               />
             ))}
-          {listing.images?.length % 2 !== 0 && listing.images?.length < 6 && (
-            <div className="w-full h-52 rounded overflow-hidden">
+          {listing.images?.length < 10 && (
+            <div
+              className={`w-full h-52 rounded overflow-hidden ${
+                listing.images.length % 2 === 0 ? "col-span-2" : ""
+              }`}
+            >
               <iframe
                 title="Listing Location"
                 width="100%"
