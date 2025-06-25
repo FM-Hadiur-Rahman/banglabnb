@@ -135,6 +135,24 @@ const ListingDetailPage = () => {
             🛏️+🚗 Stay + Ride
           </button>
         </div>
+        {/* 📝 Description & Rules */}
+        <div className="mt-6 space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-1">📝 Description</h2>
+            <p className="text-gray-700 whitespace-pre-line">
+              {listing.description}
+            </p>
+          </div>
+
+          {listing.houseRules && (
+            <div>
+              <h2 className="text-xl font-semibold mb-1">📜 House Rules</h2>
+              <p className="text-gray-700 whitespace-pre-line">
+                {listing.houseRules}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* ⭐ Reviews */}
         <div className="mt-8 space-y-4">

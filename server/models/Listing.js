@@ -50,6 +50,14 @@ const listingSchema = new mongoose.Schema(
       required: true,
       enum: ["Hotel", "Resort", "Guest House", "Personal Property", "Other"],
     },
+    description: {
+      type: String,
+      default: "",
+    },
+    houseRules: {
+      type: String,
+      default: "",
+    },
 
     hostId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -97,6 +97,8 @@ const CreateListingPage = () => {
     formData.append("division", form.division);
     formData.append("district", form.district);
     formData.append("roomType", form.roomType);
+    formData.append("description", form.description || "");
+    formData.append("houseRules", form.houseRules || "");
     formData.append("location", JSON.stringify(form.location));
     formData.append("hostId", user._id);
 
@@ -194,6 +196,21 @@ const CreateListingPage = () => {
         <option value="Personal Property">Personal Property</option>
         <option value="Other">Other</option>
       </select>
+      <textarea
+        name="description"
+        placeholder="Listing Description"
+        onChange={handleChange}
+        className="w-full p-2 border rounded"
+        rows={4}
+      />
+
+      <textarea
+        name="houseRules"
+        placeholder="House Rules (e.g., No smoking, Check-out by 12pm)"
+        onChange={handleChange}
+        className="w-full p-2 border rounded"
+        rows={3}
+      />
 
       {/* Price, Guests, Auto Detect */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
