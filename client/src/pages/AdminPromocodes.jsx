@@ -122,7 +122,8 @@ const AdminPromocodes = () => {
           >
             <option value="stay">Stay</option>
             <option value="ride">Ride</option>
-            <option value="both">Both</option>
+            <option value="combined">Combined</option>
+            <option value="all">All</option>
           </select>
           <input
             type="date"
