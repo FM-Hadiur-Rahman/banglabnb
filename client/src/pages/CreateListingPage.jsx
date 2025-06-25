@@ -198,7 +198,7 @@ const CreateListingPage = () => {
       </select>
       <textarea
         name="description"
-        placeholder="Listing Description"
+        placeholder="e.g. A cozy cottage near the tea gardens of Sylhet with free breakfast and Wi-Fi."
         onChange={handleChange}
         className="w-full p-2 border rounded"
         rows={4}
@@ -206,7 +206,7 @@ const CreateListingPage = () => {
 
       <textarea
         name="houseRules"
-        placeholder="House Rules (e.g., No smoking, Check-out by 12pm)"
+        placeholder="e.g. No smoking, Check-out by 11am, No loud music after 10pm"
         onChange={handleChange}
         className="w-full p-2 border rounded"
         rows={3}
