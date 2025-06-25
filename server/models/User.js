@@ -101,9 +101,8 @@ const userSchema = new mongoose.Schema({
     uppercase: true,
     default: function () {
       return (
-        "BNB-" +
-        this.name.split(" ")[0].toUpperCase() +
-        Math.floor(100 + Math.random() * 900)
+        this.name?.slice(0, 3).toUpperCase() +
+        crypto.randomBytes(3).toString("hex").toUpperCase()
       );
     },
   },

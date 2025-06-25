@@ -11,7 +11,7 @@ const MyReferrals = () => {
   const fetchReferrals = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/my-referral`,
+        `${import.meta.env.VITE_API_URL}/api/auth/my-referrals`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
