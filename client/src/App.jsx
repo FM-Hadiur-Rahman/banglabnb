@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Navigate } from "react-router-dom";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout";
@@ -92,6 +93,12 @@ function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterStep1 />} />
           <Route path="register/step2" element={<RegisterStep2 />} />
+          <Route
+            path="/signup"
+            element={
+              <Navigate to={`/register?${window.location.search}`} replace />
+            }
+          />
           <Route path="verify-email" element={<VerifyEmail />} />
           <Route path="/verify-phone" element={<VerifyPhonePage />} />
           <Route path="/emergency" element={<EmergencyInfoPage />} />
