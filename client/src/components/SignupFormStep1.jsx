@@ -6,6 +6,7 @@ import "react-phone-input-2/lib/style.css";
 
 import MapboxAutocomplete from "./MapboxAutocomplete";
 import LocationSelector from "./LocationSelector";
+import { useEffect } from "react";
 
 const SignupFormStep1 = () => {
   const navigate = useNavigate();
@@ -31,6 +32,14 @@ const SignupFormStep1 = () => {
 
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if (ref) {
+      setFormData((prev) => ({ ...prev, referralCode: ref.toUpperCase() }));
+    }
+  }, []);
 
   const extractAdminFromMapbox = async (lon, lat) => {
     try {
@@ -171,6 +180,14 @@ const SignupFormStep1 = () => {
           value={formData.confirmPassword}
           onChange={handleChange}
           required
+        />
+        <input
+          type="text"
+          name="referralCode"
+          placeholder="Referral Code (optional)"
+          className="w-full px-4 py-2 border rounded"
+          value={formData.referralCode || ""}
+          onChange={handleChange}
         />
 
         <select
