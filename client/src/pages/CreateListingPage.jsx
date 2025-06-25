@@ -13,6 +13,8 @@ const CreateListingPage = () => {
     division: "",
     district: "",
     roomType: "",
+    description: "",
+    houseRules: "",
     location: null,
   });
   const [images, setImages] = useState([]);
