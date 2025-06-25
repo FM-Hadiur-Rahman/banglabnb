@@ -10,6 +10,13 @@ import { useEffect } from "react";
 
 const SignupFormStep1 = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && localStorage.getItem("token")) {
+      navigate("/"); // or "/dashboard"
+    }
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
