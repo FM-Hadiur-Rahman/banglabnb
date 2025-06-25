@@ -21,10 +21,25 @@ const MyReferrals = () => {
       toast.error("❌ Failed to load referrals");
     }
   };
-
   useEffect(() => {
-    fetchReferrals();
-    setReferralCode(user?.referralCode);
+    const fetchUserAndReferrals = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/auth/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const currentUser = res.data.user;
+        setReferralCode(currentUser.referralCode); // ✅ now always fresh
+      } catch (err) {
+        console.warn("Failed to fetch user data");
+      }
+
+      fetchReferrals();
+    };
+
+    fetchUserAndReferrals();
   }, []);
 
   return (
