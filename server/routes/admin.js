@@ -502,13 +502,15 @@ router.get("/promocode", protect, authorize("admin"), async (req, res) => {
 });
 
 // Create
-router.post("/", protect, authorize("admin"), async (req, res) => {
+// Create
+router.post("/promocode", protect, authorize("admin"), async (req, res) => {
   const promo = await PromoCode.create(req.body);
   res.status(201).json(promo);
 });
+
 // Deactivate
 router.patch(
-  "/:id/deactivate",
+  "/promocode/:id/deactivate",
   protect,
   authorize("admin"),
   async (req, res) => {
@@ -522,7 +524,12 @@ router.patch(
 );
 
 // Delete
-router.delete("/:id", protect, authorize("admin"), async (req, res) => {
-  await PromoCode.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
-});
+router.delete(
+  "/promocode/:id",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    await PromoCode.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  }
+);

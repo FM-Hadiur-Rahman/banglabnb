@@ -16,7 +16,7 @@ const AdminPromocodes = () => {
   const fetchCodes = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/promocode`,
+        `${import.meta.env.VITE_API_URL}/api/admin/promocode`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -41,7 +41,7 @@ const AdminPromocodes = () => {
     try {
       setLoading(true);
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/promocode`,
+        `${import.meta.env.VITE_API_URL}/api/admin/promocode`,
         newCode,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -60,7 +60,7 @@ const AdminPromocodes = () => {
   const handleDeactivate = async (id) => {
     try {
       await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/promocode/${id}/deactivate`,
+        `${import.meta.env.VITE_API_URL}/api/admin/promocode/${id}/deactivate`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -77,7 +77,7 @@ const AdminPromocodes = () => {
 
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/promocode/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/promocode/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
