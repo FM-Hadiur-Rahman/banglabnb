@@ -16,6 +16,7 @@ const {
   switchRole,
   resendVerificationEmail,
   getMe,
+  myReferral,
 } = require("../controllers/authController");
 
 router.get("/me", protect, getMe);
@@ -47,5 +48,6 @@ router.get("/verify-token", getUserIdFromToken);
 router.post("/resend-verification", resendVerificationEmail);
 router.post("/send-otp", protect, sendOTP);
 router.post("/verify-otp", protect, verifyOTP);
+router.get("/my-referrals", protect, myReferral);
 
 module.exports = router;

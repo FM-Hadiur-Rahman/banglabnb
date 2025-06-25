@@ -270,16 +270,29 @@ const Navbar = () => {
                 </Link>
               )}
               {user.role === "user" && (
-                <Link to="/my-bookings" className="block hover:text-green-600">
-                  📅 My Bookings
-                </Link>
+                <>
+                  <Link
+                    to="/my-bookings"
+                    className="block hover:text-green-600"
+                  >
+                    📅 My Bookings
+                  </Link>
+                  <Link
+                    to="/my-referrals"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    🎁 My Referrals
+                  </Link>
+                </>
               )}
+
               <button
                 onClick={handleRoleSwitch}
                 className="block text-left w-full text-blue-600"
               >
                 🔄 Switch Role
               </button>
+
               <button
                 onClick={() => {
                   localStorage.clear();

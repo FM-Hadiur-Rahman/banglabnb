@@ -75,6 +75,8 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import RefundPolicy from "./components/RefundPolicy";
 import AdminLogs from "./pages/adminLogs";
 import EmergencyInfoPage from "./pages/EmergencyInfoPage";
+import AdminReferrals from "./pages/AdminReferrals";
+import MyReferralsPage from "./pages/MyReferralPage";
 
 function App() {
   return (
@@ -228,6 +230,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-referrals"
+            element={
+              <ProtectedRoute>
+                <MyReferralsPage />
+              </ProtectedRoute>
+            }
+          />
           {/* Admin Protected Routes */}
           <Route
             path="admin/dashboard"
@@ -328,6 +338,14 @@ function App() {
           />
           <Route path="/admin/logs" element={<AdminLogs />} />
           <Route path="/admin/promocodes" element={<AdminPromocodes />} />
+          <Route
+            path="/admin/referrals"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminReferrals />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/trip-search" element={<TripSearchPage />} />
           <Route
             path="/dashboard/driver/trips/new"

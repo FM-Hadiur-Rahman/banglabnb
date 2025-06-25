@@ -533,3 +533,13 @@ router.delete(
     res.json({ message: "Deleted" });
   }
 );
+router.get("/referrals", protect, authorize("admin"), async (req, res) => {
+  const users = await User.find({ referralCode: { $exists: true } }).select(
+    "name email referralCode referralRewards"
+  );
+  const referred = await User.find({ referredBy: { $exists: true } }).select(
+    "name email referredBy createdAt"
+  );
+
+  res.json({ referrers: users, referred });
+});

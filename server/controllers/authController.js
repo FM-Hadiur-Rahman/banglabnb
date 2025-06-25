@@ -337,3 +337,9 @@ exports.getUserIdFromToken = async (req, res) => {
 
   return res.status(200).json({ userId: user._id });
 };
+exports.myReferral = async (req, res) => {
+  const referrals = await User.find({
+    referredBy: req.user.referralCode,
+  }).select("name email createdAt");
+  res.json({ count: referrals.length, referrals });
+};
