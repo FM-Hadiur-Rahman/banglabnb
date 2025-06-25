@@ -85,6 +85,19 @@ const ListingDetailPage = () => {
                 onClick={() => setSelectedImage(url)}
               />
             ))}
+          {listing.images?.length % 2 !== 0 && listing.images?.length < 6 && (
+            <div className="w-full h-52 rounded overflow-hidden">
+              <iframe
+                title="Listing Location"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                src={`https://www.google.com/maps?q=${listing.location?.coordinates[1]},${listing.location?.coordinates[0]}&z=15&output=embed`}
+              ></iframe>
+            </div>
+          )}
         </div>
 
         {/* 🧾 Listing Details */}
