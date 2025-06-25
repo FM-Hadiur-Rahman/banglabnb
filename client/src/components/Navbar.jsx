@@ -175,6 +175,15 @@ const Navbar = () => {
                       📅 My Bookings
                     </Link>
                   )}
+                  {["user", "host", "driver"].includes(user.role) && (
+                    <Link
+                      to="/my-referrals"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      🎁 My Referrals
+                    </Link>
+                  )}
+
                   <Link
                     to="/wishlist"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -270,20 +279,17 @@ const Navbar = () => {
                 </Link>
               )}
               {user.role === "user" && (
-                <>
-                  <Link
-                    to="/my-bookings"
-                    className="block hover:text-green-600"
-                  >
-                    📅 My Bookings
-                  </Link>
-                  <Link
-                    to="/my-referrals"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    🎁 My Referrals
-                  </Link>
-                </>
+                <Link to="/my-bookings" className="block hover:text-green-600">
+                  📅 My Bookings
+                </Link>
+              )}
+              {["user", "host", "driver"].includes(user.role) && (
+                <Link
+                  to="/my-referrals"
+                  className="block px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  🎁 My Referrals
+                </Link>
               )}
 
               <button
