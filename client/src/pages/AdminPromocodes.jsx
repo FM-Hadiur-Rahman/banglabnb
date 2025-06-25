@@ -7,7 +7,8 @@ const AdminPromocodes = () => {
   const [newCode, setNewCode] = useState({
     code: "",
     discount: 0,
-    type: "stay",
+    type: "flat", // flat or percent
+    for: "stay", // stay, ride, combined, all
     expiresAt: "",
   });
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,7 @@ const AdminPromocodes = () => {
   }, []);
 
   const handleCreate = async () => {
-    if (!newCode.code || !newCode.discount || !newCode.type) {
+    if (!newCode.code || !newCode.discount || !newCode.type || !newCode.for) {
       toast.error("Please fill all required fields.");
       return;
     }
@@ -48,10 +49,17 @@ const AdminPromocodes = () => {
         }
       );
       toast.success("✅ Promo code created!");
-      setNewCode({ code: "", discount: 0, type: "stay", expiresAt: "" });
+      setNewCode({
+        code: "",
+        discount: 0,
+        type: "flat",
+        for: "stay",
+        expiresAt: "",
+      });
       fetchCodes();
     } catch (err) {
       toast.error("❌ Failed to create promo code");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -96,7 +104,7 @@ const AdminPromocodes = () => {
       {/* Create New Promo Code */}
       <div className="border p-4 rounded mb-6 bg-white shadow">
         <h3 className="text-lg font-semibold mb-2">➕ Create New Code</h3>
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-5 gap-4">
           <input
             type="text"
             placeholder="Code"
@@ -108,7 +116,7 @@ const AdminPromocodes = () => {
           />
           <input
             type="number"
-            placeholder="Discount ৳"
+            placeholder="Discount"
             value={newCode.discount}
             onChange={(e) =>
               setNewCode({ ...newCode, discount: Number(e.target.value) })
@@ -118,6 +126,14 @@ const AdminPromocodes = () => {
           <select
             value={newCode.type}
             onChange={(e) => setNewCode({ ...newCode, type: e.target.value })}
+            className="border p-2 rounded"
+          >
+            <option value="flat">Flat (৳)</option>
+            <option value="percent">Percent (%)</option>
+          </select>
+          <select
+            value={newCode.for}
+            onChange={(e) => setNewCode({ ...newCode, for: e.target.value })}
             className="border p-2 rounded"
           >
             <option value="stay">Stay</option>
@@ -151,6 +167,7 @@ const AdminPromocodes = () => {
               <th className="px-4 py-2">Code</th>
               <th className="px-4 py-2">Discount</th>
               <th className="px-4 py-2">Type</th>
+              <th className="px-4 py-2">For</th>
               <th className="px-4 py-2">Expires</th>
               <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2 text-right">Actions</th>
@@ -160,8 +177,11 @@ const AdminPromocodes = () => {
             {codes.map((c) => (
               <tr key={c._id} className="border-b">
                 <td className="px-4 py-2 font-mono">{c.code}</td>
-                <td className="px-4 py-2">৳{c.discount}</td>
+                <td className="px-4 py-2">
+                  {c.type === "percent" ? `${c.discount}%` : `৳${c.discount}`}
+                </td>
                 <td className="px-4 py-2 capitalize">{c.type}</td>
+                <td className="px-4 py-2 capitalize">{c.for}</td>
                 <td className="px-4 py-2">
                   {c.expiresAt?.slice(0, 10) || "—"}
                 </td>
@@ -192,7 +212,7 @@ const AdminPromocodes = () => {
             ))}
             {!codes.length && (
               <tr>
-                <td colSpan="6" className="text-center text-gray-500 py-6">
+                <td colSpan="7" className="text-center text-gray-500 py-6">
                   No promo codes found.
                 </td>
               </tr>
