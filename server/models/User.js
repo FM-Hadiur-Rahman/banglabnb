@@ -95,6 +95,25 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  referralCode: {
+    type: String,
+    unique: true,
+    uppercase: true,
+    default: function () {
+      return (
+        "BNB-" +
+        this.name.split(" ")[0].toUpperCase() +
+        Math.floor(100 + Math.random() * 900)
+      );
+    },
+  },
+  referredBy: {
+    type: String, // stores the referralCode used
+  },
+  referralRewards: {
+    type: Number,
+    default: 0, // e.g., number of successful referrals
+  },
 });
 
 // Hash password before saving

@@ -92,6 +92,41 @@ router.post("/success", async (req, res) => {
 
     const guest = booking.guestId;
     const listing = booking.listingId;
+    // 🎁 Referral reward (after first paid booking)
+    try {
+      const bookingsByGuest = await Booking.countDocuments({
+        guestId: guest._id,
+        paymentStatus: "paid",
+      });
+
+      if (guest.referredBy && bookingsByGuest === 1) {
+        const referrer = await User.findOne({ referralCode: guest.referredBy });
+        if (referrer) {
+          referrer.referralRewards += 1;
+
+          // Optional: Give bonus promo code
+          await PromoCode.create({
+            code: `REF${Date.now()}`,
+            discount: 150,
+            type: "flat",
+            for: "stay",
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            usageLimit: 1,
+          });
+
+          await referrer.save();
+
+          await sendEmail({
+            to: referrer.email,
+            subject: "🎉 Referral Bonus Earned!",
+            html: `<p>Someone used your referral code and completed their first booking. You've earned a reward!</p>`,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Referral logic failed:", e.message);
+    }
+
     const from = new Date(booking.dateFrom).toLocaleDateString();
     const to = new Date(booking.dateTo).toLocaleDateString();
 
