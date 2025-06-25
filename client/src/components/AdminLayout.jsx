@@ -54,6 +54,7 @@ const AdminLayout = ({ children }) => {
           </Link>
           <Link to="/admin/banners">🖼 Banners</Link>
           <Link to="/admin/logs">📨 Logs</Link>
+          <Link to="/admin/promocodes">📨 Promocodes</Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

@@ -11,7 +11,6 @@ import Home from "./pages/Home";
 import ListingsPage from "./pages/ListingsPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 import RegisterStep1 from "./pages/RegisterStep1";
 import RegisterStep2 from "./pages/RegisterStep2";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -66,6 +65,7 @@ import AdminPayouts from "./pages/AdminPayouts";
 import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
 import AdminOverduePayouts from "./pages/AdminOverduePayouts";
+import AdminPromocodes from "./pages/AdminPromocodes";
 
 import TripDetailPage from "./pages/TripDetailPage";
 import TripPaymentSuccess from "./pages/TripPaymentSuccess";
@@ -327,6 +327,7 @@ function App() {
             }
           />
           <Route path="/admin/logs" element={<AdminLogs />} />
+          <Route path="/admin/promocodes" element={<AdminPromocodes />} />
           <Route path="/trip-search" element={<TripSearchPage />} />
           <Route
             path="/dashboard/driver/trips/new"
