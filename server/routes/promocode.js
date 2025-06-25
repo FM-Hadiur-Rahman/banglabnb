@@ -1,39 +1,45 @@
 const express = require("express");
 const router = express.Router();
-const Promocode = require("../models/Promocode");
+const PromoCode = require("../models/PromoCode");
 
+// Get all
 router.post("/validate", async (req, res) => {
-  const { code, type, totalAmount } = req.body;
+  const { code, total, type } = req.body;
 
-  const promo = await Promocode.findOne({ code: code.toUpperCase() });
-  if (!promo) return res.status(404).json({ message: "❌ Invalid promo code" });
+  const promo = await PromoCode.findOne({
+    code: code.toUpperCase(),
+    active: true,
+  });
 
-  if (promo.expiresAt && promo.expiresAt < Date.now())
-    return res.status(400).json({ message: "⚠️ Promo code expired" });
-
-  if (promo.maxUses && promo.usedCount >= promo.maxUses)
-    return res
-      .status(400)
-      .json({ message: "⚠️ Promo code usage limit reached" });
-
-  if (promo.applicableTo !== "both" && promo.applicableTo !== type)
-    return res
-      .status(400)
-      .json({ message: `⚠️ Not applicable to ${type} bookings` });
-
-  if (totalAmount < promo.minBookingAmount)
-    return res
-      .status(400)
-      .json({
-        message: `Minimum booking amount is ৳${promo.minBookingAmount}`,
-      });
-
-  let discount = promo.amount;
-  if (promo.discountType === "percent") {
-    discount = Math.round((promo.amount / 100) * totalAmount);
+  if (!promo) {
+    return res.status(400).json({ message: "❌ Invalid promo code" });
   }
 
-  return res.json({ success: true, discount, promoId: promo._id });
+  if (promo.expiresAt && promo.expiresAt < new Date()) {
+    return res.status(400).json({ message: "❌ Promo expired" });
+  }
+
+  if (promo.for !== "all" && promo.for !== type) {
+    return res
+      .status(400)
+      .json({ message: "❌ Not valid for this booking type" });
+  }
+
+  if (promo.minAmount && total < promo.minAmount) {
+    return res.status(400).json({
+      message: `Minimum ৳${promo.minAmount} required to apply this code`,
+    });
+  }
+
+  let discountAmount =
+    promo.type === "flat"
+      ? promo.discount
+      : Math.round((promo.discount / 100) * total);
+
+  if (promo.maxDiscount)
+    discountAmount = Math.min(discountAmount, promo.maxDiscount);
+
+  res.json({ discount: discountAmount, promoId: promo._id });
 });
 
 module.exports = router;

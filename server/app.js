@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 
 // ✅ Mount routes
 app.use("/api/logs", logRoute);
-app.use("/api/logs", adminLogRoutes);
+app.use("/api/admin/logs", adminLogRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);

@@ -6,7 +6,7 @@ const AdminLogs = () => {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/api/logs`, {
+      .get(`${import.meta.env.VITE_API_URL}/api/admin/logs`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setLogs(res.data))

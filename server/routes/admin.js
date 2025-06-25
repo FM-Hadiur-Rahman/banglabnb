@@ -9,6 +9,7 @@ const Booking = require("../models/Booking");
 const sendEmail = require("../utils/sendEmail"); // make sure you have this
 const Payout = require("../models/Payout"); // 👈 import the model
 const Review = require("../models/Review");
+const PromoCode = require("../models/PromoCode");
 
 // Example admin-only route
 
@@ -494,3 +495,34 @@ router.get(
     res.json(overdue);
   }
 );
+// Get all promo codes (admin only)
+router.get("/promocode", protect, authorize("admin"), async (req, res) => {
+  const promos = await PromoCode.find().sort({ createdAt: -1 });
+  res.json(promos);
+});
+
+// Create
+router.post("/", protect, authorize("admin"), async (req, res) => {
+  const promo = await PromoCode.create(req.body);
+  res.status(201).json(promo);
+});
+// Deactivate
+router.patch(
+  "/:id/deactivate",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    const promo = await PromoCode.findByIdAndUpdate(
+      req.params.id,
+      { active: false },
+      { new: true }
+    );
+    res.json(promo);
+  }
+);
+
+// Delete
+router.delete("/:id", protect, authorize("admin"), async (req, res) => {
+  await PromoCode.findByIdAndDelete(req.params.id);
+  res.json({ message: "Deleted" });
+});
