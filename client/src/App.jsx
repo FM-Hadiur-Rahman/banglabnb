@@ -96,7 +96,7 @@ function App() {
           <Route
             path="/signup"
             element={
-              <Navigate to={`/register?${window.location.search}`} replace />
+              <Navigate to={`/register${window.location.search}`} replace />
             }
           />
           <Route path="verify-email" element={<VerifyEmail />} />
