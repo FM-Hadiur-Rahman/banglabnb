@@ -6,7 +6,6 @@ const MyReferrals = () => {
   const [referrals, setReferrals] = useState([]);
   const [referralCode, setReferralCode] = useState("");
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
 
   const fetchReferrals = async () => {
     try {
@@ -21,6 +20,7 @@ const MyReferrals = () => {
       toast.error("❌ Failed to load referrals");
     }
   };
+
   useEffect(() => {
     const fetchUserAndReferrals = async () => {
       try {
@@ -31,7 +31,7 @@ const MyReferrals = () => {
           }
         );
         const currentUser = res.data.user;
-        setReferralCode(currentUser.referralCode); // ✅ now always fresh
+        setReferralCode(currentUser.referralCode);
       } catch (err) {
         console.warn("Failed to fetch user data");
       }
@@ -42,13 +42,16 @@ const MyReferrals = () => {
     fetchUserAndReferrals();
   }, []);
 
+  const referralLink = `https://banglabnb.com/signup?ref=${referralCode}`;
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-xl font-bold mb-4">🎁 My Referrals</h2>
 
+      {/* Referral Code */}
       <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded">
         <h3 className="text-lg font-semibold mb-1">Your Referral Code</h3>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 mb-2">
           <input
             type="text"
             readOnly
@@ -58,18 +61,72 @@ const MyReferrals = () => {
           <button
             onClick={() => {
               navigator.clipboard.writeText(referralCode);
-              toast.success("✅ Copied to clipboard");
+              toast.success("✅ Code copied");
             }}
             className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
           >
             Copy
           </button>
         </div>
+
+        {/* Referral Link */}
+        <h3 className="text-md font-semibold mb-1">Your Referral Link</h3>
+        <div className="flex items-center space-x-2 mb-2">
+          <input
+            type="text"
+            readOnly
+            value={referralLink}
+            className="px-3 py-2 border rounded w-full text-sm"
+          />
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(referralLink);
+              toast.success("✅ Link copied");
+            }}
+            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+          >
+            Copy
+          </button>
+        </div>
+
+        {/* Share Buttons */}
+        <div className="flex gap-3 mt-2">
+          <a
+            href={`https://wa.me/?text=Join BanglaBnB and get rewarded! Use my referral: ${referralLink}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+          >
+            WhatsApp
+          </a>
+          <a
+            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+              referralLink
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+          >
+            Facebook
+          </a>
+          <a
+            href={`https://www.messenger.com/share?link=${encodeURIComponent(
+              referralLink
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+          >
+            Messenger
+          </a>
+        </div>
+
         <p className="text-sm text-gray-500 mt-2">
-          Share this code during signup. You’ll get rewards when friends book!
+          Share this link with friends. You’ll earn rewards when they book!
         </p>
       </div>
 
+      {/* Referral List */}
       <h3 className="font-semibold mb-2">
         People You Referred ({referrals.length})
       </h3>

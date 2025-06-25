@@ -249,6 +249,7 @@ exports.loginUser = async (req, res) => {
         avatar: user.avatar || "",
         role: user.role,
         isVerified: user.isVerified,
+        referralCode: user.referralCode || "",
       },
       token: generateToken(user),
     });
