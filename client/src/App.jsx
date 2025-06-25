@@ -74,6 +74,7 @@ import TermsPage from "./components/TermsPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import RefundPolicy from "./components/RefundPolicy";
 import AdminLogs from "./pages/adminLogs";
+import EmergencyInfoPage from "./pages/EmergencyInfoPage";
 
 function App() {
   return (
@@ -91,6 +92,7 @@ function App() {
           <Route path="register/step2" element={<RegisterStep2 />} />
           <Route path="verify-email" element={<VerifyEmail />} />
           <Route path="/verify-phone" element={<VerifyPhonePage />} />
+          <Route path="/emergency" element={<EmergencyInfoPage />} />
           <Route
             path="/resend-verification"
             element={<ResendVerificationPage />}

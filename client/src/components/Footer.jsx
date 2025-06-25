@@ -56,6 +56,9 @@ const Footer = () => {
           <h3 className="text-lg font-semibold mb-2">Support</h3>
           <p className="text-sm">📧 help@banglabnb.com</p>
           <p className="text-sm">📱 WhatsApp: +880-1XXX-XXXXXX</p>
+          <Link to="/emergency" className="hover:text-red-600 font-semibold">
+            🚨 Emergency Info
+          </Link>
 
           {/* 🌍 Language Selector */}
           <div className="mt-3">

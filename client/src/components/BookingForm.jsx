@@ -1,4 +1,4 @@
-// ✅ BookingForm.jsx — Full Version Supporting Stay or Stay+Ride
+// ✅ BookingForm.jsx — Full Version with Promocode Support
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -30,6 +30,9 @@ const BookingForm = ({
   const [tax, setTax] = useState(0);
   const [total, setTotal] = useState(0);
   const [bookedRanges, setBookedRanges] = useState([]);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoMessage, setPromoMessage] = useState("");
 
   const isDateBooked = (date) =>
     bookedRanges.some((r) => date >= r.startDate && date <= r.endDate);
@@ -76,10 +79,35 @@ const BookingForm = ({
       });
   }, [listingId, blockedDates]);
 
+  const handleApplyPromo = async () => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/promocode/validate`,
+        {
+          code: promoCode,
+          type: bookingMode === "combined" ? "both" : "stay",
+          totalAmount: total,
+        }
+      );
+      setPromoDiscount(res.data.discount);
+      setPromoMessage(`✅ Discount Applied: ৳${res.data.discount}`);
+    } catch (err) {
+      setPromoDiscount(0);
+      setPromoMessage(err.response?.data?.message || "❌ Invalid promo code");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
+
+    const finalAmount =
+      total -
+      promoDiscount +
+      (bookingMode === "combined" && selectedTrip
+        ? selectedTrip.farePerSeat
+        : 0);
 
     if (bookingMode === "combined" && selectedTrip) {
       try {
@@ -92,19 +120,16 @@ const BookingForm = ({
             guests,
             combined: true,
             tripId: selectedTrip._id,
+            promoCode: promoCode || null,
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("✅ Combined booking created:", bookingRes.data);
 
         const { bookingId, amount } = bookingRes.data;
 
         const combinedRes = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/combined-payment/initiate`,
-          {
-            bookingId,
-            amount,
-          },
+          { bookingId, amount: finalAmount },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -130,6 +155,7 @@ const BookingForm = ({
           dateFrom: range[0].startDate,
           dateTo: range[0].endDate,
           guests,
+          promoCode: promoCode || null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +165,7 @@ const BookingForm = ({
       const paymentRes = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payment/initiate`,
         {
-          amount: total,
+          amount: finalAmount,
           bookingId: booking._id,
           customer: {
             name: user.name,
@@ -215,6 +241,30 @@ const BookingForm = ({
         </p>
       </div>
 
+      {/* Promo Code */}
+      <div className="mt-4">
+        <label className="block text-sm font-medium">Promo Code</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Enter promo code"
+            className="w-full border px-3 py-2 rounded"
+          />
+          <button
+            type="button"
+            onClick={handleApplyPromo}
+            className="bg-blue-600 text-white px-3 py-2 rounded"
+          >
+            Apply
+          </button>
+        </div>
+        {promoMessage && (
+          <p className="text-sm mt-1 text-green-600">{promoMessage}</p>
+        )}
+      </div>
+
       <button
         type="submit"
         className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded"
@@ -238,12 +288,19 @@ const BookingForm = ({
             <span>Taxes</span>
             <span>৳{tax}</span>
           </div>
+          {promoDiscount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Promo Discount</span>
+              <span>- ৳{promoDiscount}</span>
+            </div>
+          )}
           <div className="border-t pt-2 font-semibold flex justify-between text-lg">
             <span>Total</span>
-            <span>৳{total}</span>
+            <span>৳{total - promoDiscount}</span>
           </div>
         </div>
       )}
+
       {bookingMode === "combined" && selectedTrip && (
         <div className="mt-4 border-t pt-4 space-y-2 text-sm">
           <div className="flex justify-between">
@@ -252,7 +309,7 @@ const BookingForm = ({
           </div>
           <div className="border-t pt-2 font-semibold flex justify-between text-lg">
             <span>Combined Total</span>
-            <span>৳{total + selectedTrip.farePerSeat}</span>
+            <span>৳{total - promoDiscount + selectedTrip.farePerSeat}</span>
           </div>
         </div>
       )}

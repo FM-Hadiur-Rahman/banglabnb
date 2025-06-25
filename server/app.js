@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db.js");
 
 const logRoute = require("./routes/log");
+const adminLogRoutes = require("./routes/adminLogs");
 
 const authRoutes = require("./routes/auth");
 const listingRoutes = require("./routes/listing");
@@ -54,6 +55,7 @@ app.get("/", (req, res) => {
 
 // ✅ Mount routes
 app.use("/api/logs", logRoute);
+app.use("/api/logs", adminLogRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
@@ -74,6 +76,7 @@ app.use("/api/combined-bookings", require("./routes/combinedBooking"));
 app.use("/api/combined-payment", require("./routes/combinedPayment"));
 app.use("/api/banners", bannerRoutes);
 app.use("/api/upload", require("./routes/upload"));
+app.use("/api/promocode", require("./routes/promocode"));
 
 app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://banglabnb.com");
