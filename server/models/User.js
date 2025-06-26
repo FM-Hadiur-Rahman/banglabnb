@@ -1,119 +1,124 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function (v) {
-        // Accept either +8801XXXXXXXXX or 01XXXXXXXXX
-        return /^(?:\+8801|01)[3-9][0-9]{8}$/.test(v);
-      },
-      message: (props) =>
-        `${props.value} is not a valid Bangladeshi phone number!`,
-    },
-  },
-
-  phoneVerified: {
-    type: Boolean,
-    default: false,
-  },
-  otpCode: String,
-  otpExpires: Date,
-  idDocumentUrl: String,
-  idBackUrl: String,
-  livePhotoUrl: String,
-  identityVerified: { type: Boolean, default: false },
-  signupStep: { type: Number, default: 1 },
-
-  role: {
-    type: String,
-    enum: ["user", "host", "driver", "admin"],
-    default: "user",
-  },
-  location: {
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      index: "2dsphere", // enables geospatial queries
-    },
-    address: { type: String },
-    division: {
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    phone: {
       type: String,
-      enum: Object.keys(require("../data/districts").divisions), // optional: validate only known divisions
-    },
-    district: {
-      type: String,
+      required: true,
       validate: {
-        validator: function (value) {
-          const { divisions } = require("../data/districts");
-          return Object.values(divisions).flat().includes(value);
+        validator: function (v) {
+          // Accept either +8801XXXXXXXXX or 01XXXXXXXXX
+          return /^(?:\+8801|01)[3-9][0-9]{8}$/.test(v);
         },
-        message: (props) => `${props.value} is not a valid district.`,
+        message: (props) =>
+          `${props.value} is not a valid Bangladeshi phone number!`,
       },
     },
-  },
 
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  verificationToken: String,
-  verificationTokenExpires: {
-    type: Date,
-  },
-  driver: {
-    licenseNumber: { type: String },
-    vehicleType: { type: String, enum: ["car", "bike"] },
-    vehicleModel: { type: String },
-    seats: { type: Number }, // default available seats
-    approved: { type: Boolean, default: false }, // for KYC
-  },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    otpCode: String,
+    otpExpires: Date,
+    idDocumentUrl: String,
+    idBackUrl: String,
+    livePhotoUrl: String,
+    identityVerified: { type: Boolean, default: false },
+    signupStep: { type: Number, default: 1 },
 
-  avatar: { type: String, default: "" },
-  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],
-  kyc: {
-    status: {
+    role: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ["user", "host", "driver", "admin"],
+      default: "user",
     },
-    nidUrl: String,
-    selfieUrl: String,
-    drivingLicenseUrl: { type: String },
+    location: {
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        index: "2dsphere", // enables geospatial queries
+      },
+      address: { type: String },
+      division: {
+        type: String,
+        enum: Object.keys(require("../data/districts").divisions), // optional: validate only known divisions
+      },
+      district: {
+        type: String,
+        validate: {
+          validator: function (value) {
+            const { divisions } = require("../data/districts");
+            return Object.values(divisions).flat().includes(value);
+          },
+          message: (props) => `${props.value} is not a valid district.`,
+        },
+      },
+    },
 
-    reason: {
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: String,
+    verificationTokenExpires: {
+      type: Date,
+    },
+    driver: {
+      licenseNumber: { type: String },
+      vehicleType: { type: String, enum: ["car", "bike"] },
+      vehicleModel: { type: String },
+      seats: { type: Number }, // default available seats
+      approved: { type: Boolean, default: false }, // for KYC
+    },
+
+    avatar: { type: String, default: "" },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }],
+    kyc: {
+      status: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
+      },
+      nidUrl: String,
+      selfieUrl: String,
+      drivingLicenseUrl: { type: String },
+
+      reason: {
+        type: String,
+        default: "",
+      },
+      timestamp: Date,
+    },
+    agreedToTerms: {
+      type: Boolean,
+      default: false,
+    },
+    referralCode: {
       type: String,
-      default: "",
+      unique: true,
+      uppercase: true,
+      default: function () {
+        const prefix = this.name ? this.name.slice(0, 3).toUpperCase() : "USR";
+        return prefix + crypto.randomBytes(3).toString("hex").toUpperCase();
+      },
     },
-    timestamp: Date,
-  },
-  agreedToTerms: {
-    type: Boolean,
-    default: false,
-  },
-  referralCode: {
-    type: String,
-    unique: true,
-    uppercase: true,
-    default: function () {
-      return (
-        this.name?.slice(0, 3).toUpperCase() +
-        crypto.randomBytes(3).toString("hex").toUpperCase()
-      );
+
+    referredBy: {
+      type: String, // stores the referralCode used
+    },
+    referralRewards: {
+      type: Number,
+      default: 0, // e.g., number of successful referrals
     },
   },
-  referredBy: {
-    type: String, // stores the referralCode used
-  },
-  referralRewards: {
-    type: Number,
-    default: 0, // e.g., number of successful referrals
-  },
-});
+  {
+    timestamps: true, // ✅ This line automatically adds createdAt & updatedAt
+  }
+);
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

@@ -139,7 +139,10 @@ const MyReferrals = () => {
               <div className="font-semibold">{r.name}</div>
               <div className="text-sm text-gray-500">{r.email}</div>
               <div className="text-xs text-gray-400">
-                Joined: {new Date(r.createdAt).toLocaleDateString()}
+                Joined:{" "}
+                {r.createdAt && !isNaN(new Date(r.createdAt))
+                  ? new Date(r.createdAt).toLocaleDateString()
+                  : "N/A"}
               </div>
             </li>
           ))}
