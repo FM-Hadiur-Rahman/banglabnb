@@ -114,6 +114,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0, // e.g., number of successful referrals
     },
+    referralRewarded: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // ✅ This line automatically adds createdAt & updatedAt

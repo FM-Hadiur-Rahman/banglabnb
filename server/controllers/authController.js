@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
+const Booking = require("../models/Booking");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
@@ -339,8 +340,27 @@ exports.getUserIdFromToken = async (req, res) => {
   return res.status(200).json({ userId: user._id });
 };
 exports.myReferral = async (req, res) => {
-  const referrals = await User.find({
-    referredBy: req.user.referralCode,
-  }).select("name email createdAt");
-  res.json({ count: referrals.length, referrals });
+  try {
+    const referrals = await User.find({
+      referredBy: req.user.referralCode,
+    }).select("name email createdAt");
+
+    const enriched = await Promise.all(
+      referrals.map(async (ref) => {
+        const hasBooked = await Booking.exists({
+          guestId: ref._id,
+          paymentStatus: "paid",
+        });
+        return {
+          ...ref.toObject(),
+          hasBooked,
+        };
+      })
+    );
+
+    res.json({ count: enriched.length, referrals: enriched });
+  } catch (err) {
+    console.error("❌ Referral lookup failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

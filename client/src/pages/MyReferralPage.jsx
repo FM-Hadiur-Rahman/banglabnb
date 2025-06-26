@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 const MyReferrals = () => {
   const [referrals, setReferrals] = useState([]);
   const [referralCode, setReferralCode] = useState("");
+  const [referralRewards, setReferralRewards] = useState(0);
+
   const token = localStorage.getItem("token");
 
   const fetchReferrals = async () => {
@@ -32,6 +34,7 @@ const MyReferrals = () => {
         );
         const currentUser = res.data.user;
         setReferralCode(currentUser.referralCode);
+        setReferralRewards(currentUser.referralRewards || 0);
       } catch (err) {
         console.warn("Failed to fetch user data");
       }
@@ -126,6 +129,14 @@ const MyReferrals = () => {
         </p>
       </div>
 
+      {/* Rewards Summary */}
+      <h3 className="text-md font-semibold mb-1">Your Earned Rewards</h3>
+      <p className="text-green-700 text-sm mb-4">
+        🎉 You’ve earned <strong>{referralRewards}</strong> reward
+        {referralRewards !== 1 ? "s" : ""} ={" "}
+        <strong>৳{referralRewards * 150}</strong>
+      </p>
+
       {/* Referral List */}
       <h3 className="font-semibold mb-2">
         People You Referred ({referrals.length})
@@ -136,13 +147,22 @@ const MyReferrals = () => {
         <ul className="space-y-2">
           {referrals.map((r) => (
             <li key={r.email} className="p-3 border rounded bg-white shadow-sm">
-              <div className="font-semibold">{r.name}</div>
-              <div className="text-sm text-gray-500">{r.email}</div>
-              <div className="text-xs text-gray-400">
-                Joined:{" "}
-                {r.createdAt && !isNaN(new Date(r.createdAt))
-                  ? new Date(r.createdAt).toLocaleDateString()
-                  : "N/A"}
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="font-semibold">{r.name}</div>
+                  <div className="text-sm text-gray-500">{r.email}</div>
+                  <div className="text-xs text-gray-400">
+                    Joined:{" "}
+                    {r.createdAt && !isNaN(new Date(r.createdAt))
+                      ? new Date(r.createdAt).toLocaleDateString()
+                      : "N/A"}
+                  </div>
+                </div>
+                {r.hasBooked && (
+                  <span className="text-green-600 text-xs font-semibold border border-green-300 px-2 py-1 rounded">
+                    ✅ Rewarded
+                  </span>
+                )}
               </div>
             </li>
           ))}

@@ -99,12 +99,15 @@ router.post("/success", async (req, res) => {
         paymentStatus: "paid",
       });
 
-      if (guest.referredBy && bookingsByGuest === 1) {
+      if (guest.referredBy && !guest.referralRewarded) {
         const referrer = await User.findOne({ referralCode: guest.referredBy });
         if (referrer) {
           referrer.referralRewards += 1;
+          await referrer.save();
 
-          // Optional: Give bonus promo code
+          guest.referralRewarded = true; // ✅ prevent double rewarding
+          await guest.save();
+
           await PromoCode.create({
             code: `REF${Date.now()}`,
             discount: 150,
@@ -113,8 +116,6 @@ router.post("/success", async (req, res) => {
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             usageLimit: 1,
           });
-
-          await referrer.save();
 
           await sendEmail({
             to: referrer.email,
