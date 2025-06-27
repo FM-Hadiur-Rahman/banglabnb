@@ -35,7 +35,7 @@ const AdminUsers = () => {
     if (!confirm("Are you sure?")) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(
+      await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/admin/users/${id}/soft-delete`,
         {
           headers: { Authorization: `Bearer ${token}` },
