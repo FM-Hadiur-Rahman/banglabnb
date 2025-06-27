@@ -166,6 +166,35 @@ exports.deleteListing = async (req, res) => {
     res.status(500).json({ message: "Server error while deleting listing." });
   }
 };
+exports.restoreListing = async (req, res) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing || !listing.isDeleted) {
+      return res.status(404).json({ message: "Deleted listing not found" });
+    }
+
+    listing.isDeleted = false;
+    listing.deletedAt = null;
+    await listing.save();
+
+    res.json({ message: "✅ Listing restored", listing });
+  } catch (err) {
+    console.error("❌ Restore listing failed:", err);
+    res.status(500).json({ message: "Server error while restoring listing" });
+  }
+};
+exports.getDeletedListings = async (req, res) => {
+  try {
+    const listings = await Listing.find({ isDeleted: true }).populate(
+      "hostId",
+      "name email"
+    );
+    res.json(listings);
+  } catch (err) {
+    console.error("❌ Failed to fetch deleted listings:", err);
+    res.status(500).json({ message: "Failed to fetch deleted listings" });
+  }
+};
 
 // controllers/listingController.js
 

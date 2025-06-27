@@ -14,6 +14,18 @@ router.get("/:id", listingCtrl.getListingById);
 router.get("/host/:hostId", listingCtrl.getListingsByHost);
 
 // ✅ Protected CRUD routes
+router.get(
+  "/listings/deleted",
+  protect,
+  authorize("admin"),
+  listingCtrl.getDeletedListings
+);
+router.patch(
+  "/listings/:id/restore",
+  protect,
+  authorize("admin"),
+  listingCtrl.restoreListing
+);
 router.post(
   "/",
   protect,
