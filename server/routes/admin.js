@@ -592,3 +592,49 @@ router.patch(
     }
   }
 );
+router.patch(
+  "/listings/:id/soft-delete",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const listing = await Listing.findById(req.params.id);
+      if (!listing || listing.isDeleted) {
+        return res
+          .status(404)
+          .json({ message: "Listing not found or already deleted" });
+      }
+
+      listing.isDeleted = true;
+      listing.deletedAt = new Date();
+      await listing.save();
+
+      res.json({ message: "✅ Listing soft-deleted", listing });
+    } catch (err) {
+      console.error("❌ Failed to soft-delete listing:", err);
+      res.status(500).json({ message: "Failed to soft-delete listing" });
+    }
+  }
+);
+router.patch(
+  "/listings/:id/restore",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const listing = await Listing.findById(req.params.id);
+      if (!listing || !listing.isDeleted) {
+        return res.status(404).json({ message: "Deleted listing not found" });
+      }
+
+      listing.isDeleted = false;
+      listing.deletedAt = null;
+      await listing.save();
+
+      res.json({ message: "✅ Listing restored", listing });
+    } catch (err) {
+      console.error("❌ Failed to restore listing:", err);
+      res.status(500).json({ message: "Failed to restore listing" });
+    }
+  }
+);
