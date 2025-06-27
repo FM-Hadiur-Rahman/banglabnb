@@ -4,7 +4,7 @@ const Booking = require("../models/Booking");
 exports.getAllListings = async (req, res) => {
   try {
     const { location, from, to, guests, type, minPrice, maxPrice } = req.query;
-    const query = {};
+    const query = { isDeleted: false };
 
     // Flexible filters
     if (location) {
@@ -55,7 +55,10 @@ exports.getAllListings = async (req, res) => {
 // GET single listing
 exports.getListingById = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const listing = await Listing.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    });
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
@@ -73,7 +76,11 @@ exports.getListingById = async (req, res) => {
 
 // GET listings by host
 exports.getListingsByHost = async (req, res) => {
-  const listings = await Listing.find({ hostId: req.params.hostId });
+  const listings = await Listing.find({
+    hostId: req.params.hostId,
+    isDeleted: false,
+  });
+
   res.json(listings);
 };
 
@@ -148,13 +155,18 @@ exports.deleteListing = async (req, res) => {
         .json({ message: "Not authorized to delete this listing" });
     }
 
-    await listing.deleteOne(); // ✅ safer than .remove()
-    res.json({ message: "Listing deleted" });
+    // 🔄 Soft delete instead of hard delete
+    listing.isDeleted = true;
+    listing.deletedAt = new Date();
+    await listing.save();
+
+    res.json({ message: "Listing soft-deleted" });
   } catch (err) {
     console.error("❌ DELETE error:", err);
     res.status(500).json({ message: "Server error while deleting listing." });
   }
 };
+
 // controllers/listingController.js
 
 exports.blockDates = async (req, res) => {

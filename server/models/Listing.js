@@ -70,6 +70,9 @@ const listingSchema = new mongoose.Schema(
         to: { type: Date, required: true },
       },
     ],
+    // models/Listing.js
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: Date,
   },
   { timestamps: true }
 );

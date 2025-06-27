@@ -36,7 +36,7 @@ const AdminUsers = () => {
     const token = localStorage.getItem("token");
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}/soft-delete`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -44,6 +44,21 @@ const AdminUsers = () => {
       fetchUsers(); // refresh list
     } catch (err) {
       console.error("❌ Failed to delete user:", err);
+    }
+  };
+  const restoreUser = async (id) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}/restore`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      fetchUsers(); // refresh after restore
+    } catch (err) {
+      console.error("❌ Failed to restore user:", err);
     }
   };
 
@@ -73,7 +88,12 @@ const AdminUsers = () => {
           <tbody>
             {Array.isArray(users) &&
               users.map((u) => (
-                <tr key={u._id} className="border-t">
+                <tr
+                  key={u._id}
+                  className={`border-t ${
+                    u.isDeleted ? "bg-red-100 text-gray-500 line-through" : ""
+                  }`}
+                >
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>{u.role}</td>
@@ -85,6 +105,23 @@ const AdminUsers = () => {
                     >
                       Delete
                     </button>
+                  </td>
+                  <td>
+                    {!u.isDeleted ? (
+                      <button
+                        onClick={() => deleteUser(u._id)}
+                        className="text-red-500 hover:underline"
+                      >
+                        Soft Delete
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => restoreUser(u._id)}
+                        className="text-green-600 hover:underline"
+                      >
+                        Restore
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

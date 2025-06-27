@@ -543,3 +543,52 @@ router.get("/referrals", protect, authorize("admin"), async (req, res) => {
 
   res.json({ referrers: users, referred });
 });
+// Soft delete a user
+router.patch(
+  "/users/:id/soft-delete",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user || user.isDeleted) {
+        return res
+          .status(404)
+          .json({ message: "User not found or already deleted" });
+      }
+
+      user.isDeleted = true;
+      user.deletedAt = new Date();
+      await user.save();
+
+      res.json({ message: "✅ User soft-deleted", user });
+    } catch (err) {
+      console.error("❌ Failed to soft-delete user:", err);
+      res.status(500).json({ message: "Failed to soft-delete user" });
+    }
+  }
+);
+
+// Restore a soft-deleted user
+router.patch(
+  "/users/:id/restore",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user || !user.isDeleted) {
+        return res.status(404).json({ message: "Deleted user not found" });
+      }
+
+      user.isDeleted = false;
+      user.deletedAt = null;
+      await user.save();
+
+      res.json({ message: "✅ User restored", user });
+    } catch (err) {
+      console.error("❌ Failed to restore user:", err);
+      res.status(500).json({ message: "Failed to restore user" });
+    }
+  }
+);
