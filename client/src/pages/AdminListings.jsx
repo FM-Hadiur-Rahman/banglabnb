@@ -47,7 +47,7 @@ const AdminListings = () => {
     if (!confirm("Are you sure you want to soft-delete this listing?")) return;
 
     try {
-      await axios.delete(
+      await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/admin/listings/${id}/soft-delete`,
         {
           headers: { Authorization: `Bearer ${token}` },
