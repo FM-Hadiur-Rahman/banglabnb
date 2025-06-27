@@ -52,25 +52,49 @@ const DashboardBookings = () => {
   };
 
   const handleCheckIn = async (id) => {
-    await axios.patch(
-      `${import.meta.env.VITE_API_URL}/api/bookings/${id}/checkin`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
-    );
-    fetchBookings();
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/bookings/${id}/checkin`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b._id === id ? { ...b, checkInAt: new Date().toISOString() } : b
+        )
+      );
+
+      toast.success("✅ Checked in successfully!");
+    } catch (err) {
+      toast.error("Check-in failed");
+    }
   };
 
   const handleCheckOut = async (id) => {
-    await axios.patch(
-      `${import.meta.env.VITE_API_URL}/api/bookings/${id}/checkout`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
-    );
-    fetchBookings();
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/bookings/${id}/checkout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      // ✅ Update the checkOutAt in local state instead of re-fetching
+      setBookings((prev) =>
+        prev.map((b) =>
+          b._id === id ? { ...b, checkOutAt: new Date().toISOString() } : b
+        )
+      );
+
+      toast.success("✅ Checked out successfully!");
+    } catch (err) {
+      console.error("❌ Check-out failed", err);
+      toast.error("Check-out failed");
+    }
   };
 
   const handleLeaveReview = (booking) => {
