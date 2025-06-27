@@ -195,36 +195,6 @@ exports.cancelBooking = async (req, res) => {
   }
 };
 
-// ✅ Check-in
-// exports.checkIn = async (req, res) => {
-//   const booking = await Booking.findById(req.params.id);
-//   if (!booking || booking.guestId.toString() !== req.user._id.toString())
-//     return res.status(403).json({ message: "Unauthorized" });
-
-//   const now = new Date();
-//   if (now < new Date(booking.dateFrom))
-//     return res.status(400).json({ message: "Too early to check in" });
-
-//   booking.checkInAt = now;
-//   await booking.save();
-//   res.json({ message: "Checked in", booking });
-// };
-
-// ✅ Check-out
-// exports.checkOut = async (req, res) => {
-//   const booking = await Booking.findById(req.params.id);
-//   if (!booking || booking.guestId.toString() !== req.user._id.toString())
-//     return res.status(403).json({ message: "Unauthorized" });
-
-//   const now = new Date();
-//   if (now < new Date(booking.dateTo))
-//     return res.status(400).json({ message: "Too early to check out" });
-
-//   booking.checkOutAt = now;
-//   await booking.save();
-//   res.json({ message: "Checked out", booking });
-// };
-
 exports.checkIn = async (req, res) => {
   const booking = await Booking.findById(req.params.id)
     .populate("guestId", "name email")

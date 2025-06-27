@@ -41,7 +41,7 @@ const DashboardBookings = () => {
         `${
           import.meta.env.VITE_API_URL
         }/api/bookings/${id}/request-modification`,
-        { from, to },
+        { from: from.toISOString(), to: to.toISOString() },
         authHeader()
       );
       toast.success("📅 Modification request sent");
