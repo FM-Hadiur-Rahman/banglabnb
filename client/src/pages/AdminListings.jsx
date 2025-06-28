@@ -14,12 +14,9 @@ const AdminListings = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("📦 Listings response:", res.data);
-
       if (Array.isArray(res.data)) {
         setListings(res.data);
       } else {
-        console.warn("⚠️ Unexpected listings format:", res.data);
         setListings([]);
       }
     } catch (err) {
@@ -36,7 +33,7 @@ const AdminListings = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchListings(); // Refresh the list
+      fetchListings();
     } catch (err) {
       console.error("❌ Failed to restore listing:", err);
     }
@@ -50,11 +47,9 @@ const AdminListings = () => {
       await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/admin/listings/${id}/soft-delete`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchListings(); // Refresh the list
+      fetchListings();
     } catch (err) {
       console.error("❌ Failed to soft-delete listing:", err);
     }
@@ -66,34 +61,42 @@ const AdminListings = () => {
 
   return (
     <AdminLayout>
-      <h2 className="text-2xl font-bold mb-4">All Listings</h2>
+      <h2 className="text-2xl font-bold mb-4">🏠 All Listings</h2>
 
-      {Array.isArray(listings) && listings.length > 0 ? (
-        <table className="w-full table-auto border">
-          <thead>
-            <tr className="bg-gray-200">
-              <th>Title</th>
-              <th>Location</th>
-              <th>Host</th>
-              <th>Status</th>
-              <th>Actions</th>
+      <div className="overflow-x-auto bg-white rounded shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200 text-sm md:text-base">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2 text-left whitespace-nowrap">Title</th>
+              <th className="px-4 py-2 text-left whitespace-nowrap">
+                Location
+              </th>
+              <th className="px-4 py-2 text-left whitespace-nowrap">Host</th>
+              <th className="px-4 py-2 text-left whitespace-nowrap">Status</th>
+              <th className="px-4 py-2 text-left whitespace-nowrap">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {listings.map((l) => (
               <tr
                 key={l._id}
-                className={`border-t ${
-                  l.isDeleted ? "bg-red-100 text-gray-500 line-through" : ""
+                className={`hover:bg-gray-50 ${
+                  l.isDeleted ? "bg-red-50 text-gray-500 line-through" : ""
                 }`}
               >
-                <td>{l.title}</td>
-                <td>{l.location?.address}</td>
-                <td>
-                  {l.hostId?.name} ({l.hostId?.email})
+                <td className="px-4 py-2">{l.title}</td>
+                <td className="px-4 py-2">{l.location?.address}</td>
+                <td className="px-4 py-2">
+                  {l.hostId?.name}
+                  <br />
+                  <span className="text-xs text-gray-500">
+                    {l.hostId?.email}
+                  </span>
                 </td>
-                <td>{l.isDeleted ? "Deleted" : "Active"}</td>
-                <td>
+                <td className="px-4 py-2">
+                  {l.isDeleted ? "Deleted" : "Active"}
+                </td>
+                <td className="px-4 py-2">
                   {l.isDeleted ? (
                     <button
                       onClick={() => handleRestore(l._id)}
@@ -114,8 +117,10 @@ const AdminListings = () => {
             ))}
           </tbody>
         </table>
-      ) : (
-        <p className="text-gray-500 italic">No listings found.</p>
+      </div>
+
+      {listings.length === 0 && (
+        <p className="text-gray-500 italic mt-4">No listings found.</p>
       )}
     </AdminLayout>
   );

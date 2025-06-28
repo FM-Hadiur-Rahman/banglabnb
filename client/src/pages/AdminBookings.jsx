@@ -1,4 +1,3 @@
-// pages/AdminBookings.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
@@ -23,39 +22,49 @@ const AdminBookings = () => {
 
   return (
     <AdminLayout>
-      <h2 className="text-2xl font-bold mb-4">All Bookings</h2>
-      <table className="w-full table-auto border">
-        <thead>
-          <tr className="bg-gray-200">
-            <th>Guest</th>
-            <th>Listing</th>
-            <th>Status</th>
-            <th>Check-in</th>
-            <th>Check-out</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((b) => (
-            <tr key={b._id} className="border-t">
-              <td>
-                {b.guestId?.name} ({b.guestId?.email})
-              </td>
-              <td>{b.listingId?.title}</td>
-              <td>{b.status}</td>
-              <td>
-                {b.dateFrom
-                  ? new Date(b.dateFrom).toLocaleDateString("en-GB")
-                  : "—"}
-              </td>
-              <td>
-                {b.dateTo
-                  ? new Date(b.dateTo).toLocaleDateString("en-GB")
-                  : "—"}
-              </td>
+      <h2 className="text-2xl font-bold mb-4">📅 All Bookings</h2>
+
+      <div className="overflow-x-auto bg-white rounded-lg shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200 text-sm md:text-base">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="text-left px-4 py-2 whitespace-nowrap">Guest</th>
+              <th className="text-left px-4 py-2 whitespace-nowrap">Listing</th>
+              <th className="text-left px-4 py-2 whitespace-nowrap">Status</th>
+              <th className="text-left px-4 py-2 whitespace-nowrap">
+                Check-in
+              </th>
+              <th className="text-left px-4 py-2 whitespace-nowrap">
+                Check-out
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {bookings.map((b) => (
+              <tr key={b._id} className="hover:bg-gray-50">
+                <td className="px-4 py-2">
+                  {b.guestId?.name} <br />
+                  <span className="text-xs text-gray-500">
+                    {b.guestId?.email}
+                  </span>
+                </td>
+                <td className="px-4 py-2">{b.listingId?.title}</td>
+                <td className="px-4 py-2 capitalize">{b.status}</td>
+                <td className="px-4 py-2">
+                  {b.dateFrom
+                    ? new Date(b.dateFrom).toLocaleDateString("en-GB")
+                    : "—"}
+                </td>
+                <td className="px-4 py-2">
+                  {b.dateTo
+                    ? new Date(b.dateTo).toLocaleDateString("en-GB")
+                    : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </AdminLayout>
   );
 };
