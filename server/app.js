@@ -23,6 +23,7 @@ const tripRoutes = require("./routes/tripRoutes");
 const tripPaymentRoutes = require("./routes/tripPayment");
 const bannerRoutes = require("./routes/banner");
 const checkMaintenance = require("./middleware/checkMaintenance");
+const GlobalConfig = require("./models/GlobalConfig");
 
 dotenv.config();
 const app = express();
@@ -52,15 +53,20 @@ app.use((req, res, next) => {
 
 // BEFORE all route handlers — place this BEFORE checkMaintenance
 app.use(async (req, res, next) => {
-  // Allow toggle route to bypass maintenance
-  if (req.path === "/api/admin/toggle-maintenance" && req.method === "PATCH") {
+  // Allow admin to toggle even during maintenance
+  if (
+    (req.path === "/api/admin/toggle-maintenance" && req.method === "PATCH") ||
+    (req.path === "/api/config" && req.method === "GET")
+  ) {
     return next();
   }
 
-  const GlobalConfig = require("./models/GlobalConfig"); // 👈 add here if not imported above
-  const config = await GlobalConfig.findOne();
+  let config = await GlobalConfig.findOne();
 
-  if (config?.maintenanceMode) {
+  // 🔐 Fallback if config is missing
+  if (!config) config = await GlobalConfig.create({ maintenanceMode: false });
+
+  if (config.maintenanceMode) {
     return res
       .status(503)
       .json({ message: "🚧 BanglaBnB is under maintenance" });
