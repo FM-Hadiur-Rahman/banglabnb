@@ -7,9 +7,10 @@ const {
   markAllAsRead,
   getUnreadCount,
 } = require("../controllers/notificationController");
+const checkMaintenance = require("../middleware/checkMaintenance");
 
 router.get("/", protect, getNotifications);
 router.patch("/mark-all-read", protect, markAllAsRead);
-router.get("/unread-count", protect, getUnreadCount); // ✅ Clean
+router.get("/unread-count", protect, checkMaintenance, getUnreadCount); // ✅ Clean
 
 module.exports = router;

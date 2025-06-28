@@ -10,6 +10,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [maintenance, setMaintenance] = useState(false);
 
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
@@ -23,6 +24,11 @@ const Navbar = () => {
     if (user.role === "driver") return "/dashboard/driver";
     return "/dashboard";
   };
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/config`)
+      .then((res) => res.json())
+      .then((data) => setMaintenance(data.maintenanceMode));
+  }, []);
 
   const getRoleInfo = () => {
     switch (user.role) {
@@ -72,6 +78,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchUnread = async () => {
+      if (maintenance) return;
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
