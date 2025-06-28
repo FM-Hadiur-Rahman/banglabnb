@@ -56,6 +56,9 @@ const AdminLayout = ({ children }) => {
           <Link to="/admin/logs">📨 Logs</Link>
           <Link to="/admin/promocodes">📨 Promocodes</Link>
           <Link to="/admin/referrals">📨 Referrals</Link>
+          <Link to="/admin/setting" className="hover:underline">
+            ⚙️ Settings
+          </Link>
         </nav>
       </aside>
       <main className="flex-1 bg-gray-50 p-6 overflow-auto">{children}</main>

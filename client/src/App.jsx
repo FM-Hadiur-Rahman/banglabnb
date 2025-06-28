@@ -80,6 +80,7 @@ import AdminLogs from "./pages/adminLogs";
 import EmergencyInfoPage from "./pages/EmergencyInfoPage";
 import AdminReferrals from "./pages/AdminReferrals";
 import MyReferralsPage from "./pages/MyReferralPage";
+import AdminSettings from "./pages/AdminSettings";
 
 function App() {
   return (
@@ -249,6 +250,14 @@ function App() {
             }
           />
           {/* Admin Protected Routes */}
+          <Route
+            path="/admin/setting"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSettings />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="admin/dashboard"
             element={
