@@ -49,7 +49,29 @@ app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.originalUrl}`);
   next();
 });
-app.use(checkMaintenance);
+
+// BEFORE all route handlers — place this BEFORE checkMaintenance
+app.use(async (req, res, next) => {
+  // Allow toggle route to bypass maintenance
+  if (req.path === "/api/admin/toggle-maintenance" && req.method === "PATCH") {
+    return next();
+  }
+
+  const GlobalConfig = require("./models/GlobalConfig"); // 👈 add here if not imported above
+  const config = await GlobalConfig.findOne();
+
+  if (config?.maintenanceMode) {
+    return res
+      .status(503)
+      .json({ message: "🚧 BanglaBnB is under maintenance" });
+  }
+
+  next();
+});
+
+// 🧼 REMOVE this line (already handled above)
+// app.use(checkMaintenance); // ❌ remove or comment out
+
 app.get("/", (req, res) => {
   res.send("BanglaBnB API is running");
 });

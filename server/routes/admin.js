@@ -10,6 +10,7 @@ const sendEmail = require("../utils/sendEmail"); // make sure you have this
 const Payout = require("../models/Payout"); // 👈 import the model
 const Review = require("../models/Review");
 const PromoCode = require("../models/PromoCode");
+const GlobalConfig = require("../models/GlobalConfig"); // ✅ this must be present
 
 // Example admin-only route
 
@@ -639,17 +640,27 @@ router.patch(
   }
 );
 // routes/admin.js
+// routes/admin.js
 router.patch(
   "/toggle-maintenance",
   protect,
   authorize("admin"),
   async (req, res) => {
-    let config = await GlobalConfig.findOne();
-    if (!config) config = new GlobalConfig();
+    try {
+      let config = await GlobalConfig.findOne();
+      if (!config) config = new GlobalConfig();
 
-    config.maintenanceMode = req.body.maintenanceMode;
-    await config.save();
+      // Auto toggle instead of relying on request body
+      config.maintenanceMode = !config.maintenanceMode;
+      await config.save();
 
-    res.json({ message: "Updated", maintenanceMode: config.maintenanceMode });
+      res.json({
+        message: "Maintenance mode toggled",
+        maintenanceMode: config.maintenanceMode,
+      });
+    } catch (err) {
+      console.error("Toggle failed:", err);
+      res.status(500).json({ message: "Server error" });
+    }
   }
 );
