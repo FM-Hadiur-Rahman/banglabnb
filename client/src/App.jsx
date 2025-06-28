@@ -90,7 +90,6 @@ function App() {
   const [user, setUser] = useState(null); // for role check
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
 
@@ -100,14 +99,13 @@ function App() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-
   const isAdmin = user?.role === "admin";
 
-  // 👇 show full page if under maintenance and not admin
-  if (maintenance && !isAdmin) {
-    return <MaintenancePage />;
-  }
+  // Wait for check
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+
+  // If maintenance is on and user is not admin, show maintenance page
+  if (maintenance && !isAdmin) return <MaintenancePage />;
   return (
     <Router>
       <ToastContainer position="top-left" autoClose={3000} />
