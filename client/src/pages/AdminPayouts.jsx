@@ -16,8 +16,6 @@ const AdminPayouts = () => {
         }
       );
 
-      console.log("📦 Payouts data:", res.data);
-
       if (Array.isArray(res.data)) {
         setPayouts(res.data);
       } else {
@@ -57,61 +55,64 @@ const AdminPayouts = () => {
 
   return (
     <AdminLayout>
-      <h2 className="text-2xl font-bold mb-6">💸 Pending Host Payouts</h2>
+      <div className="p-4 md:p-6">
+        <h2 className="text-2xl font-bold mb-6">💸 Pending Host Payouts</h2>
 
-      {loading ? (
-        <p>Loading payouts...</p>
-      ) : Array.isArray(payouts) && payouts.length === 0 ? (
-        <p className="text-gray-500">No pending payouts.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border rounded shadow">
-            <thead className="bg-gray-100 text-sm text-left">
-              <tr>
-                <th className="p-3">Host</th>
-                <th className="p-3">Contact</th>
-                <th className="p-3">Amount (৳)</th>
-                <th className="p-3">Booking Date</th>
-                <th className="p-3">Method</th>
-                <th className="p-3">Action</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {Array.isArray(payouts) &&
-                payouts.map((payout) => (
-                  <tr key={payout._id} className="border-t">
-                    <td className="p-3 font-semibold">
+        {loading ? (
+          <p className="text-gray-600 italic">Loading payouts...</p>
+        ) : payouts.length === 0 ? (
+          <p className="text-gray-500 italic">✅ No pending payouts.</p>
+        ) : (
+          <div className="overflow-x-auto rounded shadow bg-white">
+            <table className="min-w-full divide-y divide-gray-200 text-sm md:text-base">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left">Host</th>
+                  <th className="px-4 py-2 text-left">Contact</th>
+                  <th className="px-4 py-2 text-left">Amount (৳)</th>
+                  <th className="px-4 py-2 text-left">Booking Date</th>
+                  <th className="px-4 py-2 text-left">Method</th>
+                  <th className="px-4 py-2 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {payouts.map((payout) => (
+                  <tr key={payout._id}>
+                    <td className="px-4 py-2 font-semibold">
                       {payout.hostId?.name || "N/A"}
                     </td>
-                    <td className="p-3">
+                    <td className="px-4 py-2">
                       <div>{payout.hostId?.email}</div>
                       <div className="text-gray-500 text-xs">
-                        {payout.hostId?.phone}
+                        {payout.hostId?.phone || "—"}
                       </div>
                     </td>
-                    <td className="p-3 font-medium">
+                    <td className="px-4 py-2 font-medium text-green-700">
                       {payout.amount?.toLocaleString()}
                     </td>
-                    <td className="p-3">
+                    <td className="px-4 py-2 whitespace-nowrap">
                       {new Date(
                         payout.bookingId?.createdAt
                       ).toLocaleDateString()}
                     </td>
-                    <td className="p-3 capitalize">{payout.method}</td>
-                    <td className="p-3">
+                    <td className="px-4 py-2 capitalize">
+                      {payout.method || "manual"}
+                    </td>
+                    <td className="px-4 py-2">
                       <button
                         onClick={() => markAsPaid(payout._id)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs md:text-sm"
                       >
                         Mark as Paid
                       </button>
                     </td>
                   </tr>
                 ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </AdminLayout>
   );
 };

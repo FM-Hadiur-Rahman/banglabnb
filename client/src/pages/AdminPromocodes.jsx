@@ -7,8 +7,8 @@ const AdminPromocodes = () => {
   const [newCode, setNewCode] = useState({
     code: "",
     discount: 0,
-    type: "flat", // flat or percent
-    for: "stay", // stay, ride, combined, all
+    type: "flat",
+    for: "stay",
     expiresAt: "",
   });
   const [loading, setLoading] = useState(false);
@@ -98,13 +98,13 @@ const AdminPromocodes = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">🎁 Promo Code Management</h2>
 
-      {/* Create New Promo Code */}
-      <div className="border p-4 rounded mb-6 bg-white shadow">
-        <h3 className="text-lg font-semibold mb-2">➕ Create New Code</h3>
-        <div className="grid md:grid-cols-5 gap-4">
+      {/* Form */}
+      <div className="bg-white border p-4 rounded shadow mb-6">
+        <h3 className="text-lg font-semibold mb-3">➕ Create New Promo Code</h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input
             type="text"
             placeholder="Code"
@@ -112,7 +112,7 @@ const AdminPromocodes = () => {
             onChange={(e) =>
               setNewCode({ ...newCode, code: e.target.value.toUpperCase() })
             }
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           />
           <input
             type="number"
@@ -121,12 +121,12 @@ const AdminPromocodes = () => {
             onChange={(e) =>
               setNewCode({ ...newCode, discount: Number(e.target.value) })
             }
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           />
           <select
             value={newCode.type}
             onChange={(e) => setNewCode({ ...newCode, type: e.target.value })}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           >
             <option value="flat">Flat (৳)</option>
             <option value="percent">Percent (%)</option>
@@ -134,7 +134,7 @@ const AdminPromocodes = () => {
           <select
             value={newCode.for}
             onChange={(e) => setNewCode({ ...newCode, for: e.target.value })}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           >
             <option value="stay">Stay</option>
             <option value="ride">Ride</option>
@@ -147,20 +147,20 @@ const AdminPromocodes = () => {
             onChange={(e) =>
               setNewCode({ ...newCode, expiresAt: e.target.value })
             }
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           />
         </div>
         <button
           onClick={handleCreate}
           disabled={loading}
-          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"
         >
           {loading ? "Creating..." : "Create Promo Code"}
         </button>
       </div>
 
-      {/* Promo Code List */}
-      <div className="bg-white shadow rounded overflow-x-auto">
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded shadow">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100">
             <tr>
