@@ -22,6 +22,7 @@ const messageRoutes = require("./routes/messageRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const tripPaymentRoutes = require("./routes/tripPayment");
 const bannerRoutes = require("./routes/banner");
+const checkMaintenance = require("./middleware/checkMaintenance");
 
 dotenv.config();
 const app = express();
@@ -48,7 +49,7 @@ app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.originalUrl}`);
   next();
 });
-
+app.use(checkMaintenance);
 app.get("/", (req, res) => {
   res.send("BanglaBnB API is running");
 });
@@ -77,6 +78,7 @@ app.use("/api/combined-payment", require("./routes/combinedPayment"));
 app.use("/api/banners", bannerRoutes);
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/promocode", require("./routes/promocode"));
+app.use("/api/config", require("./routes/config"));
 
 app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://banglabnb.com");

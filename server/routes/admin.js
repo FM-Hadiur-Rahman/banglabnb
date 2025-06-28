@@ -638,3 +638,18 @@ router.patch(
     }
   }
 );
+// routes/admin.js
+router.patch(
+  "/toggle-maintenance",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    let config = await GlobalConfig.findOne();
+    if (!config) config = new GlobalConfig();
+
+    config.maintenanceMode = req.body.maintenanceMode;
+    await config.save();
+
+    res.json({ message: "Updated", maintenanceMode: config.maintenanceMode });
+  }
+);

@@ -3,6 +3,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Navigate } from "react-router-dom";
 
+import MaintenanceBanner from "./components/MaintenanceBanner";
+
 // Layouts
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -84,6 +86,7 @@ function App() {
     <Router>
       <ToastContainer position="top-left" autoClose={3000} />
       <Routes>
+        <MaintenanceBanner />
         {/* Main Layout Wrapper */}
         <Route path="/" element={<MainLayout />}>
           {/* Public Routes */}
