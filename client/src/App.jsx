@@ -85,8 +85,8 @@ function App() {
   return (
     <Router>
       <ToastContainer position="top-left" autoClose={3000} />
+      <MaintenanceBanner />
       <Routes>
-        <MaintenanceBanner />
         {/* Main Layout Wrapper */}
         <Route path="/" element={<MainLayout />}>
           {/* Public Routes */}
