@@ -2,9 +2,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Navigate } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
 
 import MaintenanceBanner from "./components/MaintenanceBanner";
-
+import MaintenancePage from "./pages/MaintenancePage";
 // Layouts
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -83,6 +85,29 @@ import MyReferralsPage from "./pages/MyReferralPage";
 import AdminSettings from "./pages/AdminSettings";
 
 function App() {
+  const [maintenance, setMaintenance] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null); // for role check
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/config`)
+      .then((res) => res.json())
+      .then((data) => setMaintenance(data.maintenanceMode))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+
+  const isAdmin = user?.role === "admin";
+
+  // 👇 show full page if under maintenance and not admin
+  if (maintenance && !isAdmin) {
+    return <MaintenancePage />;
+  }
   return (
     <Router>
       <ToastContainer position="top-left" autoClose={3000} />
