@@ -87,7 +87,7 @@ import AdminSettings from "./pages/AdminSettings";
 function App() {
   const [maintenance, setMaintenance] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null); // for role check
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -101,10 +101,10 @@ function App() {
 
   const isAdmin = user?.role === "admin";
 
-  // Wait for check
+  // Wait until loading done
   if (loading) return <div className="p-8 text-center">Loading...</div>;
 
-  // If maintenance is on and user is not admin, show maintenance page
+  // If maintenance ON and not admin, show full maintenance page
   if (maintenance && !isAdmin) return <MaintenancePage />;
   return (
     <Router>
