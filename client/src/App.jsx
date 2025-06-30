@@ -27,6 +27,7 @@ import HelpCenterPage from "./pages/HelpCenterPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import MyWishlistPage from "./pages/MyWishlistPage";
 import VerifyPhonePage from "./pages/VerifyPhone";
+import FullPageSpinner from "./components/FullPageSpinner";
 
 // User Dashboard
 import DashboardPage from "./pages/DashboardPage";
@@ -102,7 +103,7 @@ function App() {
   const isAdmin = user?.role === "admin";
 
   // Wait until loading done
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (loading) return <FullPageSpinner message="Waking up the server..." />;
 
   // If maintenance ON and not admin, show full maintenance page
   if (maintenance && !isAdmin) return <MaintenancePage />;
