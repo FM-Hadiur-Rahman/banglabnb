@@ -9,10 +9,10 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     bn: { translation: bn },
   },
-  lng: "en", // default language
+  lng: localStorage.getItem("lng") || "en",
   fallbackLng: "en",
   interpolation: {
-    escapeValue: false, // React already escapes by default
+    escapeValue: false,
   },
 });
 
