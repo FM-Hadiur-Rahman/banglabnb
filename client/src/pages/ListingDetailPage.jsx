@@ -5,7 +5,6 @@ import axios from "axios";
 import BookingForm from "../components/BookingForm";
 import ReviewList from "../components/ReviewList";
 import RideResults from "../components/RideResults";
-import { useTranslation } from "react-i18next";
 
 const ListingDetailPage = () => {
   const { id } = useParams();
@@ -13,12 +12,8 @@ const ListingDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [suggestedTrips, setSuggestedTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(false);
-  const [bookingMode, setBookingMode] = useState("stay");
+  const [bookingMode, setBookingMode] = useState("stay"); // 'stay' or 'combined'
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const { t, i18n } = useTranslation();
-
-  const toBanglaNumber = (num) =>
-    String(num).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
 
   useEffect(() => {
     axios
@@ -26,13 +21,13 @@ const ListingDetailPage = () => {
       .then((res) => setListing(res.data))
       .catch((err) => console.error("Failed to load listing:", err));
   }, [id]);
-
   useEffect(() => {
     if (!listing?.district) return;
 
-    setLoadingTrips(true);
+    setLoadingTrips(true); // 🟢 START loading
 
-    const isDev = true;
+    // 🧪 TEMPORARY HARDCODED TEST LOCATION IN BANGLADESH (Dhaka)
+    const isDev = true; // set false in production
 
     if (isDev) {
       const latitude = 23.8103;
@@ -76,7 +71,9 @@ const ListingDetailPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Left: Image Gallery and Details */}
       <div className="lg:col-span-2 space-y-6">
+        {/* 🖼 Image Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {Array.isArray(listing.images) &&
             listing.images.map((url, idx) => (
@@ -107,25 +104,17 @@ const ListingDetailPage = () => {
           )}
         </div>
 
+        {/* 🧾 Listing Details */}
         <div>
           <h1 className="text-3xl font-bold">{listing.title}</h1>
           <p className="text-gray-600 mt-1">{listing.location?.address}</p>
           <p className="text-green-600 font-bold text-lg">
-            ৳
-            {i18n.language === "bn"
-              ? toBanglaNumber(listing.price)
-              : listing.price}{" "}
-            / {t("price_per_night_unit")}
+            ৳{listing.price} / night
           </p>
           <p className="mt-4 text-gray-700">
-            {i18n.language === "bn"
-              ? `এই আরামদায়ক জায়গায় সর্বোচ্চ ${toBanglaNumber(
-                  listing.maxGuests
-                )} জন অতিথি থাকতে পারেন।`
-              : `This cozy place can host up to ${listing.maxGuests} guests.`}
+            This cozy place can host up to {listing.maxGuests} guests.
           </p>
         </div>
-
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => setBookingMode("stay")}
@@ -133,7 +122,7 @@ const ListingDetailPage = () => {
               bookingMode === "stay" ? "bg-green-600 text-white" : "bg-gray-100"
             }`}
           >
-            🛏️ {t("stay_only")}
+            🛏️ Stay Only
           </button>
           <button
             onClick={() => setBookingMode("combined")}
@@ -143,15 +132,13 @@ const ListingDetailPage = () => {
                 : "bg-gray-100"
             }`}
           >
-            🛏️+🚗 {t("stay_and_ride")}
+            🛏️+🚗 Stay + Ride
           </button>
         </div>
-
+        {/* 📝 Description & Rules */}
         <div className="mt-6 space-y-4">
           <div>
-            <h2 className="text-xl font-semibold mb-1">
-              📝 {t("description")}
-            </h2>
+            <h2 className="text-xl font-semibold mb-1">📝 Description</h2>
             <p className="text-gray-700 whitespace-pre-line">
               {listing.description}
             </p>
@@ -159,9 +146,7 @@ const ListingDetailPage = () => {
 
           {listing.houseRules && (
             <div>
-              <h2 className="text-xl font-semibold mb-1">
-                📜 {t("house_rules")}
-              </h2>
+              <h2 className="text-xl font-semibold mb-1">📜 House Rules</h2>
               <p className="text-gray-700 whitespace-pre-line">
                 {listing.houseRules}
               </p>
@@ -169,19 +154,19 @@ const ListingDetailPage = () => {
           )}
         </div>
 
+        {/* ⭐ Reviews */}
         <div className="mt-8 space-y-4">
           <ReviewList listingId={listing._id} />
         </div>
-
         <div className="mt-10 border-t pt-6">
           {loadingTrips ? (
             <p className="text-center text-gray-500 mt-6">
-              🔄 {t("finding_rides")}
+              🔄 Finding nearby rides...
             </p>
           ) : suggestedTrips.length > 0 ? (
             <>
               <h3 className="text-xl font-bold text-gray-800 mb-4">
-                🚗 {t("suggested_rides")}
+                🚗 Suggested Rides
               </h3>
               <RideResults
                 trips={suggestedTrips}
@@ -191,12 +176,13 @@ const ListingDetailPage = () => {
             </>
           ) : (
             <p className="text-center text-gray-400 mt-6 italic">
-              😔 {t("no_rides_found")}
+              😔 No rides found for this destination.
             </p>
           )}
         </div>
       </div>
 
+      {/* Right: Booking Form */}
       <div className="bg-white border rounded-lg p-6 shadow-md h-fit sticky top-20">
         <BookingForm
           listingId={listing._id}
@@ -208,6 +194,7 @@ const ListingDetailPage = () => {
         />
       </div>
 
+      {/* ✅ Modal Image Viewer */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
