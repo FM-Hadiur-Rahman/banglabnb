@@ -1,95 +1,89 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t, i18n } = useTranslation();
+
   return (
     <footer className="bg-green-700 text-white pt-10 pb-6 px-4">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
           <h2 className="text-xl font-bold mb-2">BanglaBnB</h2>
-          <p className="text-sm text-gray-200">
-            Discover unique stays across Bangladesh hosted by real people.
-          </p>
-          {/* 🔐 Trust Badge */}
+          <p className="text-sm text-gray-200">{t("footer.description")}</p>
           <div className="mt-3 text-xs bg-green-800 px-3 py-1 inline-block rounded-full font-semibold">
-            🔒 Verified by National ID
+            🔒 {t("footer.verified_badge")}
           </div>
         </div>
 
         {/* Explore */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Explore</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("footer.explore")}</h3>
           <ul className="space-y-1 text-sm text-gray-100">
             <li>
-              <Link to="/listings">Find a Stay</Link>
+              <Link to="/listings">{t("footer.find_stay")}</Link>
             </li>
             <li>
-              <Link to="/register">Become a Host</Link>
+              <Link to="/register">{t("footer.become_host")}</Link>
             </li>
             <li>
-              <Link to="/help">Help Center</Link>
+              <Link to="/help">{t("footer.help_center")}</Link>
             </li>
             <li>
-              <Link to="/contact">Contact Us</Link>
+              <Link to="/contact">{t("footer.contact_us")}</Link>
             </li>
           </ul>
         </div>
 
         {/* Legal */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Legal</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("footer.legal")}</h3>
           <ul className="space-y-1 text-sm text-gray-100">
             <li>
-              <Link to="/terms">Terms & Conditions</Link>
+              <Link to="/terms">{t("footer.terms")}</Link>
             </li>
             <li>
-              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/privacy">{t("footer.privacy")}</Link>
             </li>
             <li>
-              <Link to="/refund-policy">Refund Policy</Link>
+              <Link to="/refund-policy">{t("footer.refund")}</Link>
             </li>
           </ul>
         </div>
 
-        {/* Contact + Language + Apps */}
+        {/* Support */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Support</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("footer.support")}</h3>
           <p className="text-sm">📧 help@banglabnb.com</p>
           <p className="text-sm">📱 WhatsApp: +880-1XXX-XXXXXX</p>
           <Link to="/emergency" className="hover:text-red-600 font-semibold">
-            🚨 Emergency Info
+            🚨 {t("footer.emergency")}
           </Link>
 
-          {/* 🌍 Language Selector */}
           <div className="mt-3">
             <label htmlFor="lang" className="text-sm font-medium">
-              🌍 Language:
+              🌍 {t("footer.language")}
             </label>
             <select
               id="lang"
               className="ml-2 text-black text-sm px-2 py-1 rounded"
-              defaultValue="en"
+              value={i18n.language}
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
             >
               <option value="en">English</option>
               <option value="bn">বাংলা</option>
             </select>
           </div>
 
-          {/* 📱 App Badges */}
           <div className="flex gap-2 mt-4">
-            <img src="/icon.png" alt="Get it on Google Play" className="h-10" />
-            <img
-              src="/icon.png"
-              alt="Download on the App Store"
-              className="h-10"
-            />
+            <img src="/icon.png" alt="Google Play" className="h-10" />
+            <img src="/icon.png" alt="App Store" className="h-10" />
           </div>
         </div>
       </div>
 
-      {/* Bottom Line */}
       <div className="text-center text-sm text-gray-200 mt-8 border-t border-green-600 pt-4">
-        &copy; {new Date().getFullYear()} BanglaBnB. All rights reserved.
+        &copy; {new Date().getFullYear()} BanglaBnB. {t("footer.rights")}
       </div>
     </footer>
   );

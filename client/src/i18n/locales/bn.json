@@ -168,5 +168,22 @@
   "district.Lalmonirhat": "লালমনিরহাট",
   "district.Nilphamari": "নীলফামারী",
   "district.Panchagarh": "পঞ্চগড়",
-  "district.Thakurgaon": "ঠাকুরগাঁও"
+  "district.Thakurgaon": "ঠাকুরগাঁও",
+  "footer": {
+    "description": "বাংলাদেশজুড়ে স্বতন্ত্র ও আসল মানুষের হোস্ট করা থাকার স্থান খুঁজে বের করুন।",
+    "verified_badge": "জাতীয় পরিচয়পত্র দ্বারা যাচাইকৃত",
+    "explore": "এক্সপ্লোর",
+    "find_stay": "থাকার জায়গা খুঁজুন",
+    "become_host": "হোস্ট হন",
+    "help_center": "সহায়তা কেন্দ্র",
+    "contact_us": "যোগাযোগ করুন",
+    "legal": "আইনি",
+    "terms": "শর্তাবলী",
+    "privacy": "গোপনীয়তা নীতি",
+    "refund": "ফেরত নীতি",
+    "support": "সহায়তা",
+    "emergency": "জরুরি তথ্য",
+    "language": "ভাষা",
+    "rights": "সকল অধিকার সংরক্ষিত।"
+  }
 }

@@ -167,5 +167,22 @@
   "district.Lalmonirhat": "Lalmonirhat",
   "district.Nilphamari": "Nilphamari",
   "district.Panchagarh": "Panchagarh",
-  "district.Thakurgaon": "Thakurgaon"
+  "district.Thakurgaon": "Thakurgaon",
+  "footer": {
+    "description": "Discover unique stays across Bangladesh hosted by real people.",
+    "verified_badge": "Verified by National ID",
+    "explore": "Explore",
+    "find_stay": "Find a Stay",
+    "become_host": "Become a Host",
+    "help_center": "Help Center",
+    "contact_us": "Contact Us",
+    "legal": "Legal",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "refund": "Refund Policy",
+    "support": "Support",
+    "emergency": "Emergency Info",
+    "language": "Language",
+    "rights": "All rights reserved."
+  }
 }

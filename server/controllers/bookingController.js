@@ -243,67 +243,77 @@ exports.checkIn = async (req, res) => {
 };
 
 exports.checkOut = async (req, res) => {
-  const booking = await Booking.findById(req.params.id)
-    .populate("guestId", "email name")
-    .populate("listingId", "title hostId price");
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate("guestId", "email name")
+      .populate("listingId", "title hostId price");
 
-  if (!booking || booking.guestId._id.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: "Unauthorized" });
+    if (
+      !booking ||
+      booking.guestId._id.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const now = new Date();
+    if (now < new Date(booking.dateTo)) {
+      return res.status(400).json({ message: "Too early to check out" });
+    }
+
+    booking.checkOutAt = now;
+    await booking.save();
+
+    // ✅ Safe email logic
+    const guestReviewLink = `${process.env.CLIENT_URL}/dashboard/reviews?booking=${booking._id}`;
+    await sendEmail({
+      to: booking.guestId.email,
+      subject: "📝 Leave a Review for Your Stay",
+      html: `
+        <div style="font-family:sans-serif;">
+          <h2>Thanks for staying at ${booking.listingId.title}!</h2>
+          <p>Your checkout is now complete. We'd love to hear your feedback.</p>
+          <a href="${guestReviewLink}" style="padding:10px 16px; background:#22c55e; color:white; border-radius:6px; text-decoration:none;">Leave a Review</a>
+          <p style="font-size:12px; color:gray; margin-top:10px;">Please leave your review within 7 days.</p>
+        </div>
+      `,
+    });
+
+    const host = await User.findById(booking.listingId.hostId).select(
+      "email name"
+    );
+    const earnings = booking.listingId.price;
+    const platformFee = earnings * 0.1;
+    const payout = earnings - platformFee;
+
+    await sendEmail({
+      to: host.email,
+      subject: `💰 Booking Completed: Guest Checked Out`,
+      html: `
+        <div style="font-family:sans-serif;">
+          <h2>Your guest has checked out from <strong>${
+            booking.listingId.title
+          }</strong></h2>
+          <p><strong>Guest:</strong> ${booking.guestId.name}</p>
+          <p><strong>Total Nights:</strong> ${
+            (new Date(booking.dateTo) - new Date(booking.dateFrom)) /
+            (1000 * 3600 * 24)
+          }</p>
+          <p><strong>Total Earned:</strong> ৳${earnings.toFixed(2)}</p>
+          <p><strong>Platform Fee:</strong> ৳${platformFee.toFixed(2)}</p>
+          <p><strong>Payout to You:</strong> ৳${payout.toFixed(2)}</p>
+          <p>We’ll process your payout shortly.</p>
+        </div>
+      `,
+    });
+
+    // ✅ Always send a response
+    return res.status(200).json({ message: "Checked out", booking });
+  } catch (error) {
+    console.error("❌ Checkout failed:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
-
-  const now = new Date();
-  if (now < new Date(booking.dateTo)) {
-    return res.status(400).json({ message: "Too early to check out" });
-  }
-
-  booking.checkOutAt = now;
-  await booking.save();
-
-  // 📩 Send Email to Guest
-  const guestReviewLink = `${process.env.CLIENT_URL}/dashboard/reviews?booking=${booking._id}`;
-  await sendEmail({
-    to: booking.guestId.email,
-    subject: "📝 Leave a Review for Your Stay",
-    html: `
-      <div style="font-family:sans-serif;">
-        <h2>Thanks for staying at ${booking.listingId.title}!</h2>
-        <p>Your checkout is now complete. We'd love to hear your feedback.</p>
-        <a href="${guestReviewLink}" style="padding:10px 16px; background:#22c55e; color:white; border-radius:6px; text-decoration:none;">Leave a Review</a>
-        <p style="font-size:12px; color:gray; margin-top:10px;">Please leave your review within 7 days.</p>
-      </div>
-    `,
-  });
-
-  // 📩 Send Email to Host with Earnings
-  const host = await User.findById(booking.listingId.hostId).select(
-    "email name"
-  );
-  const earnings = booking.listingId.price;
-  const platformFee = earnings * 0.1;
-  const payout = earnings - platformFee;
-
-  await sendEmail({
-    to: host.email,
-    subject: `💰 Booking Completed: Guest Checked Out`,
-    html: `
-      <div style="font-family:sans-serif;">
-        <h2>Your guest has checked out from <strong>${
-          booking.listingId.title
-        }</strong></h2>
-        <p><strong>Guest:</strong> ${booking.guestId.name}</p>
-        <p><strong>Total Nights:</strong> ${
-          (new Date(booking.dateTo) - new Date(booking.dateFrom)) /
-          (1000 * 3600 * 24)
-        }</p>
-        <p><strong>Total Earned:</strong> ৳${earnings.toFixed(2)}</p>
-        <p><strong>Platform Fee:</strong> ৳${platformFee.toFixed(2)}</p>
-        <p><strong>Payout to You:</strong> ৳${payout.toFixed(2)}</p>
-        <p>We’ll process your payout shortly.</p>
-      </div>
-    `,
-  });
-
-  res.json({ message: "Checked out", booking });
 };
 
 exports.requestModification = async (req, res) => {
