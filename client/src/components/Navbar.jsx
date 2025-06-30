@@ -22,7 +22,7 @@ const Navbar = () => {
 
   const handleLanguageChange = (lng) => {
     i18n.changeLanguage(lng);
-    localStorage.setItem("lng", lng); // optional: persist choice
+    localStorage.setItem("lng", lng);
   };
 
   const getDashboardPath = () => {
@@ -31,6 +31,7 @@ const Navbar = () => {
     if (user.role === "driver") return "/dashboard/driver";
     return "/dashboard";
   };
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/config`)
       .then((res) => res.json())
@@ -58,12 +59,12 @@ const Navbar = () => {
       const newRole = res.data.newRole;
       const updatedUser = { ...user, role: newRole };
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      toast.success(`✅ Switched to ${newRole.toUpperCase()} role`);
+      toast.success(`✅ ${t("switch_role")} → ${newRole.toUpperCase()}`);
       if (newRole === "admin") navigate("/admin/dashboard");
       else if (newRole === "host") navigate("/host/dashboard");
       else navigate("/dashboard");
     } catch (err) {
-      toast.error("❌ Failed to switch role");
+      toast.error(t("error_switch_role"));
     }
   };
 
@@ -108,7 +109,6 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Desktop Nav */}
         <nav className="hidden sm:flex items-center space-x-6 text-gray-700">
           {isLoggedIn && (
             <Link to="/notifications" className="relative group">
@@ -120,7 +120,6 @@ const Navbar = () => {
               )}
             </Link>
           )}
-          {/* Language Switcher */}
           <div className="ml-4">
             <select
               value={i18n.language}
@@ -131,7 +130,6 @@ const Navbar = () => {
               <option value="bn">🇧🇩 বাংলা</option>
             </select>
           </div>
-
           {isLoggedIn ? (
             <div className="relative" ref={menuRef}>
               <button
@@ -144,17 +142,7 @@ const Navbar = () => {
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <span>{user.name}</span>
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M19 9l-7 7-7-7" />
-                </svg>
               </button>
-
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 min-w-[13rem] bg-white border rounded shadow-lg z-50 whitespace-nowrap">
                   <div
@@ -169,27 +157,27 @@ const Navbar = () => {
                       onClick={handleRoleSwitch}
                       className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
                     >
-                      🔄 Switch to {user.role === "host" ? "User" : "Host"} Mode
+                      🔄 {t("switch_role")}
                     </button>
                   )}
                   <Link
                     to={getDashboardPath()}
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
                   <Link
                     to="/my-account"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    👤 My Account
+                    👤 {t("my_account")}
                   </Link>
                   {user.role === "host" && (
                     <Link
                       to="/host/create"
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      ➕ Create Listing
+                      ➕ {t("create_listing")}
                     </Link>
                   )}
                   {user.role === "user" && (
@@ -197,29 +185,20 @@ const Navbar = () => {
                       to="/my-bookings"
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      📅 My Bookings
+                      📅 {t("my_bookings")}
                     </Link>
                   )}
-                  {["user", "host", "driver"].includes(user.role) && (
-                    <Link
-                      to="/my-referrals"
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      🎁 My Referrals
-                    </Link>
-                  )}
-
                   <Link
                     to="/wishlist"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    ❤️ My Wishlist
+                    ❤️ Wishlist
                   </Link>
                   <Link
                     to="/profile"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    🙍 Edit Profile
+                    🙍 {t("edit_profile")}
                   </Link>
                   <button
                     onClick={() => {
@@ -228,7 +207,7 @@ const Navbar = () => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
-                    Logout
+                    {t("logout")}
                   </button>
                 </div>
               )}
@@ -236,128 +215,15 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login" className="hover:text-green-600">
-                Login
+                {t("login")}
               </Link>
               <Link to="/register" className="hover:text-green-600">
-                Register
+                {t("register")}
               </Link>
             </>
           )}
         </nav>
-
-        {/* Mobile Hamburger */}
-        <div className="sm:hidden">
-          <button
-            className={`hamburger w-8 h-8 flex flex-col justify-center items-center space-y-1 ${
-              mobileOpen ? "open" : ""
-            }`}
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            <span className="w-6 h-0.5 bg-gray-700" />
-            <span className="w-6 h-0.5 bg-gray-700" />
-            <span className="w-6 h-0.5 bg-gray-700" />
-          </button>
-        </div>
       </div>
-
-      {/* Mobile Dropdown */}
-      {mobileOpen && (
-        <div className="fixed top-[60px] right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden">
-          {isLoggedIn ? (
-            <>
-              <div className="flex items-center space-x-2 border-b pb-2 mb-2">
-                <img
-                  src={user.avatar || "/default-avatar.png"}
-                  alt="Avatar"
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-green-700">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user.role.toUpperCase()}
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                to={getDashboardPath()}
-                className="block hover:text-green-600"
-              >
-                Dashboard
-              </Link>
-              <Link to="/my-account" className="block hover:text-green-600">
-                My Account
-              </Link>
-              <Link to="/notifications" className="block hover:text-green-600">
-                🔔 Notifications{" "}
-                {unreadCount > 0 && (
-                  <span className="ml-2 text-xs text-red-600 font-semibold">
-                    ({unreadCount})
-                  </span>
-                )}
-              </Link>
-              {user.role === "host" && (
-                <Link to="/host/create" className="block hover:text-green-600">
-                  ➕ Create Listing
-                </Link>
-              )}
-              {user.role === "user" && (
-                <Link to="/my-bookings" className="block hover:text-green-600">
-                  📅 My Bookings
-                </Link>
-              )}
-              {["user", "host", "driver"].includes(user.role) && (
-                <Link
-                  to="/my-referrals"
-                  className="block px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  🎁 My Referrals
-                </Link>
-              )}
-
-              <button
-                onClick={handleRoleSwitch}
-                className="block text-left w-full text-blue-600"
-              >
-                🔄 Switch Role
-              </button>
-
-              <button
-                onClick={() => {
-                  localStorage.clear();
-                  navigate("/login");
-                }}
-                className="block text-left w-full text-red-600"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="block hover:text-green-600">
-                Login
-              </Link>
-              <Link to="/register" className="block hover:text-green-600">
-                Register
-              </Link>
-            </>
-          )}
-          {/* Language Switch (Mobile) */}
-          <div className="pt-4 border-t mt-4">
-            <label className="block text-xs text-gray-500 mb-1">Language</label>
-            <select
-              value={i18n.language}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 w-full"
-            >
-              <option value="en">🇬🇧 English</option>
-              <option value="bn">🇧🇩 বাংলা</option>
-            </select>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
