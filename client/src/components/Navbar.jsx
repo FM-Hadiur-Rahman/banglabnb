@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -17,6 +18,12 @@ const Navbar = () => {
 
   const token = localStorage.getItem("token");
   const isLoggedIn = user && token && user.isVerified;
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageChange = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem("lng", lng); // optional: persist choice
+  };
 
   const getDashboardPath = () => {
     if (user.role === "admin") return "/admin/dashboard";
@@ -113,6 +120,17 @@ const Navbar = () => {
               )}
             </Link>
           )}
+          {/* Language Switcher */}
+          <div className="ml-4">
+            <select
+              value={i18n.language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              <option value="en">🇬🇧 English</option>
+              <option value="bn">🇧🇩 বাংলা</option>
+            </select>
+          </div>
 
           {isLoggedIn ? (
             <div className="relative" ref={menuRef}>
@@ -326,6 +344,18 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          {/* Language Switch (Mobile) */}
+          <div className="pt-4 border-t mt-4">
+            <label className="block text-xs text-gray-500 mb-1">Language</label>
+            <select
+              value={i18n.language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1 w-full"
+            >
+              <option value="en">🇬🇧 English</option>
+              <option value="bn">🇧🇩 বাংলা</option>
+            </select>
+          </div>
         </div>
       )}
     </header>
