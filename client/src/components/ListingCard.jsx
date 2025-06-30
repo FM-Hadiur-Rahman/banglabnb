@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { HeartIcon as OutlineHeart } from "@heroicons/react/24/outline";
 import { HeartIcon as SolidHeart } from "@heroicons/react/24/solid";
+import { useTranslation } from "react-i18next";
 
 const ListingCard = ({ listing }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const { t, i18n } = useTranslation();
+
   const token = localStorage.getItem("token");
+
+  const toBanglaNumber = (num) =>
+    String(num).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
 
   // Optional: preload wishlist status from local storage or API
   useEffect(() => {
@@ -66,7 +72,13 @@ const ListingCard = ({ listing }) => {
 
         <h3 className="text-lg font-bold mt-2">{listing.title}</h3>
         <p className="text-gray-500">{listing.location?.address}</p>
-        <p className="text-green-600 font-semibold">৳{listing.price}/night</p>
+        <p className="text-green-600 font-semibold">
+          ৳
+          {i18n.language === "bn"
+            ? toBanglaNumber(listing.price)
+            : listing.price}
+          /{t("price_per_night_unit") || "night"}
+        </p>
       </div>
     </Link>
   );

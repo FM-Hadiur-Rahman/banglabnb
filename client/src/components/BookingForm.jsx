@@ -1,10 +1,9 @@
-// ✅ BookingForm.jsx — Full Version with Promocode Support
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DateRange } from "react-date-range";
 import { addDays } from "date-fns";
 import { toast, ToastContainer } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -17,6 +16,7 @@ const BookingForm = ({
   bookingMode = "stay",
   selectedTrip = null,
 }) => {
+  const { t } = useTranslation();
   const [range, setRange] = useState([
     {
       startDate: new Date(),
@@ -90,10 +90,12 @@ const BookingForm = ({
         }
       );
       setPromoDiscount(res.data.discount);
-      setPromoMessage(`✅ Discount Applied: ৳${res.data.discount}`);
+      setPromoMessage(
+        t("booking_form.discount_applied", { discount: res.data.discount })
+      );
     } catch (err) {
       setPromoDiscount(0);
-      setPromoMessage(err.response?.data?.message || "❌ Invalid promo code");
+      setPromoMessage(t("booking_form.invalid_code"));
     }
   };
 
@@ -137,7 +139,7 @@ const BookingForm = ({
           toast.success("✅ Redirecting to combined payment...");
           window.location.href = combinedRes.data.gatewayUrl;
         } else {
-          toast.error("❌ Combined payment URL not received.");
+          toast.error(t("booking.payment_url_missing"));
         }
       } catch (err) {
         toast.error("❌ Failed to initiate combined booking payment");
@@ -146,7 +148,7 @@ const BookingForm = ({
       return;
     }
 
-    // Stay-only flow
+    // Stay-only
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/bookings`,
@@ -181,7 +183,7 @@ const BookingForm = ({
         toast.success("✅ Redirecting to payment gateway...");
         window.location.href = paymentRes.data.url;
       } else {
-        toast.error("❌ Payment URL not received.");
+        toast.error(t("booking.payment_url_missing"));
       }
     } catch (err) {
       const msg =
@@ -200,7 +202,8 @@ const BookingForm = ({
     >
       <ToastContainer />
       <div className="text-2xl font-semibold">
-        ৳{price} <span className="text-sm">night</span>
+        {t("booking_form.price_per_night", { price })}{" "}
+        <span className="text-sm">{t("price_per_night_unit")}</span>
       </div>
 
       <DateRange
@@ -217,16 +220,18 @@ const BookingForm = ({
       <div className="flex gap-4 text-sm mt-2">
         <div className="flex items-center gap-1">
           <div className="w-4 h-4 bg-[#f43f5e] rounded"></div>
-          <span>Selected</span>
+          <span>{t("search.add_date")}</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-4 h-4 bg-[#9333ea] rounded"></div>
-          <span>Unavailable</span>
+          <span>{t("booking_form.summary.promo_discount")}</span>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Guests</label>
+        <label className="block text-sm font-medium">
+          {t("booking_form.guests")}
+        </label>
         <input
           type="number"
           value={guests}
@@ -237,19 +242,20 @@ const BookingForm = ({
           className="w-full border px-3 py-2 rounded"
         />
         <p className="text-sm text-gray-500">
-          Maximum {maxGuests} guest{maxGuests > 1 && "s"} allowed
+          {t("booking_form.max_guests_note", { max: maxGuests })}
         </p>
       </div>
 
-      {/* Promo Code */}
       <div className="mt-4">
-        <label className="block text-sm font-medium">Promo Code</label>
+        <label className="block text-sm font-medium">
+          {t("booking_form.promo_code")}
+        </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={promoCode}
             onChange={(e) => setPromoCode(e.target.value)}
-            placeholder="Enter promo code"
+            placeholder={t("booking_form.promo_placeholder")}
             className="w-full border px-3 py-2 rounded"
           />
           <button
@@ -257,7 +263,7 @@ const BookingForm = ({
             onClick={handleApplyPromo}
             className="bg-blue-600 text-white px-3 py-2 rounded"
           >
-            Apply
+            {t("booking_form.apply")}
           </button>
         </div>
         {promoMessage && (
@@ -269,33 +275,31 @@ const BookingForm = ({
         type="submit"
         className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded"
       >
-        Reserve
+        {t("booking_form.reserve")}
       </button>
 
       {nights > 0 && (
         <div className="border-t pt-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span>
-              ৳{price} x {nights} night{nights > 1 && "s"}
-            </span>
+            <span>{t("booking_form.summary.subtotal", { price, nights })}</span>
             <span>৳{price * nights}</span>
           </div>
           <div className="flex justify-between">
-            <span>Service fee</span>
+            <span>{t("booking_form.summary.service_fee")}</span>
             <span>৳{serviceFee}</span>
           </div>
           <div className="flex justify-between">
-            <span>Taxes</span>
+            <span>{t("booking_form.summary.tax")}</span>
             <span>৳{tax}</span>
           </div>
           {promoDiscount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Promo Discount</span>
+              <span>{t("booking_form.summary.promo_discount")}</span>
               <span>- ৳{promoDiscount}</span>
             </div>
           )}
           <div className="border-t pt-2 font-semibold flex justify-between text-lg">
-            <span>Total</span>
+            <span>{t("booking_form.summary.total")}</span>
             <span>৳{total - promoDiscount}</span>
           </div>
         </div>
@@ -304,11 +308,11 @@ const BookingForm = ({
       {bookingMode === "combined" && selectedTrip && (
         <div className="mt-4 border-t pt-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span>Ride Fare (1 seat)</span>
+            <span>{t("booking_form.ride_fare")}</span>
             <span>৳{selectedTrip.farePerSeat}</span>
           </div>
           <div className="border-t pt-2 font-semibold flex justify-between text-lg">
-            <span>Combined Total</span>
+            <span>{t("booking_form.summary.combined_total")}</span>
             <span>৳{total - promoDiscount + selectedTrip.farePerSeat}</span>
           </div>
         </div>

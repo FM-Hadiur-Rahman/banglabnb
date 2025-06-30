@@ -4,7 +4,8 @@ import { DateRange } from "react-date-range";
 import { isWithinInterval } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { toast } from "react-toastify"; // ✅ if not already imported
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const BookingCard = ({
   booking,
@@ -13,6 +14,7 @@ const BookingCard = ({
   onLeaveReview,
   onRequestModification,
 }) => {
+  const { t } = useTranslation();
   const [showModifyForm, setShowModifyForm] = useState(false);
   const [newRange, setNewRange] = useState([
     {
@@ -44,7 +46,7 @@ const BookingCard = ({
       )
       .then((res) => {
         const ranges = res.data
-          .filter((b) => b._id !== booking._id) // exclude current booking
+          .filter((b) => b._id !== booking._id)
           .map((b) => ({
             startDate: new Date(b.dateFrom),
             endDate: new Date(b.dateTo),
@@ -76,16 +78,17 @@ const BookingCard = ({
       if (res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        toast.error("⚠️ Payment gateway URL missing.");
+        toast.error(t("booking.payment_url_missing"));
       }
     } catch (err) {
-      toast.error("❌ Failed to initiate extra payment");
+      toast.error(t("booking.extra_payment_failed"));
       console.error(err);
     }
   };
+
   const handleClaimRefund = async (bookingId) => {
     try {
-      const res = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payment/claim-refund`,
         { bookingId },
         {
@@ -94,11 +97,11 @@ const BookingCard = ({
           },
         }
       );
-      toast.success("✅ Refund claim submitted");
+      toast.success(t("booking.refund_claimed"));
       window.location.reload();
     } catch (err) {
-      console.error("❌ Refund claim failed", err);
-      toast.error("Refund claim failed");
+      console.error(t("booking.refund_failed"), err);
+      toast.error(t("booking.refund_failed"));
     }
   };
 
@@ -112,10 +115,9 @@ const BookingCard = ({
         📅 {dateFrom.toLocaleDateString()} → {dateTo.toLocaleDateString()}
       </p>
 
-      {/* Show modification status */}
       {booking.modificationRequest?.status === "requested" && (
         <p className="text-sm text-yellow-600 mt-2">
-          🔄 Date change requested:{" "}
+          🔄 {t("booking.requested_change")}:{" "}
           {new Date(
             booking.modificationRequest.requestedDates.from
           ).toLocaleDateString()}{" "}
@@ -127,36 +129,43 @@ const BookingCard = ({
       )}
       {booking.modificationRequest?.status === "accepted" && (
         <p className="text-sm text-green-600 mt-2">
-          ✅ Your date change was accepted
+          ✅ {t("booking.change_accepted")}
         </p>
       )}
       {booking.modificationRequest?.status === "rejected" && (
         <p className="text-sm text-red-600 mt-2">
-          ❌ Your date change was rejected
+          ❌ {t("booking.change_rejected")}
         </p>
       )}
 
       <p className="text-sm text-gray-600">
-        💰 ৳{booking.listingId?.price} / night
+        💰 ৳{booking.listingId?.price} / {t("price_per_night_unit")}
       </p>
+
       {booking.extraPayment?.required &&
         booking.extraPayment?.status === "pending" && (
           <div className="bg-yellow-100 text-yellow-800 p-3 rounded text-sm">
-            🛎 Extra payment of ৳{booking.extraPayment.amount} required.
+            🛎{" "}
+            {t("booking.extra_required", {
+              amount: booking.extraPayment.amount,
+            })}
             <button
               onClick={() =>
                 initiateExtraPayment(booking._id, booking.extraPayment.amount)
               }
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded ml-3"
             >
-              Pay Now
+              {t("booking.pay_now")}
             </button>
           </div>
         )}
+
       {booking.extraPayment?.status === "refund_pending" && (
         <div className="bg-green-100 text-green-700 p-3 rounded text-sm mt-2">
-          💸 You will be refunded ৳{Math.abs(booking.extraPayment.amount)} due
-          to the reduced booking duration.
+          💸{" "}
+          {t("booking.refund_notice", {
+            amount: Math.abs(booking.extraPayment.amount),
+          })}
         </div>
       )}
       {booking.extraPayment?.status === "refund_pending" &&
@@ -165,7 +174,7 @@ const BookingCard = ({
             onClick={() => handleClaimRefund(booking._id)}
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded mt-2"
           >
-            💸 Claim Refund
+            💸 {t("booking.claim_refund")}
           </button>
         )}
 
@@ -176,7 +185,7 @@ const BookingCard = ({
               onClick={() => setShowModifyForm(!showModifyForm)}
               className="px-3 py-1 bg-purple-500 text-white text-sm rounded"
             >
-              ✏️ Request Date Change
+              ✏️ {t("booking.request_change")}
             </button>
 
             {showModifyForm && (
@@ -199,12 +208,11 @@ const BookingCard = ({
                   disabledDay={isDateBlocked}
                   rangeColors={["#f43f5e"]}
                 />
-
                 <button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded"
                 >
-                  Submit Modification Request
+                  {t("booking.submit_change")}
                 </button>
               </form>
             )}
@@ -216,7 +224,7 @@ const BookingCard = ({
             className="px-3 py-1 bg-blue-500 text-white text-sm rounded"
             onClick={() => onCheckIn(booking._id)}
           >
-            ✅ Check In
+            ✅ {t("booking.check_in")}
           </button>
         )}
         {canCheckOut && (
@@ -224,7 +232,7 @@ const BookingCard = ({
             className="px-3 py-1 bg-green-600 text-white text-sm rounded"
             onClick={() => onCheckOut(booking._id)}
           >
-            ✅ Check Out
+            ✅ {t("booking.check_out")}
           </button>
         )}
         {canReview && (
@@ -232,7 +240,7 @@ const BookingCard = ({
             className="px-3 py-1 bg-yellow-500 text-white text-sm rounded"
             onClick={() => onLeaveReview(booking)}
           >
-            ✍️ Leave Review
+            ✍️ {t("booking.leave_review")}
           </button>
         )}
       </div>
