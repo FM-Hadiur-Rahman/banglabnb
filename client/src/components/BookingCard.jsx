@@ -38,6 +38,8 @@ const BookingCard = ({
     booking.modificationRequest?.status !== "requested";
 
   useEffect(() => {
+    if (!booking?.listingId?._id) return; // ✅ Guard clause to prevent error
+
     axios
       .get(
         `${import.meta.env.VITE_API_URL}/api/bookings/listing/${
