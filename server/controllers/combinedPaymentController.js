@@ -21,6 +21,13 @@ exports.initiateCombinedPayment = async (req, res) => {
   booking.transactionId = transactionId;
   await booking.save();
 
+  // Safely extract guest info
+  const guest = booking.guestId;
+  const guestName = guest?.name || "Guest";
+  const guestEmail = guest?.email || "guest@example.com";
+  const guestPhone = guest?.phone || "01700000000";
+  const guestAddress = guest?.district || "Bangladesh";
+
   const postData = {
     store_id: process.env.SSLC_STORE_ID,
     store_passwd: process.env.SSLC_STORE_PASS,
@@ -32,10 +39,10 @@ exports.initiateCombinedPayment = async (req, res) => {
     cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
     ipn_url: `${process.env.API_URL}/api/combined-payment/success`,
 
-    cus_name: booking.guestId.name,
-    cus_email: booking.guestId.email,
-    cus_add1: "Bangladesh",
-    cus_phone: booking.guestId.phone,
+    cus_name: guestName,
+    cus_email: guestEmail,
+    cus_add1: guestAddress,
+    cus_phone: guestPhone,
 
     product_name: booking.combined ? "Stay + Ride" : "Stay Only",
     product_category: "CombinedBooking",

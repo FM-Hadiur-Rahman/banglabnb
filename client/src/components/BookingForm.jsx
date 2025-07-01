@@ -115,6 +115,18 @@ const BookingForm = ({
     e.preventDefault();
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
+    // ⛔ Check if selectedTrip is in the past
+    if (
+      bookingMode === "combined" &&
+      selectedTrip &&
+      new Date(selectedTrip.date) < new Date()
+    ) {
+      toast.error(
+        "🚫 Selected trip is in the past. Please choose a valid trip."
+      );
+      return;
+    }
+
     const finalAmount =
       total -
       promoDiscount +
@@ -142,7 +154,7 @@ const BookingForm = ({
 
         const combinedRes = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/combined-payment/initiate`,
-          { bookingId, amount: finalAmount },
+          { bookingId, amount },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
