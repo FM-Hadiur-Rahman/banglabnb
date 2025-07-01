@@ -154,7 +154,16 @@ const BookingForm = ({
 
         const combinedRes = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/combined-payment/initiate`,
-          { bookingId, amount },
+          {
+            bookingId,
+            amount,
+            customer: {
+              name: user.name,
+              email: user.email,
+              address: user.address || "Bangladesh",
+              phone: user.phone,
+            },
+          },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

@@ -9,69 +9,58 @@ const qs = require("qs");
 const axios = require("axios");
 
 exports.initiateCombinedPayment = async (req, res) => {
-  const { bookingId, amount } = req.body;
-
-  const booking = await Booking.findById(bookingId)
-    .populate("listingId")
-    .populate("guestId");
-
-  if (!booking) return res.status(404).json({ message: "Booking not found" });
-
-  const transactionId = `COMBINED_${bookingId}_${Date.now()}`;
-  booking.transactionId = transactionId;
-  await booking.save();
-
-  // Safely extract guest info
-  const guest = booking.guestId;
-  const guestName = guest?.name || "Guest";
-  const guestEmail = guest?.email || "guest@example.com";
-  const guestPhone = guest?.phone || "01700000000";
-  const guestAddress = guest?.district || "Bangladesh";
-
-  const postData = {
-    store_id: process.env.SSLC_STORE_ID,
-    store_passwd: process.env.SSLC_STORE_PASS,
-    total_amount: amount,
-    currency: "BDT",
-    tran_id: transactionId,
-    success_url: `${process.env.API_URL}/api/combined-payment/success`,
-    fail_url: `${process.env.CLIENT_URL}/payment-fail`,
-    cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
-    ipn_url: `${process.env.API_URL}/api/combined-payment/success`,
-
-    cus_name: guestName,
-    cus_email: guestEmail,
-    cus_add1: guestAddress,
-    cus_phone: guestPhone,
-
-    product_name: booking.combined ? "Stay + Ride" : "Stay Only",
-    product_category: "CombinedBooking",
-    product_profile: "general",
-  };
+  const { bookingId, amount, customer } = req.body;
 
   try {
-    const sslRes = await axios.post(
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const transactionId = `COMBINED_${bookingId}_${Date.now()}`;
+    booking.transactionId = transactionId;
+    await booking.save();
+
+    const data = {
+      store_id: process.env.SSLCOMMERZ_STORE_ID,
+      store_passwd: process.env.SSLCOMMERZ_STORE_PASS,
+      total_amount: amount,
+      currency: "BDT",
+      tran_id: transactionId,
+      success_url: `${process.env.API_URL}/api/combined-payment/success`,
+      fail_url: `${process.env.CLIENT_URL}/payment-fail`,
+      cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
+      ipn_url: `${process.env.API_URL}/api/combined-payment/ipn`,
+      cus_name: customer?.name || "Guest",
+      cus_email: customer?.email || "guest@example.com",
+      cus_add1: customer?.address || "Bangladesh",
+      cus_city: "Dhaka",
+      cus_postcode: "1200",
+      cus_country: "Bangladesh",
+      cus_phone: customer?.phone || "01700000000",
+      shipping_method: "NO",
+      product_name: "BanglaBnB Stay + Ride",
+      product_category: "Combined",
+      product_profile: "general",
+    };
+
+    const response = await axios.post(
       process.env.SSLCOMMERZ_API_URL,
-      qs.stringify(postData),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
+      qs.stringify(data),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
-    if (sslRes.data?.status === "SUCCESS") {
-      return res.json({ gatewayUrl: sslRes.data.GatewayPageURL });
-    } else {
-      return res
-        .status(400)
-        .json({ message: "SSLCommerz initiation failed", data: sslRes.data });
+    if (!response.data.GatewayPageURL) {
+      return res.status(400).json({
+        message: "SSLCommerz initiation failed",
+        data: response.data,
+      });
     }
+
+    return res.json({ gatewayUrl: response.data.GatewayPageURL });
   } catch (err) {
-    console.error("❌ SSLCommerz error:", err.message);
-    res
+    console.error("❌ SSLCommerz initiation error:", err.message);
+    return res
       .status(500)
-      .json({ message: "Payment gateway error", error: err.message });
+      .json({ message: "Payment initiation failed", error: err.message });
   }
 };
 
