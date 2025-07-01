@@ -229,11 +229,11 @@ const BookingForm = ({
 
       <div className="flex gap-4 text-sm mt-2">
         <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-[#f43f5e] rounded"></div>
+          <div className="w-4 h-4 bg-red-500 rounded"></div>
           <span>{t("booking_form.selected")}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-[#9333ea] rounded"></div>
+          <div className="w-4 h-4 bg-purple-500 rounded"></div>
           <span>{t("booking_form.unavailable")}</span>
         </div>
       </div>
