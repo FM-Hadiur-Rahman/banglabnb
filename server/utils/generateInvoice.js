@@ -19,9 +19,9 @@ const generateInvoice = async (
     const qrPath = path.join(invoiceDir, `qr-${booking._id}.png`);
     const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-    // 🔀 Pipe based on context
+    // 🔀 Pipe to stream or file
     if (streamTo) {
-      doc.pipe(streamTo); // ✅ stream to browser
+      doc.pipe(streamTo);
     } else {
       const stream = fs.createWriteStream(filePath);
       doc.pipe(stream);
@@ -32,7 +32,6 @@ const generateInvoice = async (
       stream.on("error", reject);
     }
 
-    // Load resources
     const logoPath = path.join(__dirname, "../assets/banglabnb-logo.png");
     const banglaFontPath = path.join(
       __dirname,
@@ -63,10 +62,12 @@ const generateInvoice = async (
     const baseRate = listing.price;
     const baseTotal = baseRate * nights;
     const serviceFee = baseTotal * 0.1;
-    const tax = (baseTotal + serviceFee) * 0.1;
+    const tax = (baseTotal + serviceFee) * 0.15;
     const total = baseTotal + serviceFee + tax;
 
-    const formatCurrency = (v) => `BDT${v.toFixed(2)}`;
+    const formatCurrency = (v) => `৳${v?.toFixed(2)}`;
+    const guests = booking.guests || 1;
+
     doc.rect(50, 120, 500, 100).fill("#f8f8f8").stroke();
     doc.fillColor("black").font("Helvetica").fontSize(11);
     let top = 130;
@@ -103,28 +104,27 @@ const generateInvoice = async (
     doc.font("Helvetica").fontSize(12);
     const left = 60;
     const right = 500;
-    doc.text(`Nightly Rate (BDT${baseRate} x ${nights} nights):`, left, doc.y);
+    doc.text(`Nightly Rate (৳${baseRate} x ${nights} nights):`, left, doc.y);
     doc.text(formatCurrency(baseTotal), right, doc.y, { align: "right" });
     doc.text("Service Fee (10%):", left);
     doc.text(formatCurrency(serviceFee), right, doc.y, { align: "right" });
-    doc.text("VAT (10%):", left);
+    doc.text("VAT (15%):", left);
     doc.text(formatCurrency(tax), right, doc.y, { align: "right" });
     doc.font("Helvetica-Bold").text("Total Amount Paid:", left);
     doc.text(formatCurrency(total), right, doc.y, { align: "right" });
 
     // 🚗 Ride Details (if available)
     if (trip) {
-      const rideTotal = trip.farePerSeat * booking.guests;
+      const rideTotal = trip.farePerSeat * guests;
       const pickupDate = new Date(trip.date).toLocaleDateString();
       const pickupTime = trip.time || "N/A";
 
+      doc.addPage();
       doc
-        .addPage()
         .font("Helvetica-Bold")
         .fontSize(14)
         .fillColor("black")
         .text("🚗 Ride Details", { underline: true });
-
       doc.font("Helvetica").fontSize(12);
       doc.text(`From: ${trip.from}`);
       doc.text(`To: ${trip.to}`);
@@ -132,15 +132,16 @@ const generateInvoice = async (
       doc.text(`Pickup Time: ${pickupTime}`);
       doc.text(`Vehicle: ${trip.vehicleModel}`);
       doc.text(`License Plate: ${trip.licensePlate || "N/A"}`);
-      doc.text(`Fare Per Seat: ৳${trip.farePerSeat}`);
-      doc.text(`Seats Reserved: ${booking.guests}`);
-      doc.text(`Ride Total: ৳${rideTotal}`);
+      doc.text(`Fare Per Seat: ${formatCurrency(trip.farePerSeat)}`);
+      doc.text(`Seats Reserved: ${guests}`);
+      doc.text(`Ride Total: ${formatCurrency(rideTotal)}`);
 
-      // Bangla section
+      // Bangla version of ride info
       doc.moveDown();
       doc.font("Bangla").fontSize(11);
       doc.text(`পিকআপ: ${pickupDate} ${pickupTime}`);
-      doc.text(`ভাড়া প্রতি আসন: ৳${trip.farePerSeat}`);
+      doc.text(`আসন সংখ্যা: ${guests}`);
+      doc.text(`ভাড়া প্রতি আসন: ${formatCurrency(trip.farePerSeat)}`);
     }
 
     // 📅 Metadata
@@ -177,7 +178,7 @@ const generateInvoice = async (
     doc.end();
     if (streamTo) {
       fs.unlink(qrPath, () => {});
-      resolve(); // ✅ finish for browser streaming
+      resolve();
     }
   });
 };
