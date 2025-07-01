@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -18,12 +17,6 @@ const Navbar = () => {
 
   const token = localStorage.getItem("token");
   const isLoggedIn = user && token && user.isVerified;
-  const { t, i18n } = useTranslation();
-
-  const handleLanguageChange = (lng) => {
-    i18n.changeLanguage(lng);
-    localStorage.setItem("lng", lng);
-  };
 
   const getDashboardPath = () => {
     if (user.role === "admin") return "/admin/dashboard";
@@ -31,7 +24,6 @@ const Navbar = () => {
     if (user.role === "driver") return "/dashboard/driver";
     return "/dashboard";
   };
-
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/config`)
       .then((res) => res.json())
@@ -59,12 +51,12 @@ const Navbar = () => {
       const newRole = res.data.newRole;
       const updatedUser = { ...user, role: newRole };
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      toast.success(`✅ ${t("switch_role")} → ${newRole.toUpperCase()}`);
+      toast.success(`✅ Switched to ${newRole.toUpperCase()} role`);
       if (newRole === "admin") navigate("/admin/dashboard");
       else if (newRole === "host") navigate("/host/dashboard");
       else navigate("/dashboard");
     } catch (err) {
-      toast.error(t("error_switch_role"));
+      toast.error("❌ Failed to switch role");
     }
   };
 
@@ -109,6 +101,7 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
+        {/* Desktop Nav */}
         <nav className="hidden sm:flex items-center space-x-6 text-gray-700">
           {isLoggedIn && (
             <Link to="/notifications" className="relative group">
@@ -120,16 +113,7 @@ const Navbar = () => {
               )}
             </Link>
           )}
-          <div className="ml-4">
-            <select
-              value={i18n.language}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-            >
-              <option value="en">🇬🇧 English</option>
-              <option value="bn">🇧🇩 বাংলা</option>
-            </select>
-          </div>
+
           {isLoggedIn ? (
             <div className="relative" ref={menuRef}>
               <button
@@ -142,7 +126,17 @@ const Navbar = () => {
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <span>{user.name}</span>
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
+
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 min-w-[13rem] bg-white border rounded shadow-lg z-50 whitespace-nowrap">
                   <div
@@ -157,27 +151,27 @@ const Navbar = () => {
                       onClick={handleRoleSwitch}
                       className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
                     >
-                      🔄 {t("switch_role")}
+                      🔄 Switch to {user.role === "host" ? "User" : "Host"} Mode
                     </button>
                   )}
                   <Link
                     to={getDashboardPath()}
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    {t("dashboard")}
+                    Dashboard
                   </Link>
                   <Link
                     to="/my-account"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    👤 {t("my_account")}
+                    👤 My Account
                   </Link>
                   {user.role === "host" && (
                     <Link
                       to="/host/create"
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      ➕ {t("create_listing")}
+                      ➕ Create Listing
                     </Link>
                   )}
                   {user.role === "user" && (
@@ -185,20 +179,29 @@ const Navbar = () => {
                       to="/my-bookings"
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      📅 {t("my_bookings")}
+                      📅 My Bookings
                     </Link>
                   )}
+                  {["user", "host", "driver"].includes(user.role) && (
+                    <Link
+                      to="/my-referrals"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      🎁 My Referrals
+                    </Link>
+                  )}
+
                   <Link
                     to="/wishlist"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    ❤️ Wishlist
+                    ❤️ My Wishlist
                   </Link>
                   <Link
                     to="/profile"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
-                    🙍 {t("edit_profile")}
+                    🙍 Edit Profile
                   </Link>
                   <button
                     onClick={() => {
@@ -207,7 +210,7 @@ const Navbar = () => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
-                    {t("logout")}
+                    Logout
                   </button>
                 </div>
               )}
@@ -215,15 +218,116 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login" className="hover:text-green-600">
-                {t("login")}
+                Login
               </Link>
               <Link to="/register" className="hover:text-green-600">
-                {t("register")}
+                Register
               </Link>
             </>
           )}
         </nav>
+
+        {/* Mobile Hamburger */}
+        <div className="sm:hidden">
+          <button
+            className={`hamburger w-8 h-8 flex flex-col justify-center items-center space-y-1 ${
+              mobileOpen ? "open" : ""
+            }`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            <span className="w-6 h-0.5 bg-gray-700" />
+            <span className="w-6 h-0.5 bg-gray-700" />
+            <span className="w-6 h-0.5 bg-gray-700" />
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Dropdown */}
+      {mobileOpen && (
+        <div className="fixed top-[60px] right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden">
+          {isLoggedIn ? (
+            <>
+              <div className="flex items-center space-x-2 border-b pb-2 mb-2">
+                <img
+                  src={user.avatar || "/default-avatar.png"}
+                  alt="Avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-green-700">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user.role.toUpperCase()}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                to={getDashboardPath()}
+                className="block hover:text-green-600"
+              >
+                Dashboard
+              </Link>
+              <Link to="/my-account" className="block hover:text-green-600">
+                My Account
+              </Link>
+              <Link to="/notifications" className="block hover:text-green-600">
+                🔔 Notifications{" "}
+                {unreadCount > 0 && (
+                  <span className="ml-2 text-xs text-red-600 font-semibold">
+                    ({unreadCount})
+                  </span>
+                )}
+              </Link>
+              {user.role === "host" && (
+                <Link to="/host/create" className="block hover:text-green-600">
+                  ➕ Create Listing
+                </Link>
+              )}
+              {user.role === "user" && (
+                <Link to="/my-bookings" className="block hover:text-green-600">
+                  📅 My Bookings
+                </Link>
+              )}
+              {["user", "host", "driver"].includes(user.role) && (
+                <Link
+                  to="/my-referrals"
+                  className="block px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  🎁 My Referrals
+                </Link>
+              )}
+
+              <button
+                onClick={handleRoleSwitch}
+                className="block text-left w-full text-blue-600"
+              >
+                🔄 Switch Role
+              </button>
+
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate("/login");
+                }}
+                className="block text-left w-full text-red-600"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="block hover:text-green-600">
+                Login
+              </Link>
+              <Link to="/register" className="block hover:text-green-600">
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 };
