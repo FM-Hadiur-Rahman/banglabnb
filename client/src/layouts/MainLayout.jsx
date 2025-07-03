@@ -3,15 +3,10 @@ import { Outlet, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import logo from "../assets/banglabnb-logo2.png";
+import TrustBadge from "../components/TrustBadge";
 
 const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showBadge, setShowBadge] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowBadge(true), 300); // slight delay
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,16 +57,7 @@ const MainLayout = () => {
       <Footer />
 
       {/* Floating Trust Badge */}
-      {showBadge && (
-        <div className="hidden sm:block fixed bottom-6 right-6 z-50 animate-slide-in bg-green-700 text-white shadow-lg rounded-lg px-4 py-3 text-sm w-64 transition-all duration-700">
-          <h4 className="font-semibold mb-1">✅ Verified & Trusted</h4>
-          <ul className="list-disc list-inside space-y-1 text-xs text-white/90">
-            <li>Verified by National ID</li>
-            <li>Secure Payments</li>
-            <li>Comfortable Stays</li>
-          </ul>
-        </div>
-      )}
+      <TrustBadge />
     </div>
   );
 };
