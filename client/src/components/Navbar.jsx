@@ -8,6 +8,8 @@ const Navbar = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const menuRef = useRef();
+  const mobileMenuRef = useRef();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -81,6 +83,22 @@ const Navbar = () => {
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target) &&
+        !e.target.closest(".hamburger")
+      ) {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -252,7 +270,10 @@ const Navbar = () => {
           </button>
         </div>
         {mobileOpen && (
-          <div className="fixed top-3 right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden">
+          <div
+            ref={mobileMenuRef}
+            className="fixed top-16 right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden"
+          >
             {isLoggedIn ? (
               <>
                 <div className="flex items-center space-x-2 border-b pb-2 mb-2">
