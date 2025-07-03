@@ -19,7 +19,6 @@ const generateInvoice = async (
     const qrPath = path.join(invoiceDir, `qr-${booking._id}.png`);
     const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-    // 🔀 Pipe to stream or file
     if (streamTo) {
       doc.pipe(streamTo);
     } else {
@@ -32,7 +31,7 @@ const generateInvoice = async (
       stream.on("error", reject);
     }
 
-    const logoPath = path.join(__dirname, "../assets/banglabnb-logo.png");
+    const logoPath = path.join(__dirname, "../assets/banglabnb-logo2.png");
     const banglaFontPath = path.join(
       __dirname,
       "../fonts/NotoSansBengali-VariableFont_wdth,wght.ttf"
@@ -40,38 +39,52 @@ const generateInvoice = async (
     if (fs.existsSync(banglaFontPath))
       doc.registerFont("Bangla", banglaFontPath);
 
-    // 🟩 Header
-    doc.rect(0, 0, doc.page.width, 100).fill("#e6f2f0");
-    if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 30, { width: 80 });
+    // Header background
+    doc.rect(0, 0, doc.page.width, 100).fill("#34495e");
+
+    // Logo
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, 460, 20, {
+        fit: [70, 50],
+        align: "center",
+        valign: "center",
+      });
+    }
+
     doc
-      .fillColor("#006a4e")
-      .font("Helvetica-Bold")
-      .fontSize(22)
-      .text("BanglaBnB", 0, 40, { align: "right", width: 500 });
+      .font("Helvetica")
+      .fontSize(10)
+      .fillColor("white")
+      .text("BanglaBnB", 460, 75, { width: 70, align: "center" });
+
+    // Invoice Title
     doc
       .fontSize(14)
       .fillColor("#d21034")
       .text("📄 Booking Invoice", { align: "right", width: 500 });
     doc.moveTo(50, 110).lineTo(550, 110).stroke();
 
-    // 🧾 Booking Info
+    // Booking details
     const nights = Math.ceil(
       (new Date(booking.dateTo) - new Date(booking.dateFrom)) /
         (1000 * 60 * 60 * 24)
     );
-    const baseRate = listing.price;
+    const baseRate = listing.price || 0;
     const baseTotal = baseRate * nights;
     const serviceFee = baseTotal * 0.1;
     const tax = (baseTotal + serviceFee) * 0.15;
     const total = baseTotal + serviceFee + tax;
 
-    const formatCurrency = (v) => `৳${v?.toFixed(2)}`;
+    const formatCurrency = (v) =>
+      `BDT${Number(v || 0).toLocaleString("en-BD", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
     const guests = booking.guests || 1;
 
     doc.rect(50, 120, 500, 100).fill("#f8f8f8").stroke();
     doc.fillColor("black").font("Helvetica").fontSize(11);
-    let top = 130;
-    doc.text(`Booking ID: ${booking._id}`, 60, top);
+    doc.text(`Booking ID: ${booking._id}`, 60, 130);
     doc.text(`Guest: ${guest.name} (${guest.email})`);
     doc.text(`Listing: ${listing.title}`);
     doc.text(`Address: ${listing.location?.address}`);
@@ -82,7 +95,7 @@ const generateInvoice = async (
     );
     doc.text(`Status: ${booking.paymentStatus}`);
 
-    // 🌐 Bangla Summary
+    // Bangla summary
     doc.moveDown();
     doc.font("Bangla").fontSize(11).fillColor("#333");
     doc.text(`অতিথি: ${guest.name}`);
@@ -94,37 +107,61 @@ const generateInvoice = async (
       ).toLocaleDateString()}`
     );
 
-    // 💰 Payment Breakdown
+    // Payment Summary
     doc
       .moveDown()
       .font("Helvetica-Bold")
       .fontSize(13)
       .fillColor("black")
       .text(" Payment Summary", { underline: true });
-    doc.font("Helvetica").fontSize(12);
-    const left = 60;
-    const right = 500;
-    doc.text(`Nightly Rate (৳${baseRate} x ${nights} nights):`, left, doc.y);
-    doc.text(formatCurrency(baseTotal), right, doc.y, { align: "right" });
-    doc.text("Service Fee (10%):", left);
-    doc.text(formatCurrency(serviceFee), right, doc.y, { align: "right" });
-    doc.text("VAT (15%):", left);
-    doc.text(formatCurrency(tax), right, doc.y, { align: "right" });
-    doc.font("Helvetica-Bold").text("Total Amount Paid:", left);
-    doc.text(formatCurrency(total), right, doc.y, { align: "right" });
 
-    // 🚗 Ride Details (if available)
+    doc.moveDown(0.5);
+    doc.font("Helvetica").fontSize(12);
+
+    const left = 60;
+    const width = 500 - left;
+
+    const summaryLines = [
+      [
+        `Nightly Rate (BDT ${baseRate} x ${nights} nights):`,
+        formatCurrency(baseTotal),
+      ],
+      ["Service Fee (10%):", formatCurrency(serviceFee)],
+      ["VAT (15%):", formatCurrency(tax)],
+      ["Total Amount Paid:", formatCurrency(total)],
+    ];
+
+    summaryLines.forEach(([label, value]) => {
+      const isTotal = label.includes("Total");
+      const currentY = doc.y;
+
+      doc
+        .font(isTotal ? "Helvetica-Bold" : "Helvetica")
+        .text(label, left, currentY);
+
+      doc
+        .font(isTotal ? "Helvetica-Bold" : "Helvetica")
+        .text(value, left, currentY, {
+          align: "right",
+          width,
+        });
+
+      doc.moveDown(0.8);
+    });
+
+    // Optional Ride Section
     if (trip) {
-      const rideTotal = trip.farePerSeat * guests;
+      const rideTotal = (trip.farePerSeat || 0) * guests;
       const pickupDate = new Date(trip.date).toLocaleDateString();
       const pickupTime = trip.time || "N/A";
 
-      doc.addPage();
       doc
+        .addPage()
         .font("Helvetica-Bold")
         .fontSize(14)
         .fillColor("black")
-        .text("🚗 Ride Details", { underline: true });
+        .text("Ride Details", { underline: true });
+
       doc.font("Helvetica").fontSize(12);
       doc.text(`From: ${trip.from}`);
       doc.text(`To: ${trip.to}`);
@@ -136,7 +173,6 @@ const generateInvoice = async (
       doc.text(`Seats Reserved: ${guests}`);
       doc.text(`Ride Total: ${formatCurrency(rideTotal)}`);
 
-      // Bangla version of ride info
       doc.moveDown();
       doc.font("Bangla").fontSize(11);
       doc.text(`পিকআপ: ${pickupDate} ${pickupTime}`);
@@ -144,12 +180,12 @@ const generateInvoice = async (
       doc.text(`ভাড়া প্রতি আসন: ${formatCurrency(trip.farePerSeat)}`);
     }
 
-    // 📅 Metadata
+    // Invoice metadata
     doc.moveDown(2).font("Helvetica").fontSize(11).fillColor("gray");
     doc.text(`Invoice Number: INV-${booking._id}`, left);
     doc.text(`Issued on: ${new Date().toLocaleDateString("en-GB")}`, left);
 
-    // 🖨 QR Code
+    // QR Code
     await QRCode.toFile(
       qrPath,
       `https://banglabnb.com/bookings/${booking._id}`,
@@ -157,7 +193,7 @@ const generateInvoice = async (
     );
     doc.image(qrPath, 450, doc.y - 50, { width: 80 });
 
-    // ✍ Signatures
+    // Signatures
     doc.moveDown(6);
     doc.fontSize(12).fillColor("black");
     const signatureY = doc.y;
@@ -166,7 +202,7 @@ const generateInvoice = async (
     doc.text("__________________________", 350, signatureY);
     doc.text("Authorized Signature", 350, signatureY + 15);
 
-    // 🔻 Footer
+    // Footer
     doc.rect(0, 760, doc.page.width, 40).fill("#f0f0f0");
     doc
       .fillColor("gray")

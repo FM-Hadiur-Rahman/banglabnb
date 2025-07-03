@@ -53,23 +53,16 @@ const HostDashboard = () => {
       });
       setTotalReviews(reviewCount);
 
-      // 4. Fetch earnings chart data
-      const earningsRes = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/stats/earnings`,
+      // 4. Fetch earnings and reviews chart data
+      const statsRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/stats/host/${user._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setEarningsData(Array.isArray(earningsRes.data) ? earningsRes.data : []);
 
-      // 5. Fetch reviews chart data
-      const reviewsRes = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/stats/reviews`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setReviewsData(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
+      setEarningsData(statsRes.data?.earnings || []);
+      setReviewsData(statsRes.data?.reviews || []);
     } catch (err) {
       console.error("❌ Error loading dashboard data:", err);
     }
@@ -158,7 +151,7 @@ const HostDashboard = () => {
                     {new Date(b.dateTo).toLocaleDateString()}
                   </div>
                   <div className="text-sm">
-                    👤 Guest ID: {b.guestId._id || "Unknown"}
+                    👤 Guest ID: {b.guestId._id?.name || "Unknown"}
                   </div>
                 </li>
               ))}

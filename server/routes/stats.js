@@ -4,61 +4,72 @@ const Booking = require("../models/Booking");
 const Review = require("../models/Review");
 const protect = require("../middleware/protect");
 
-// Get monthly earnings for a host
-router.get("/earnings", protect, async (req, res) => {
-  const hostId = req.user._id;
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+router.get("/host/:id", protect, async (req, res) => {
+  const hostId = req.params.id;
 
   try {
-    const data = await Booking.aggregate([
-      { $match: { hostId } },
-      {
-        $group: {
-          _id: { $month: "$dateFrom" },
-          total: { $sum: "$totalPrice" },
+    const [earningsData, reviewsData] = await Promise.all([
+      Booking.aggregate([
+        { $match: { hostId } },
+        {
+          $group: {
+            _id: { $month: "$dateFrom" },
+            total: { $sum: "$totalPrice" },
+          },
         },
-      },
-      {
-        $project: {
-          month: "$_id",
-          total: 1,
-          _id: 0,
+        { $sort: { _id: 1 } },
+      ]),
+      Review.aggregate([
+        { $match: { hostId } },
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            count: { $sum: 1 },
+          },
         },
-      },
-      { $sort: { month: 1 } },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
-    res.json(data);
+    // 🧠 Pad missing months with 0
+    const fullEarnings = MONTH_NAMES.map((name, i) => {
+      const monthData = earningsData.find((m) => m._id === i + 1);
+      return {
+        month: name,
+        total: monthData ? monthData.total : 0,
+      };
+    });
+
+    const fullReviews = MONTH_NAMES.map((name, i) => {
+      const monthData = reviewsData.find((m) => m._id === i + 1);
+      return {
+        month: name,
+        count: monthData ? monthData.count : 0,
+      };
+    });
+
+    res.json({
+      earnings: fullEarnings,
+      reviews: fullReviews,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to get earnings." });
-  }
-});
-
-// Get monthly reviews count for a host
-router.get("/reviews", protect, async (req, res) => {
-  const hostId = req.user._id;
-
-  try {
-    const data = await Review.aggregate([
-      { $match: { hostId } },
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          month: "$_id",
-          count: 1,
-          _id: 0,
-        },
-      },
-      { $sort: { month: 1 } },
-    ]);
-
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to get reviews." });
+    console.error("❌ Stats error:", err);
+    res.status(500).json({ error: "Failed to fetch host stats." });
   }
 });
 
