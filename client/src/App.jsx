@@ -84,6 +84,7 @@ import EmergencyInfoPage from "./pages/EmergencyInfoPage";
 import AdminReferrals from "./pages/AdminReferrals";
 import MyReferralsPage from "./pages/MyReferralPage";
 import AdminSettings from "./pages/AdminSettings";
+import AdminUserDetail from "./pages/AdminUserDetail";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -298,6 +299,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/admin/users/:id" element={<AdminUserDetail />} />
           <Route
             path="admin/listings"
             element={

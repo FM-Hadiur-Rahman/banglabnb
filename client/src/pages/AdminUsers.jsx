@@ -106,6 +106,12 @@ const AdminUsers = () => {
                     >
                       Delete
                     </button>
+                    <Link
+                      to={`/admin/users/${u._id}`}
+                      className="text-blue-600 hover:underline mr-2"
+                    >
+                      View
+                    </Link>
                   </td>
                   <td>
                     {!u.isDeleted ? (

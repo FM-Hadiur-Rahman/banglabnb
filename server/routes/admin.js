@@ -38,6 +38,13 @@ router.get("/users", protect, authorize("admin"), async (req, res) => {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
+// In /routes/admin.js
+router.get("/users/:id", protect, authorize("admin"), async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  res.json(user);
+});
+
 // Get all listings (Admin only)
 router.put("/users/:id/role", protect, authorize("admin"), async (req, res) => {
   const { role } = req.body;
