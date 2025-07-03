@@ -252,7 +252,7 @@ const Navbar = () => {
           </button>
         </div>
         {mobileOpen && (
-          <div className="fixed top-[72px] right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden">
+          <div className="fixed top-3 right-0 w-1/2 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50 space-y-2 text-gray-700 h-[calc(100vh-60px)] overflow-y-auto sm:hidden">
             {isLoggedIn ? (
               <>
                 <div className="flex items-center space-x-2 border-b pb-2 mb-2">
