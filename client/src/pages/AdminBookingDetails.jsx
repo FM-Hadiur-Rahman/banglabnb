@@ -12,7 +12,7 @@ const AdminBookingDetail = () => {
       const token = localStorage.getItem("token");
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/bookings/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/admin/bookings/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setBooking(res.data);

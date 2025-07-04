@@ -836,11 +836,12 @@ router.get("/export-search", async (req, res) => {
   }
 });
 // Get one booking (for admin detail view)
+// ✅ Admin-only route to fetch one booking
 router.get("/bookings/:id", protect, authorize("admin"), async (req, res) => {
   const booking = await Booking.findById(req.params.id)
-    .populate("guestId")
-    .populate("listingId");
+    .populate("guestId", "name email phone")
+    .populate("listingId", "title location");
 
-  if (!booking) return res.status(404).json({ message: "Not found" });
+  if (!booking) return res.status(404).json({ message: "Booking not found" });
   res.json(booking);
 });
