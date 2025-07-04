@@ -11,6 +11,8 @@ const Payout = require("../models/Payout"); // 👈 import the model
 const Review = require("../models/Review");
 const PromoCode = require("../models/PromoCode");
 const GlobalConfig = require("../models/GlobalConfig"); // ✅ this must be present
+const { Parser } = require("json2csv");
+const ExcelJS = require("exceljs");
 
 // Example admin-only route
 
@@ -671,3 +673,165 @@ router.patch(
     }
   }
 );
+// /routes/admin.js
+
+router.get("/export/users", protect, authorize("admin"), async (req, res) => {
+  try {
+    const users = await User.find().select("-password -__v");
+    const fields = [
+      "_id",
+      "name",
+      "email",
+      "phone",
+      "role",
+      "isVerified",
+      "kyc.status",
+      "createdAt",
+    ];
+    const opts = { fields };
+    const parser = new Parser(opts);
+    const csv = parser.parse(users);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("users.csv");
+    return res.send(csv);
+  } catch (err) {
+    console.error("❌ Export failed:", err);
+    res.status(500).json({ message: "Failed to export users" });
+  }
+});
+
+router.get(
+  "/export/users-xlsx",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const users = await User.find().select("-password");
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Users");
+
+      // Add header row
+      worksheet.columns = [
+        { header: "Name", key: "name", width: 25 },
+        { header: "Email", key: "email", width: 30 },
+        { header: "Role", key: "role", width: 15 },
+        { header: "Verified", key: "isVerified", width: 10 },
+        { header: "Created At", key: "createdAt", width: 20 },
+      ];
+
+      // Add user rows
+      users.forEach((user) => {
+        worksheet.addRow({
+          name: user.name || "N/A",
+          email: user.email || "N/A",
+          role: user.role || "N/A",
+          isVerified: user.isVerified ? "✅" : "❌",
+          createdAt: user.createdAt
+            ? user.createdAt.toISOString().split("T")[0]
+            : "N/A",
+        });
+      });
+
+      // Set response headers
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
+
+      // Write workbook to response
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (err) {
+      console.error("❌ Excel export error:", err);
+      res.status(500).json({ message: "Failed to export users as Excel" });
+    }
+  }
+);
+// routes/admin.js
+router.get("/search", protect, authorize("admin"), async (req, res) => {
+  const { query } = req.query;
+  const adminId = req.user._id;
+
+  if (!query) return res.status(400).json({ message: "Query is required" });
+
+  const regex = new RegExp(query, "i");
+  const results = {};
+
+  const user = await User.findOne({
+    $or: [{ email: regex }, { name: regex }, { _id: query }],
+  }).select("-password");
+
+  if (user) results.user = user;
+
+  const booking = await Booking.findOne({
+    $or: [{ _id: query }, { "extraPayment.tran_id": query }],
+  })
+    .populate("guestId listingId")
+    .lean();
+  if (booking) results.booking = booking;
+
+  const tripRes = await require("../models/TripReservation")
+    .findOne({
+      $or: [{ _id: query }, { tran_id: query }],
+    })
+    .populate("tripId userId")
+    .lean();
+  if (tripRes) results.tripReservation = tripRes;
+
+  // Optional: Save to search history
+  await require("../models/AdminSearchLog").create({
+    adminId,
+    query,
+    timestamp: new Date(),
+  });
+
+  res.json(results);
+});
+
+router.get("/export-search", async (req, res) => {
+  const { query, type, token } = req.query;
+  if (!query || !type || !token) return res.status(400).send("Missing params");
+
+  const jwt = require("jsonwebtoken");
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const admin = await User.findById(decoded.id);
+  if (!admin || admin.role !== "admin")
+    return res.status(403).send("Forbidden");
+
+  const regex = new RegExp(query, "i");
+
+  const users = await User.find({
+    $or: [{ name: regex }, { email: regex }],
+  });
+
+  if (type === "csv") {
+    const fields = ["name", "email", "role", "isVerified"];
+    const parser = new Parser({ fields });
+    const csv = parser.parse(users);
+    res.header("Content-Type", "text/csv");
+    res.attachment("search_results.csv");
+    return res.send(csv);
+  }
+
+  if (type === "pdf") {
+    const doc = new PDFDocument();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=search_results.pdf"
+    );
+    doc.pipe(res);
+    doc.fontSize(18).text("Search Results", { underline: true });
+    users.forEach((u) => {
+      doc.moveDown();
+      doc.text(`Name: ${u.name}`);
+      doc.text(`Email: ${u.email}`);
+      doc.text(`Role: ${u.role}`);
+      doc.text(`Verified: ${u.isVerified ? "Yes" : "No"}`);
+    });
+    doc.end();
+  }
+});

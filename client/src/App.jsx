@@ -85,6 +85,7 @@ import AdminReferrals from "./pages/AdminReferrals";
 import MyReferralsPage from "./pages/MyReferralPage";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUserDetail from "./pages/AdminUserDetail";
+import AdminSearch from "./pages/AdminSearch";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -288,6 +289,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/search"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSearch />
               </ProtectedRoute>
             }
           />

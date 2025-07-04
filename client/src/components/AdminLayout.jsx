@@ -23,6 +23,10 @@ const AdminLayout = ({ children }) => {
           <h2 className="text-2xl font-bold">BanglaBnB Admin</h2>
           <nav className="flex flex-col space-y-2 text-sm font-medium">
             <Link to="/admin/dashboard">📊 Dashboard</Link>
+            <Link to="/admin/search" className="hover:text-green-600">
+              🔍 Admin Search
+            </Link>
+
             <Link to="/admin/users">👤 Users</Link>
             <Link to="/admin/listings">🏠 Listings</Link>
             <Link to="/admin/bookings">📅 Bookings</Link>

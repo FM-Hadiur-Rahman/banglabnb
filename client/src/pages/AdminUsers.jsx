@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
+import { Link } from "react-router-dom";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -66,10 +67,61 @@ const AdminUsers = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+  const handleExportCSV = async () => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/admin/export/users`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "users.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleExportExcel = async () => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/admin/export/users-xlsx`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "users.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
   return (
     <AdminLayout>
       <h2 className="text-2xl font-bold mb-4">All Users</h2>
+      <button
+        onClick={handleExportCSV}
+        className="px-4 py-2 border rounded text-sm hover:bg-gray-100"
+      >
+        ⬇ Export CSV
+      </button>
+      <button
+        onClick={handleExportExcel}
+        className="px-4 py-2 border rounded text-sm hover:bg-gray-100"
+      >
+        📊 Export Excel
+      </button>
 
       {loading ? (
         <p>Loading users...</p>
