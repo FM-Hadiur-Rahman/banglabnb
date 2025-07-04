@@ -835,3 +835,12 @@ router.get("/export-search", async (req, res) => {
     doc.end();
   }
 });
+// Get one booking (for admin detail view)
+router.get("/bookings/:id", protect, authorize("admin"), async (req, res) => {
+  const booking = await Booking.findById(req.params.id)
+    .populate("guestId")
+    .populate("listingId");
+
+  if (!booking) return res.status(404).json({ message: "Not found" });
+  res.json(booking);
+});

@@ -86,6 +86,7 @@ import MyReferralsPage from "./pages/MyReferralPage";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminSearch from "./pages/AdminSearch";
+import AdminBookingDetail from "./pages/AdminBookingDetails";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -297,6 +298,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminSearch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/bookings/:id"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminBookingDetail />
               </ProtectedRoute>
             }
           />
