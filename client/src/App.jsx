@@ -87,6 +87,8 @@ import AdminSettings from "./pages/AdminSettings";
 import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminSearch from "./pages/AdminSearch";
 import AdminBookingDetail from "./pages/AdminBookingDetails";
+import AdminListingDetails from "./pages/AdminListingDetails";
+import AdminTripDetails from "./pages/AdminTripDetails";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -306,6 +308,22 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminBookingDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/listings/:id"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminListingDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/trips/:id"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminTripDetails />
               </ProtectedRoute>
             }
           />

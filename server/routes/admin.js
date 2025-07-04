@@ -845,3 +845,14 @@ router.get("/bookings/:id", protect, authorize("admin"), async (req, res) => {
   if (!booking) return res.status(404).json({ message: "Booking not found" });
   res.json(booking);
 });
+router.get("/listings/:id", protect, authorize("admin"), async (req, res) => {
+  const listing = await Listing.findById(req.params.id).populate("hostId");
+  if (!listing) return res.status(404).json({ message: "Listing not found" });
+  res.json(listing);
+});
+const Trip = require("../models/Trip");
+router.get("/trips/:id", protect, authorize("admin"), async (req, res) => {
+  const trip = await Trip.findById(req.params.id).populate("driver");
+  if (!trip) return res.status(404).json({ message: "Trip not found" });
+  res.json(trip);
+});
