@@ -1,4 +1,5 @@
 // === Imports ===
+const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/protect"); // ✅ Correct path
@@ -751,44 +752,49 @@ router.get(
   }
 );
 // routes/admin.js
+
 router.get("/search", protect, authorize("admin"), async (req, res) => {
   const { query } = req.query;
-  const adminId = req.user._id;
-
   if (!query) return res.status(400).json({ message: "Query is required" });
 
-  const regex = new RegExp(query, "i");
   const results = {};
+  const isObjectId = mongoose.Types.ObjectId.isValid(query);
 
-  const user = await User.findOne({
-    $or: [{ email: regex }, { name: regex }, { _id: query }],
-  }).select("-password");
+  try {
+    // User by email or ID
+    const user = await User.findOne({
+      $or: [{ email: query }, ...(isObjectId ? [{ _id: query }] : [])],
+    }).select("-password");
 
-  if (user) results.user = user;
+    if (user) results.user = user;
 
-  const booking = await Booking.findOne({
-    $or: [{ _id: query }, { "extraPayment.tran_id": query }],
-  })
-    .populate("guestId listingId")
-    .lean();
-  if (booking) results.booking = booking;
-
-  const tripRes = await require("../models/TripReservation")
-    .findOne({
-      $or: [{ _id: query }, { tran_id: query }],
+    // Booking by ID or transaction
+    const booking = await Booking.findOne({
+      $or: [
+        ...(isObjectId ? [{ _id: query }] : []),
+        { "extraPayment.tran_id": query },
+      ],
     })
-    .populate("tripId userId")
-    .lean();
-  if (tripRes) results.tripReservation = tripRes;
+      .populate("guestId listingId")
+      .lean();
 
-  // Optional: Save to search history
-  await require("../models/AdminSearchLog").create({
-    adminId,
-    query,
-    timestamp: new Date(),
-  });
+    if (booking) results.booking = booking;
 
-  res.json(results);
+    // Trip reservation by ID or tran_id
+    const tripRes = await require("../models/TripReservation")
+      .findOne({
+        $or: [...(isObjectId ? [{ _id: query }] : []), { tran_id: query }],
+      })
+      .populate("tripId userId")
+      .lean();
+
+    if (tripRes) results.tripReservation = tripRes;
+
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Admin search failed:", err);
+    res.status(500).json({ message: "Search failed" });
+  }
 });
 
 router.get("/export-search", async (req, res) => {
