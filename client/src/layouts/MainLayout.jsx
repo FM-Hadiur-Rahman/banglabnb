@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import logo from "../assets/banglabnb-logo2.png";
 import TrustBadge from "../components/TrustBadge";
+import TawkToWidget from "../components/TawkToWidget";
 
 const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -58,6 +59,7 @@ const MainLayout = () => {
 
       {/* Floating Trust Badge */}
       <TrustBadge />
+      <TawkToWidget />
     </div>
   );
 };
