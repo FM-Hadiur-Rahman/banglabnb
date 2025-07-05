@@ -345,8 +345,9 @@ module.exports = router;
 router.get("/stats", protect, authorize("admin"), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const guests = await User.countDocuments({ role: "guest" });
+    const guests = await User.countDocuments({ role: "user" });
     const hosts = await User.countDocuments({ role: "host" });
+    const driver = await User.countDocuments({ role: "driver" });
     const totalListings = await Listing.countDocuments();
     const totalBookings = await Booking.countDocuments({
       paymentStatus: "paid",
@@ -361,6 +362,7 @@ router.get("/stats", protect, authorize("admin"), async (req, res) => {
       users: totalUsers,
       guests,
       hosts,
+      driver,
       listings: totalListings,
       bookings: totalBookings,
       revenue: revenue[0]?.total || 0,

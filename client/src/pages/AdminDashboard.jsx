@@ -55,6 +55,11 @@ const AdminDashboard = () => {
         </div>
 
         <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">👨‍💼 Driver</h2>
+          <p className="text-3xl">{stats.driver ?? 0}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
           <h2 className="text-xl font-bold">🏠 Listings</h2>
           <p className="text-3xl">{stats.listings ?? 0}</p>
         </div>
