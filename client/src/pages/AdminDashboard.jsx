@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import AdminLayout from "../components/AdminLayout";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     users: 0,
+    guests: 0,
+    hosts: 0,
     listings: 0,
     bookings: 0,
+    revenue: 0,
   });
 
   useEffect(() => {
@@ -31,48 +35,41 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white p-6 space-y-4">
-        <h2 className="text-2xl font-bold">BanglaBnB Admin</h2>
-        <nav className="flex flex-col space-y-2">
-          <a href="/admin/dashboard" className="hover:underline">
-            Dashboard
-          </a>
-          <a href="/admin/users" className="hover:underline">
-            Users
-          </a>
-          <a href="/admin/listings" className="hover:underline">
-            Listings
-          </a>
-          <a href="/admin/bookings" className="hover:underline">
-            Bookings
-          </a>
-        </nav>
-      </aside>
+    <AdminLayout>
+      <h1 className="text-3xl font-bold mb-6">📊 Admin Dashboard</h1>
 
-      {/* Main Content */}
-      <main className="flex-1 p-10 bg-gray-50">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-xl font-bold">👥 Total Users</h2>
-            <p className="text-3xl">{stats.users ?? 0}</p>
-          </div>
-
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-xl font-bold">🏡 Total Listings</h2>
-            <p className="text-3xl">{stats.listings ?? 0}</p>
-          </div>
-
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-xl font-bold">📆 Total Bookings</h2>
-            <p className="text-3xl">{stats.bookings ?? 0}</p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">👥 Total Users</h2>
+          <p className="text-3xl">{stats.users ?? 0}</p>
         </div>
-      </main>
-    </div>
+
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">🧍 Guests</h2>
+          <p className="text-3xl">{stats.guests ?? 0}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">👨‍💼 Hosts</h2>
+          <p className="text-3xl">{stats.hosts ?? 0}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">🏠 Listings</h2>
+          <p className="text-3xl">{stats.listings ?? 0}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">📅 Bookings</h2>
+          <p className="text-3xl">{stats.bookings ?? 0}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-bold">💸 Total Revenue</h2>
+          <p className="text-3xl">৳ {stats.revenue?.toLocaleString() ?? 0}</p>
+        </div>
+      </div>
+    </AdminLayout>
   );
 };
 

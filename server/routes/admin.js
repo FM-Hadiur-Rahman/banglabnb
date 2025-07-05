@@ -341,13 +341,36 @@ module.exports = router;
 // === Payout Management ===
 
 // === Miscellaneous Stats ===
+// /routes/admin.js
 router.get("/stats", protect, authorize("admin"), async (req, res) => {
-  const users = await User.countDocuments();
-  const listings = await Listing.countDocuments();
-  const bookings = await Booking.countDocuments();
+  try {
+    const totalUsers = await User.countDocuments();
+    const guests = await User.countDocuments({ role: "guest" });
+    const hosts = await User.countDocuments({ role: "host" });
+    const totalListings = await Listing.countDocuments();
+    const totalBookings = await Booking.countDocuments({
+      paymentStatus: "paid",
+    });
 
-  res.json({ users, listings, bookings });
+    const revenue = await Booking.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      { $group: { _id: null, total: { $sum: "$paidAmount" } } },
+    ]);
+
+    res.json({
+      users: totalUsers,
+      guests,
+      hosts,
+      listings: totalListings,
+      bookings: totalBookings,
+      revenue: revenue[0]?.total || 0,
+    });
+  } catch (err) {
+    console.error("❌ Failed to fetch admin stats:", err);
+    res.status(500).json({ message: "Failed to load stats" });
+  }
 });
+
 // Get all users (Admin only)
 router.get("/stats", protect, authorize("admin"), async (req, res) => {
   const totalUsers = await User.countDocuments();
