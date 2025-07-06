@@ -45,3 +45,27 @@ exports.getCurrentUser = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user profile" });
   }
 };
+exports.getPaymentDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("paymentDetails");
+    res.json(user.paymentDetails);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch payment details" });
+  }
+};
+
+exports.updatePaymentDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    user.paymentDetails = req.body; // Validate if needed
+    user.paymentDetails.verified = false; // Reset verification
+    await user.save();
+    res.json({
+      message: "✅ Payment details updated",
+      paymentDetails: user.paymentDetails,
+    });
+  } catch (err) {
+    console.error("❌ Update failed:", err);
+    res.status(500).json({ message: "Failed to update payment details" });
+  }
+};

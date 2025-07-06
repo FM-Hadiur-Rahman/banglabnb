@@ -89,6 +89,7 @@ import AdminSearch from "./pages/AdminSearch";
 import AdminBookingDetail from "./pages/AdminBookingDetails";
 import AdminListingDetails from "./pages/AdminListingDetails";
 import AdminTripDetails from "./pages/AdminTripDetails";
+import EditTripForm from "./pages/EditTripForm";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -433,6 +434,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DriverTripForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/driver/trips/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditTripForm />
               </ProtectedRoute>
             }
           />

@@ -7,8 +7,8 @@ const tripSchema = new mongoose.Schema(
     date: { type: String, required: true },
     time: { type: String, required: true },
 
-    totalSeats: { type: Number, required: true },
-    farePerSeat: { type: Number, required: true },
+    totalSeats: { type: Number, required: true, min: 1 },
+    farePerSeat: { type: Number, required: true, min: 0 },
 
     passengers: [
       {
@@ -38,7 +38,10 @@ const tripSchema = new mongoose.Schema(
       enum: ["available", "booked", "cancelled"],
       default: "available",
     },
-
+    departureAt: { type: Date },
+    cancelReason: { type: String },
+    cancelledAt: { type: Date },
+    isCompleted: { type: Boolean, default: false },
     image: { type: String },
     driverId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -118,6 +118,25 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    paymentDetails: {
+      accountType: {
+        type: String,
+        enum: ["bkash", "nagad", "bank", "rocket"],
+      },
+      accountNumber: String,
+      accountName: String,
+      bankName: String, // Only for bank
+      routingNumber: String, // Only for bank
+      verified: {
+        type: Boolean,
+        default: false,
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+
     isDeleted: {
       type: Boolean,
       default: false,

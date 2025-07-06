@@ -1,5 +1,6 @@
 // === controllers/tripController.js ===
 const Trip = require("../models/Trip");
+const cloudinary = require("../middleware/cloudinaryUpload");
 
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
@@ -71,12 +72,13 @@ exports.getTripById = async (req, res) => {
   }
 };
 // controllers/tripController.js
-exports.reserveSeat = async (req, res) => {
-  console.log("🛑 tripId received:", req.params.tripId);
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
 
+exports.reserveSeat = async (req, res) => {
   try {
     const { seats = 1 } = req.body;
-    const trip = await Trip.findById(req.params.tripId);
+    const trip = await Trip.findById(req.params.tripId).populate("driverId");
 
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
@@ -93,25 +95,181 @@ exports.reserveSeat = async (req, res) => {
       .reduce((sum, p) => sum + (p.seats || 1), 0);
 
     const availableSeats = trip.totalSeats - reservedSeats;
-
     if (availableSeats < seats)
-      return res.status(400).json({ message: "Not enough seats available" });
+      return res
+        .status(400)
+        .json({ message: `Only ${availableSeats} seat(s) available` });
 
-    trip.passengers.push({ user: req.user._id, seats });
+    trip.passengers.push({
+      user: req.user._id,
+      seats,
+      status: "reserved",
+      paymentStatus: "pending",
+    });
 
-    // ✅ Mark as booked if all seats filled
     if (reservedSeats + seats >= trip.totalSeats) {
       trip.status = "booked";
     }
 
     await trip.save();
-    res.json({ message: "Reserved", trip });
+
+    // Send email to passenger
+    const passenger = await User.findById(req.user._id);
+    if (passenger?.email) {
+      await sendEmail({
+        to: passenger.email,
+        subject: "Trip Reserved on BanglaBnB 🚗",
+        html: `
+          <p>Hi ${passenger.name},</p>
+          <p>Your seat has been reserved for the trip from <b>${
+            trip.from
+          }</b> to <b>${trip.to}</b> on <b>${trip.date}</b> at <b>${
+          trip.time
+        }</b>.</p>
+          <p>Seats Reserved: ${seats} | Fare per Seat: ৳${trip.farePerSeat}</p>
+          <p>Total: ৳${seats * trip.farePerSeat}</p>
+          <br/>
+          <p>Driver: ${trip.driverId.name}</p>
+          <p>Please complete the payment to confirm your reservation.</p>
+          <p>Thanks for using <b>BanglaBnB Rides</b>!</p>
+        `,
+      });
+    }
+
+    res.json({ message: "✅ Reserved and email sent", trip });
   } catch (err) {
     console.error("❌ Reserve failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+exports.updateTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    // 🚫 Check if trip belongs to user
+    if (trip.driverId.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to edit this trip" });
+    }
+    if (trip.passengers?.some((p) => p.status !== "cancelled")) {
+      return res
+        .status(400)
+        .json({ message: "Cannot edit trip with active reservations." });
+    }
+
+    // 🚫 Block editing if trip already started
+    const now = new Date();
+    const tripStart = new Date(`${trip.date}T${trip.time}`);
+    if (tripStart < now) {
+      return res
+        .status(400)
+        .json({ message: "Trip already departed. Editing not allowed." });
+    }
+
+    const {
+      from,
+      to,
+      date,
+      time,
+      totalSeats,
+      farePerSeat,
+      vehicleType,
+      vehicleModel,
+      licensePlate,
+    } = req.body;
+
+    const newStart = new Date(`${date}T${time}`);
+    if (newStart < now) {
+      return res
+        .status(400)
+        .json({ message: "New trip time must be in the future" });
+    }
+
+    trip.from = from;
+    trip.to = to;
+    trip.date = date;
+    trip.time = time;
+    trip.totalSeats = Number(totalSeats);
+    trip.farePerSeat = Number(farePerSeat);
+    trip.vehicleType = vehicleType;
+    trip.vehicleModel = vehicleModel;
+    trip.licensePlate = licensePlate;
+
+    if (req.body.location) {
+      try {
+        trip.location = JSON.parse(req.body.location);
+      } catch {
+        return res.status(400).json({ message: "Invalid location format" });
+      }
+    }
+
+    if (req.file && req.file.path) {
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "trip_vehicles",
+      });
+      trip.image = uploaded.secure_url;
+    }
+
+    await trip.save();
+    res.json({ message: "✅ Trip updated", trip });
+  } catch (err) {
+    console.error("❌ Trip update failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+exports.cancelTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    // 🚫 Only driver can cancel
+    if (trip.driverId.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to cancel this trip" });
+    }
+
+    // 🚫 Cannot cancel past or already cancelled trip
+    const tripStart = new Date(`${trip.date}T${trip.time}`);
+    if (tripStart < new Date()) {
+      return res
+        .status(400)
+        .json({ message: "Trip already started or expired" });
+    }
+
+    if (trip.status === "cancelled") {
+      return res.status(400).json({ message: "Trip already cancelled" });
+    }
+
+    // ✅ Optional: Save cancellation reason
+    trip.status = "cancelled";
+    trip.cancelledAt = new Date();
+    if (req.body.reason) trip.cancelReason = req.body.reason;
+
+    await trip.save();
+    for (const p of trip.passengers) {
+      const passengerUser = await User.findById(p.user);
+      if (passengerUser?.email) {
+        await sendEmail({
+          to: passengerUser.email,
+          subject: "Trip Cancelled",
+          html: `<p>Hello ${passengerUser.name},</p>
+        <p>We regret to inform you that your ride from <b>${trip.from}</b> to <b>${trip.to}</b> on <b>${trip.date}</b> has been cancelled by the driver.</p>
+        <p>Please find another trip using BanglaBnB. We're sorry for the inconvenience.</p>`,
+        });
+      }
+    }
+
+    res.json({ message: "🚫 Trip cancelled successfully", trip });
+  } catch (err) {
+    console.error("❌ Cancel trip error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 // Cancel reservation
 exports.cancelReservation = async (req, res) => {
   try {
