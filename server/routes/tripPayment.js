@@ -167,11 +167,11 @@ router.post("/trip-success", async (req, res) => {
 });
 
 // ✅ Get Trip Reservation by Transaction ID (Protected)
-router.get("/reservation/:tran_id", protect, async (req, res) => {
+router.get("/reservation/:tran_id", async (req, res) => {
   try {
     const reservation = await TripReservation.findOne({
       transactionId: req.params.tran_id,
-      userId: req.user._id,
+
       status: "paid", // ✅ Only return if reservation is paid
     })
       .populate("tripId")

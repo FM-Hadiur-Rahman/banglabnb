@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+// Bank options
 const BANK_OPTIONS = [
   { value: "BRAC Bank", label: "BRAC Bank" },
   { value: "Dutch-Bangla Bank", label: "Dutch-Bangla Bank (DBBL)" },
@@ -25,8 +28,32 @@ const BANK_OPTIONS = [
   { value: "First Security Islami Bank", label: "First Security Islami Bank" },
   { value: "NRB Commercial Bank", label: "NRB Commercial Bank" },
   { value: "Social Islami Bank", label: "Social Islami Bank (SIBL)" },
-  // ... add more as needed
 ];
+
+// Get label with icon
+const getPaymentMethodLabel = (type) => {
+  const t = (type || "").trim().toLowerCase();
+  switch (t) {
+    case "bkash":
+      return "📱 bKash";
+    case "nagad":
+      return "📱 Nagad";
+    case "rocket":
+      return "📱 Rocket";
+    case "bank":
+      return "🏦 Bank Account";
+    default:
+      return "❓ Unknown";
+  }
+};
+
+// Mask account numbers
+const maskAccountNumber = (number = "") => {
+  if (number.length <= 8) return number.replace(/.(?=.{2})/g, "*");
+  const visibleStart = number.slice(0, 5);
+  const visibleEnd = number.slice(-4);
+  return `${visibleStart}${"*".repeat(number.length - 9)}${visibleEnd}`;
+};
 
 export default function PaymentDetailsForm() {
   const [form, setForm] = useState({
@@ -42,13 +69,22 @@ export default function PaymentDetailsForm() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/users/payment-details`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setForm(res.data))
-      .catch(() => {}); // silent if not set
+      .then((res) => {
+        if (res.data) setForm(res.data);
+      })
+      .catch(() => {
+        setForm({
+          accountType: "bkash",
+          accountNumber: "",
+          accountName: "",
+          bankName: "",
+          routingNumber: "",
+        });
+      });
   }, []);
 
   const handleChange = (e) => {
@@ -56,24 +92,28 @@ export default function PaymentDetailsForm() {
   };
 
   const handleBankChange = (selected) => {
-    setForm((prev) => ({ ...prev, bankName: selected.value }));
+    setForm((prev) => ({ ...prev, bankName: selected?.value || "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
     setLoading(true);
-    await axios.put(
-      `${import.meta.env.VITE_API_URL}/api/users/payment-details`,
-      form,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    setLoading(false);
-    alert("✅ Payment details saved");
-    setIsEditing(false);
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/users/payment-details`,
+        form,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("✅ Payment details saved");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("❌ Failed to save payment details");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,33 +133,43 @@ export default function PaymentDetailsForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Account Type */}
+        {/* Payment Method */}
         <div>
           <label className="block font-medium mb-1">Payment Method</label>
-          <select
-            name="accountType"
-            value={form.accountType}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className="w-full border rounded px-3 py-2"
-          >
-            <option value="bkash">📱 bKash</option>
-            <option value="nagad">📱 Nagad</option>
-            <option value="rocket">📱 Rocket</option>
-            <option value="bank">🏦 Bank Account</option>
-          </select>
+          {isEditing ? (
+            <select
+              name="accountType"
+              value={form.accountType}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            >
+              <option value="bkash">📱 bKash</option>
+              <option value="nagad">📱 Nagad</option>
+              <option value="rocket">📱 Rocket</option>
+              <option value="bank">🏦 Bank Account</option>
+            </select>
+          ) : (
+            <p className="text-gray-700">
+              {getPaymentMethodLabel(form.accountType)}
+            </p>
+          )}
         </div>
 
         {/* Account Name */}
         <div>
           <label className="block font-medium mb-1">Account Holder Name</label>
-          <input
-            name="accountName"
-            value={form.accountName}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className="w-full border rounded px-3 py-2"
-          />
+          {isEditing ? (
+            <input
+              name="accountName"
+              value={form.accountName}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
+          ) : (
+            <p className="text-gray-700">{form.accountName || "N/A"}</p>
+          )}
         </div>
 
         {/* Account Number */}
@@ -129,55 +179,71 @@ export default function PaymentDetailsForm() {
               ? "Bank Account Number"
               : "Mobile Wallet Number"}
           </label>
-          <input
-            name="accountNumber"
-            value={form.accountNumber}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className="w-full border rounded px-3 py-2"
-          />
+          {isEditing ? (
+            <input
+              name="accountNumber"
+              value={form.accountNumber}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              disabled={loading}
+            />
+          ) : (
+            <p className="text-gray-700">
+              {maskAccountNumber(form.accountNumber)}
+            </p>
+          )}
         </div>
 
-        {/* Bank Specific Fields */}
+        {/* Bank-Specific Fields */}
         {form.accountType === "bank" && (
           <>
             <div>
               <label className="block font-medium mb-1">Bank Name</label>
-              <Select
-                value={BANK_OPTIONS.find((b) => b.value === form.bankName)}
-                options={BANK_OPTIONS}
-                onChange={handleBankChange}
-                isDisabled={!isEditing}
-              />
+              {isEditing ? (
+                <Select
+                  value={BANK_OPTIONS.find((b) => b.value === form.bankName)}
+                  options={BANK_OPTIONS}
+                  onChange={handleBankChange}
+                  isDisabled={loading}
+                />
+              ) : (
+                <p className="text-gray-700">{form.bankName || "N/A"}</p>
+              )}
             </div>
-
             <div>
               <label className="block font-medium mb-1">Routing Number</label>
-              <input
-                name="routingNumber"
-                value={form.routingNumber}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full border rounded px-3 py-2"
-              />
+              {isEditing ? (
+                <input
+                  name="routingNumber"
+                  value={form.routingNumber}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2"
+                  disabled={loading}
+                />
+              ) : (
+                <p className="text-gray-700">
+                  {form.routingNumber || "Not provided"}
+                </p>
+              )}
             </div>
           </>
         )}
 
-        {/* Buttons */}
+        {/* Action Buttons */}
         {isEditing && (
           <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsEditing(false)}
               className="px-4 py-2 bg-gray-200 rounded"
+              disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading}
               className="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              disabled={loading}
             >
               {loading ? "Saving..." : "💾 Save"}
             </button>

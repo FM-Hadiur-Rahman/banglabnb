@@ -15,6 +15,10 @@ const {
   getSuggestedTrips,
   updateTrip, // ✅ Add this
   cancelTrip,
+  markTripCompleted, // ✅ New
+  getTripEarnings, // ✅ New
+  getDriverStats, // ✅ New
+  getTripPassengers,
 } = require("../controllers/tripController");
 
 // ✅ CREATE trip (with image upload)
@@ -30,6 +34,11 @@ router.post(
 router.get("/my-rides", protect, MyRides); // must come before `/:id`
 router.get("/my", protect, authorize("driver"), getMyTrips);
 router.get("/suggestions", getSuggestedTrips);
+// ✅ Earnings for all trips of the logged-in driver
+router.get("/earnings", protect, authorize("driver"), getTripEarnings);
+
+// ✅ Stats for the driver's dashboard
+router.get("/driver-stats", protect, authorize("driver"), getDriverStats);
 
 // ✅ PUBLIC ROUTES
 router.get("/", getTrips);
@@ -40,6 +49,11 @@ router.post("/:tripId/reserve", protect, reserveSeat);
 router.post("/:tripId/cancel", protect, cancelReservation);
 router.put("/:id", protect, upload.single("image"), updateTrip);
 router.put("/:id/cancel", protect, cancelTrip);
+// ✅ View all passengers for a specific trip
+router.get("/:id/passengers", protect, authorize("driver"), getTripPassengers);
+
+// ✅ Mark trip as completed
+router.post("/:id/complete", protect, authorize("driver"), markTripCompleted);
 
 router.get("/:id", getTripById);
 

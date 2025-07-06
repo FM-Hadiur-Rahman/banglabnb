@@ -302,6 +302,8 @@ exports.cancelReservation = async (req, res) => {
     // ✅ Mark as cancelled
     trip.passengers[index].status = "cancelled";
     trip.passengers[index].cancelledAt = new Date();
+    trip.passengers[index].cancelReason =
+      req.body.reason || "No reason provided";
 
     // ✅ Recalculate seats
     const reservedSeatsAfterCancel = trip.passengers
@@ -371,6 +373,109 @@ exports.getSuggestedTrips = async (req, res) => {
     res.json(trips);
   } catch (err) {
     console.error("❌ Trip suggestions error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// controllers/tripController.js
+exports.getTripEarnings = async (req, res) => {
+  try {
+    const trips = await Trip.find({ driverId: req.user._id });
+
+    const detailed = trips.map((trip) => {
+      const earnings = trip.passengers
+        .filter((p) => p.status === "reserved" && p.paymentStatus === "paid")
+        .reduce((sum, p) => sum + p.seats * trip.farePerSeat, 0);
+      return {
+        tripId: trip._id,
+        from: trip.from,
+        to: trip.to,
+        date: trip.date,
+        time: trip.time,
+        totalSeats: trip.totalSeats,
+        earnings,
+      };
+    });
+
+    const totalEarnings = detailed.reduce((sum, t) => sum + t.earnings, 0);
+
+    res.json({ totalEarnings, trips: detailed });
+  } catch (err) {
+    console.error("❌ Earnings fetch failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+exports.markTripCompleted = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    if (trip.driverId.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: "Unauthorized" });
+
+    const tripTime = new Date(`${trip.date}T${trip.time}`);
+    if (tripTime > new Date()) {
+      return res.status(400).json({ message: "Trip hasn't started yet" });
+    }
+
+    trip.isCompleted = true;
+    await trip.save();
+
+    res.json({ message: "✅ Trip marked as completed", trip });
+  } catch (err) {
+    console.error("❌ Mark completed failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// GET /api/trips/:id/passengers
+exports.getTripPassengers = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id).populate(
+      "passengers.user",
+      "name phone email"
+    );
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    if (trip.driverId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const activePassengers = trip.passengers.filter(
+      (p) => p.status === "reserved"
+    );
+
+    res.json({ passengers: activePassengers });
+  } catch (err) {
+    console.error("❌ Fetch passengers failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// GET /api/trips/driver-stats
+exports.getDriverStats = async (req, res) => {
+  try {
+    const trips = await Trip.find({ driverId: req.user._id });
+
+    const totalTrips = trips.length;
+    const completed = trips.filter((t) => t.isCompleted).length;
+    const cancelled = trips.filter((t) => t.status === "cancelled").length;
+
+    const totalEarnings = trips.reduce((sum, trip) => {
+      const earnings = trip.passengers
+        .filter((p) => p.status === "reserved" && p.paymentStatus === "paid")
+        .reduce((s, p) => s + p.seats * trip.farePerSeat, 0);
+      return sum + earnings;
+    }, 0);
+
+    res.json({
+      totalTrips,
+      completed,
+      cancelled,
+      totalEarnings,
+    });
+  } catch (err) {
+    console.error("❌ Driver stats fetch failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -6,26 +6,36 @@ import getTimeLeft from "../utils/getTimeLeft";
 const DriverDashboard = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [earnings, setEarnings] = useState([]);
 
   useEffect(() => {
-    const fetchMyTrips = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/trips/my`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setTrips(res.data);
+        const token = localStorage.getItem("token");
+        const [tripRes, statsRes, earningsRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/api/trips/my`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/trips/driver-stats`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/trips/earnings`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        setTrips(tripRes.data);
+        setStats(statsRes.data);
+        setEarnings(earningsRes.data.trips);
       } catch (err) {
-        console.error("❌ Error fetching driver's trips:", err);
+        console.error("❌ Error loading driver dashboard:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchMyTrips();
+
+    fetchData();
   }, []);
 
   const handleCancelTrip = async (tripId) => {
@@ -53,9 +63,32 @@ const DriverDashboard = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">🚘 My Posted Rides</h2>
 
+      {/* STATS */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-white">
+          <div className="bg-blue-600 p-4 rounded shadow">
+            <p className="text-sm">Total Trips</p>
+            <p className="text-xl font-bold">{stats.totalTrips}</p>
+          </div>
+          <div className="bg-green-600 p-4 rounded shadow">
+            <p className="text-sm">Completed</p>
+            <p className="text-xl font-bold">{stats.completed}</p>
+          </div>
+          <div className="bg-red-600 p-4 rounded shadow">
+            <p className="text-sm">Cancelled</p>
+            <p className="text-xl font-bold">{stats.cancelled}</p>
+          </div>
+          <div className="bg-yellow-600 p-4 rounded shadow">
+            <p className="text-sm">Total Earnings</p>
+            <p className="text-xl font-bold">৳{stats.totalEarnings}</p>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE BUTTON */}
       <Link
         to="/dashboard/driver/trips/new"
         className="inline-block bg-green-600 text-white px-4 py-2 rounded mb-6"
@@ -63,6 +96,36 @@ const DriverDashboard = () => {
         ➕ Create New Trip
       </Link>
 
+      {/* EARNINGS TABLE */}
+      {earnings?.length > 0 && (
+        <div className="bg-white rounded shadow p-4 mb-6 overflow-x-auto">
+          <h3 className="text-lg font-semibold mb-2">💰 Trip Earnings</h3>
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="py-2">Date</th>
+                <th className="py-2">From → To</th>
+                <th className="py-2">Earnings</th>
+              </tr>
+            </thead>
+            <tbody>
+              {earnings.map((e) => (
+                <tr key={e.tripId} className="border-b">
+                  <td className="py-1">{e.date}</td>
+                  <td className="py-1">
+                    {e.from} → {e.to}
+                  </td>
+                  <td className="py-1 font-semibold text-green-700">
+                    ৳{e.earnings}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* TRIP LIST */}
       {loading ? (
         <p className="text-gray-500">Loading your trips...</p>
       ) : trips.length === 0 ? (
@@ -116,12 +179,6 @@ const DriverDashboard = () => {
                   {trip.status}
                 </span>
               </p>
-
-              {trip.paymentStatus && (
-                <p className="text-sm text-gray-600">
-                  💰 <strong>Payment Status:</strong> {trip.paymentStatus}
-                </p>
-              )}
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
