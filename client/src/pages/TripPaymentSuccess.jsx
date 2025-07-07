@@ -67,14 +67,15 @@ const TripPaymentSuccess = () => {
       <p>
         <strong>Transaction ID:</strong> {reservation.transactionId}
       </p>
-
       <a
-        href={`https://banglabnb.com/invoices/trip-invoice-${reservation._id}.pdf`}
+        href={`${import.meta.env.VITE_API_URL}/invoices/trip-invoice-${
+          reservation._id
+        }.pdf`}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        className="bg-blue-600 text-white px-4 py-2 rounded mt-4 inline-block"
       >
-        📄 Download Invoice
+        📄 View Trip Invoice
       </a>
     </div>
   );

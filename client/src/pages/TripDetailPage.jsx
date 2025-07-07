@@ -363,6 +363,11 @@ const TripDetailPage = () => {
   if (!trip)
     return <p className="text-center mt-10 text-red-600">Trip not found.</p>;
 
+  const subtotal = trip.farePerSeat * seatsToReserve;
+  const serviceFee = Math.round(subtotal * 0.1); // 10%
+  const vat = Math.round((subtotal + serviceFee) * 0.075); // 7.5%
+  const total = subtotal + serviceFee + vat;
+
   const reservedSeats =
     trip.passengers
       ?.filter((p) => p.status !== "cancelled")
@@ -544,6 +549,22 @@ const TripDetailPage = () => {
                       : "🚫 This trip is fully booked."}
                   </p>
                 )}
+                <div className="bg-gray-50 border rounded p-4 text-sm space-y-1">
+                  <p>
+                    <strong>Subtotal:</strong> ৳{subtotal}
+                  </p>
+                  <p>
+                    <strong>Service Fee (10%):</strong> ৳{serviceFee}
+                  </p>
+                  <p>
+                    <strong>VAT (7.5%):</strong> ৳{vat}
+                  </p>
+                  <hr />
+                  <p className="text-lg font-semibold text-green-700">
+                    Total to Pay: ৳{total}
+                  </p>
+                </div>
+
                 <button
                   onClick={() => handleReserve(trip, seatsToReserve)}
                   disabled={availableSeats === 0 || isExpired || isCancelled}

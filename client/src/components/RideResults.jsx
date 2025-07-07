@@ -244,6 +244,12 @@ const RideResults = ({
 }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [confirmTrip, setConfirmTrip] = useState(null);
+  const calculateTotal = (baseFare, seats) => {
+    const subtotal = baseFare * seats;
+    const serviceFee = Math.round(subtotal * 0.1);
+    const vat = Math.round((subtotal + serviceFee) * 0.075);
+    return subtotal + serviceFee + vat;
+  };
 
   if (!trips.length)
     return <p className="text-center text-gray-600 py-6">❌ No rides found.</p>;
@@ -351,6 +357,14 @@ const RideResults = ({
                   <strong>Seats:</strong> {seatsLeft} of {trip.totalSeats}{" "}
                   available
                 </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Base Fare:</strong> ৳{trip.farePerSeat}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Estimated Total (1 seat):</strong> ৳
+                  {calculateTotal(trip.farePerSeat, 1)}
+                </p>
+
                 <p className="text-sm text-gray-600">
                   <strong>Status:</strong>{" "}
                   <span className={`font-medium ${color}`}>{label}</span>

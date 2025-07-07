@@ -24,6 +24,7 @@ const tripPaymentRoutes = require("./routes/tripPayment");
 const bannerRoutes = require("./routes/banner");
 const checkMaintenance = require("./middleware/checkMaintenance");
 const GlobalConfig = require("./models/GlobalConfig");
+const path = require("path");
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,7 @@ app.use(
 
 app.use(express.urlencoded({ extended: true })); // ✅ For form-encoded data
 app.use(express.json());
+app.use("/invoices", express.static(path.join(__dirname, "invoices")));
 
 app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.originalUrl}`);
