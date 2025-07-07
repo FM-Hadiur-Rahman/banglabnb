@@ -16,9 +16,6 @@ const TawkToWidget = () => {
     );
     if (isExcluded) return;
 
-    // 3. 🌐 Detect browser language, fallback to English
-    const browserLang = navigator.language?.split("-")[0] || "en";
-
     // 4. Inject script
     const s1 = document.createElement("script");
     s1.src = "https://embed.tawk.to/686933b9be8a1b1910b84326/1ivdf43q7";
@@ -37,9 +34,6 @@ const TawkToWidget = () => {
           },
           (err) => err && console.warn("Tawk setAttributes error:", err)
         );
-
-        // 🌐 Set language
-        window.Tawk_API.setLanguage(browserLang === "bn" ? "bn" : "en");
 
         // 🚀 Open for host, or delay open for guest
         if (user.role === "host") {

@@ -116,6 +116,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal Server Error" });
 });
 
+require("./cron/premiumReminder");
+
 connectDB()
   .then(() => {
     app.listen(PORT, () => {

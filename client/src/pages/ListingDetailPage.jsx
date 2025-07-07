@@ -85,7 +85,7 @@ const ListingDetailPage = () => {
                   className="w-full h-52 object-cover rounded cursor-pointer hover:opacity-90 transition-transform hover:scale-105"
                   onClick={() => setSelectedImage(url)}
                 />
-                {idx === 0 && listing.host?.premium?.isActive && (
+                {idx === 0 && listing.hostId?.premium?.isActive && (
                   <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10">
                     🌟 Premium
                   </span>

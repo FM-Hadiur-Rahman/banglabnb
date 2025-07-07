@@ -93,6 +93,7 @@ exports.getAllListings = async (req, res) => {
     }
 
     // ✅ Add this after other $match stages (e.g., after tags filter)
+    // ✅ Add this after other $match stages (e.g., after tags filter)
     pipeline.push({
       $lookup: {
         from: "users",
@@ -103,6 +104,25 @@ exports.getAllListings = async (req, res) => {
       },
     });
     pipeline.push({ $unwind: "$host" });
+
+    // ✅ Add Premium boost field
+    pipeline.push({
+      $addFields: {
+        premiumBoost: { $cond: ["$host.premium.isActive", 1, 0] },
+      },
+    });
+
+    // ✅ Sort by premium first, then the chosen field
+    pipeline.push({
+      $sort: {
+        premiumBoost: -1,
+        ...(sortBy === "priceAsc"
+          ? { price: 1 }
+          : sortBy === "priceDesc"
+          ? { price: -1 }
+          : { [sortBy]: order === "asc" ? 1 : -1 }),
+      },
+    });
 
     // ✅ 5. Date-based booking exclusion
     if (from && to) {
