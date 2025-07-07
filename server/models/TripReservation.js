@@ -28,6 +28,12 @@ const tripReservationSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  farePerSeat: Number,
+  subtotal: Number,
+  serviceFee: Number,
+  vat: Number,
+  totalAmount: Number,
+
   valId: String,
   paidAt: Date,
   status: {

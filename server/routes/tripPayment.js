@@ -19,7 +19,12 @@ router.post("/trip-initiate", protect, async (req, res) => {
     const trip = await Trip.findById(tripId);
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
-    const totalFare = seats * trip.farePerSeat;
+    const farePerSeat = trip.farePerSeat;
+    const subtotal = seats * farePerSeat;
+    const serviceFee = Math.round(subtotal * 0.1); // 10%
+    const vat = Math.round((subtotal + serviceFee) * 0.075); // 7.5%
+    const totalAmount = subtotal + serviceFee + vat;
+
     const tran_id = `TRIP_${tripId}_${Date.now()}`;
 
     const reservation = await TripReservation.create({
@@ -27,14 +32,18 @@ router.post("/trip-initiate", protect, async (req, res) => {
       userId: req.user._id,
       transactionId: tran_id,
       numberOfSeats: seats,
-      farePerSeat: trip.farePerSeat,
-      totalAmount: totalFare,
+      farePerSeat,
+      subtotal,
+      serviceFee,
+      vat,
+      totalAmount,
+      status: "pending",
     });
 
     const data = {
       store_id: process.env.SSLCOMMERZ_STORE_ID,
       store_passwd: process.env.SSLCOMMERZ_STORE_PASS,
-      total_amount: totalFare,
+      total_amount: totalAmount,
       currency: "BDT",
       tran_id,
       success_url: `${process.env.API_URL}/api/trip-payment/trip-success`,
