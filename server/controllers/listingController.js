@@ -1,56 +1,6 @@
 const Listing = require("../models/Listing");
 const Booking = require("../models/Booking");
 
-// exports.getAllListings = async (req, res) => {
-//   try {
-//     const { location, from, to, guests, type, minPrice, maxPrice } = req.query;
-//     const query = { isDeleted: false };
-
-//     // Flexible filters
-//     if (location) {
-//       query["location.address"] = { $regex: location, $options: "i" };
-//     }
-
-//     if (type) {
-//       query.type = type; // e.g., 'hotel', 'resort'
-//     }
-
-//     if (guests) {
-//       query.maxGuests = { $gte: parseInt(guests) };
-//     }
-
-//     if (minPrice || maxPrice) {
-//       query.price = {};
-//       if (minPrice) query.price.$gte = parseFloat(minPrice);
-//       if (maxPrice) query.price.$lte = parseFloat(maxPrice);
-//     }
-
-//     let listings = await Listing.find(query);
-
-//     // Date-based availability filter
-//     if (from && to) {
-//       const Booking = require("../models/Booking");
-//       const dateFrom = new Date(from);
-//       const dateTo = new Date(to);
-
-//       const bookedIds = await Booking.find({
-//         $or: [
-//           {
-//             dateFrom: { $lte: dateTo },
-//             dateTo: { $gte: dateFrom },
-//           },
-//         ],
-//       }).distinct("listingId");
-
-//       listings = listings.filter((l) => !bookedIds.includes(l._id.toString()));
-//     }
-
-//     res.json(listings);
-//   } catch (err) {
-//     console.error("❌ Error filtering listings:", err);
-//     res.status(500).json({ message: "Failed to fetch listings" });
-//   }
-// };
 exports.getAllListings = async (req, res) => {
   try {
     const {
@@ -142,6 +92,18 @@ exports.getAllListings = async (req, res) => {
       });
     }
 
+    // ✅ Add this after other $match stages (e.g., after tags filter)
+    pipeline.push({
+      $lookup: {
+        from: "users",
+        localField: "hostId",
+        foreignField: "_id",
+        as: "host",
+        pipeline: [{ $project: { name: 1, avatar: 1, premium: 1 } }],
+      },
+    });
+    pipeline.push({ $unwind: "$host" });
+
     // ✅ 5. Date-based booking exclusion
     if (from && to) {
       const dateFrom = new Date(from);
@@ -206,7 +168,7 @@ exports.getListingById = async (req, res) => {
     const listing = await Listing.findOne({
       _id: req.params.id,
       isDeleted: false,
-    });
+    }).populate("hostId", "name avatar premium");
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });

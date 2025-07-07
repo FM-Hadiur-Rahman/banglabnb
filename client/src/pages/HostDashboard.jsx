@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import EarningsChart from "../components/EarningsChart";
 import ReviewsChart from "../components/ReviewsChart";
 import PaymentReminderModal from "../components/PaymentReminderModal";
+import PremiumUpgradeCard from "../components/PremiumUpgradeCard";
+import { toast } from "react-toastify";
 
 const HostDashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
@@ -89,6 +91,14 @@ const HostDashboard = () => {
     if (user?.role === "host") fetchData();
   }, [user]);
 
+  // inside HostDashboard.jsx
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("status") === "premium") {
+      toast.success("🎉 Premium upgrade successful!");
+    }
+  }, []);
+
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this listing?")) return;
 
@@ -131,6 +141,15 @@ const HostDashboard = () => {
             </Link>
           </div>
         </div>
+        {/* ✅ Premium Host Upgrade Card */}
+        {user?.role === "host" && (
+          <div className="mb-6">
+            <PremiumUpgradeCard
+              isPremium={user?.premium?.isActive}
+              expiresAt={user?.premium?.expiresAt}
+            />
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">

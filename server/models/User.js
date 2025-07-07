@@ -136,6 +136,15 @@ const userSchema = new mongoose.Schema(
         default: Date.now,
       },
     },
+    premium: {
+      isActive: { type: Boolean, default: false },
+      expiresAt: Date,
+      upgradedAt: Date,
+      paymentInfo: {
+        transactionId: String,
+        amount: Number,
+      },
+    },
 
     isDeleted: {
       type: Boolean,

@@ -69,16 +69,22 @@ const ListingCard = ({ listing }) => {
             </button>
           )}
         </div>
-
-        <h3 className="text-lg font-bold mt-2">{listing.title}</h3>
-        <p className="text-gray-500">{listing.location?.address}</p>
-        <p className="text-green-600 font-semibold">
-          ৳
-          {i18n.language === "bn"
-            ? toBanglaNumber(listing.price)
-            : listing.price}
-          /{t("price_per_night_unit") || "night"}
-        </p>
+        <div>
+          <h3 className="text-lg font-bold mt-2">{listing.title}</h3>
+          <p className="text-gray-500">{listing.location?.address}</p>
+          <p className="text-green-600 font-semibold">
+            ৳
+            {i18n.language === "bn"
+              ? toBanglaNumber(listing.price)
+              : listing.price}
+            /{t("price_per_night_unit") || "night"}
+          </p>
+          {listing.host?.premium?.isActive && (
+            <span className="absolute top-2 left-2 bg-yellow-400 text-white text-xs font-semibold px-2 py-1 rounded">
+              🌟 Premium
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
