@@ -19,23 +19,22 @@ const ListingsPage = () => {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const query = Object.fromEntries([...searchParams.entries()]);
-        if (!query.page) query.page = 1;
-        if (!query.limit) query.limit = 12;
+        const queryObj = Object.fromEntries([...searchParams.entries()]);
+        const hasFilters = Object.keys(queryObj).length > 0;
 
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/listings`,
-          {
-            params: query,
-          }
-        );
+        const url = `${import.meta.env.VITE_API_URL}/api/listings`;
 
-        if (Array.isArray(res.data.listings)) {
-          setListings(res.data.listings);
+        const res = hasFilters
+          ? await axios.get(url, { params: queryObj })
+          : await axios.get(url); // No filters → load all
+
+        const data = res.data;
+        if (Array.isArray(data.listings)) {
+          setListings(data.listings);
           setPagination({
-            currentPage: res.data.currentPage,
-            totalPages: res.data.totalPages,
-            totalCount: res.data.totalCount,
+            currentPage: data.currentPage || 1,
+            totalPages: data.totalPages || 1,
+            totalCount: data.totalCount || data.listings.length,
           });
         } else {
           setListings([]);

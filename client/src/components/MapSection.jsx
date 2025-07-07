@@ -83,7 +83,7 @@ const MapSection = ({
 
   return (
     <section className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 pb-8">
+      <div className="w-full mx-auto px-0 pb-8">
         <div
           ref={mapRef}
           className="w-full h-64 sm:h-72 lg:h-96 xl:h-[32rem] rounded border border-gray-300"

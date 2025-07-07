@@ -77,6 +77,7 @@ exports.getAllListings = async (req, res) => {
 
     // 🔍 Log raw request params for debugging
     console.log("🔍 Incoming search filters:", req.query);
+    console.log("✅ Final pipeline:", JSON.stringify(pipeline, null, 2));
 
     // ✅ 1. Geo search with radius (if lat/lng provided)
     const useGeo =
