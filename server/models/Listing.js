@@ -58,6 +58,11 @@ const listingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    tags: {
+      type: [String],
+      default: [],
+      enum: ["AC", "Wifi", "Sea View", "Resort", "Family Friendly"],
+    },
 
     hostId: {
       type: mongoose.Schema.Types.ObjectId,

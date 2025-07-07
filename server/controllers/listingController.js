@@ -62,20 +62,27 @@ exports.getAllListings = async (req, res) => {
       minPrice,
       maxPrice,
       keyword,
+      tags,
       sortBy = "createdAt",
       order = "desc",
       lat,
       lng,
+      radius = 50, // default 50km
       page = 1,
       limit = 12,
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const pipeline = [];
 
-    // ✅ 1. Geo search (only if lat & lng provided)
-    if (lat && lng) {
+    // 🔍 Log raw request params for debugging
+    console.log("🔍 Incoming search filters:", req.query);
+
+    // ✅ 1. Geo search with radius (if lat/lng provided)
+    const useGeo =
+      lat && lng && !isNaN(lat) && !isNaN(lng) && parseFloat(radius) > 0;
+
+    if (useGeo) {
       pipeline.push({
         $geoNear: {
           near: {
@@ -84,18 +91,26 @@ exports.getAllListings = async (req, res) => {
           },
           distanceField: "distance",
           spherical: true,
+          maxDistance: parseFloat(radius) * 1000, // convert km to meters
         },
       });
     }
 
-    // ✅ 2. Match base filters
+    // ✅ 2. Base match filter
     const match = { isDeleted: false };
 
     if (location) {
       match["location.address"] = { $regex: location, $options: "i" };
     }
+
     if (type) match.type = type;
-    if (guests) match.maxGuests = { $gte: parseInt(guests) };
+    if (req.query.guests && !isNaN(req.query.guests)) {
+      const guestInt = parseInt(req.query.guests);
+      if (guestInt > 1) {
+        match.maxGuests = { $gte: guestInt };
+      }
+    }
+
     if (minPrice || maxPrice) {
       match.price = {};
       if (minPrice) match.price.$gte = parseFloat(minPrice);
@@ -104,7 +119,7 @@ exports.getAllListings = async (req, res) => {
 
     pipeline.push({ $match: match });
 
-    // ✅ 3. Full-text keyword search
+    // ✅ 3. Keyword search
     if (keyword) {
       pipeline.push({
         $match: {
@@ -116,40 +131,61 @@ exports.getAllListings = async (req, res) => {
       });
     }
 
-    // ✅ 4. Exclude booked listings (optional)
-    let bookedIds = [];
-    if (from && to) {
-      const dateFrom = new Date(from);
-      const dateTo = new Date(to);
-
-      bookedIds = await Booking.find({
-        $or: [{ dateFrom: { $lte: dateTo }, dateTo: { $gte: dateFrom } }],
-      }).distinct("listingId");
-
+    // ✅ 4. Tags filter
+    if (tags) {
+      const tagArray = tags.split(",").map((tag) => tag.trim());
       pipeline.push({
         $match: {
-          _id: { $nin: bookedIds.map((id) => new mongoose.Types.ObjectId(id)) },
+          tags: { $in: tagArray },
         },
       });
     }
 
-    // ✅ 5. Sort (by rating, price, createdAt, etc.)
-    const sortStage = {};
-    sortStage[sortBy] = order === "asc" ? 1 : -1;
-    pipeline.push({ $sort: sortStage });
+    // ✅ 5. Date-based booking exclusion
+    if (from && to) {
+      const dateFrom = new Date(from);
+      const dateTo = new Date(to);
 
-    // ✅ 6. Count total before pagination
+      const bookedIds = await Booking.find({
+        $or: [{ dateFrom: { $lte: dateTo }, dateTo: { $gte: dateFrom } }],
+      }).distinct("listingId");
+
+      if (bookedIds.length > 0) {
+        pipeline.push({
+          $match: {
+            _id: {
+              $nin: bookedIds.map((id) => new mongoose.Types.ObjectId(id)),
+            },
+          },
+        });
+      }
+    }
+
+    // ✅ 6. Sorting logic
+    const sortField =
+      sortBy === "priceAsc"
+        ? { price: 1 }
+        : sortBy === "priceDesc"
+        ? { price: -1 }
+        : { [sortBy]: order === "asc" ? 1 : -1 };
+
+    pipeline.push({ $sort: sortField });
+
+    // ✅ 7. Count listings before pagination
     const countPipeline = [...pipeline, { $count: "totalCount" }];
     const countResult = await Listing.aggregate(countPipeline);
     const totalCount = countResult[0]?.totalCount || 0;
     const totalPages = Math.ceil(totalCount / limit);
 
-    // ✅ 7. Pagination
+    // ✅ 8. Paginate and fetch
     pipeline.push({ $skip: skip });
     pipeline.push({ $limit: parseInt(limit) });
 
-    // ✅ 8. Final result
     const listings = await Listing.aggregate(pipeline);
+
+    console.log(
+      `✅ ${listings.length} listings returned (page ${page} of ${totalPages})`
+    );
 
     res.json({
       listings,
@@ -158,7 +194,7 @@ exports.getAllListings = async (req, res) => {
       currentPage: parseInt(page),
     });
   } catch (err) {
-    console.error("❌ Error in getAllListings aggregate:", err);
+    console.error("❌ Error in getAllListings:", err);
     res.status(500).json({ message: "Failed to fetch listings" });
   }
 };

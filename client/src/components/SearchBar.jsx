@@ -218,7 +218,8 @@ const SearchBar = () => {
     if (district) params.append("location", district);
     if (checkIn) params.append("from", checkIn.toISOString());
     if (checkOut) params.append("to", checkOut.toISOString());
-    if (guests) params.append("guests", guests);
+    if (guests && guests !== 1) params.append("guests", guests);
+
     if (keyword) params.append("keyword", keyword);
     if (tags.length > 0) params.append("tags", tags.join(","));
     if (sortBy) params.append("sortBy", sortBy);
