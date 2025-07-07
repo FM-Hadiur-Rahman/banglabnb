@@ -429,6 +429,7 @@ const SearchBar = () => {
   const [useGeo, setUseGeo] = useState(false);
   const [coords, setCoords] = useState({ lat: null, lng: null });
   const [radius, setRadius] = useState(10);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const availableTags = ["AC", "Sea View", "Wifi", "Resort", "Family Friendly"];
   const districts = division ? divisions[division] : [];
@@ -483,7 +484,7 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="bg-white shadow rounded-full px-4 py-3 max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-white shadow px-4 py-3 max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       {/* Location Dropdowns */}
       <div className="flex items-center gap-2">
         <MapPin size={18} />
@@ -561,7 +562,7 @@ const SearchBar = () => {
       {/* Mobile drawer toggle */}
       <button
         className="lg:hidden flex items-center gap-1 px-4 py-2 rounded-full bg-gray-100 text-sm"
-        onClick={() => alert("TODO: open mobile drawer")}
+        onClick={() => setShowMobileFilters(true)}
       >
         <SlidersHorizontal size={16} /> {t("search.filters")}
       </button>
@@ -627,6 +628,115 @@ const SearchBar = () => {
       >
         <Search size={16} /> {t("search.search_btn")}
       </button>
+
+      {/* Mobile Filter Drawer */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-end lg:hidden">
+          <div className="bg-white w-full rounded-t-2xl p-4 max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">{t("search.filters")}</h2>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="text-gray-500 text-sm"
+              >
+                ✖ Close
+              </button>
+            </div>
+
+            {/* Tags */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                {t("search.tags")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => (
+                  <label key={tag} className="flex items-center gap-1 text-sm">
+                    <input
+                      type="checkbox"
+                      value={tag}
+                      checked={tags.includes(tag)}
+                      onChange={() =>
+                        setTags((prev) =>
+                          prev.includes(tag)
+                            ? prev.filter((t) => t !== tag)
+                            : [...prev, tag]
+                        )
+                      }
+                      className="accent-rose-500"
+                    />
+                    {tag}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Keyword */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                {t("search.keyword")}
+              </label>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder={t("search.add_keyword")}
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+            </div>
+
+            {/* Sort By */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                {t("search.sort_by")}
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="">{t("search.default_sort")}</option>
+                <option value="priceAsc">{t("search.price_low_high")}</option>
+                <option value="priceDesc">{t("search.price_high_low")}</option>
+                <option value="rating">{t("search.rating")}</option>
+                <option value="popular">{t("search.popular")}</option>
+              </select>
+            </div>
+
+            {/* Radius + Use My Location */}
+            <div className="mb-4">
+              <button
+                onClick={detectLocation}
+                className="bg-blue-500 text-white px-4 py-1 rounded text-sm mb-2"
+              >
+                📍 {t("search.use_my_location")}
+              </button>
+              {useGeo && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">Radius (km):</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={radius}
+                    onChange={(e) => setRadius(Number(e.target.value))}
+                    className="w-20 border rounded px-2 py-1 text-sm"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Apply Button */}
+            <button
+              onClick={() => {
+                setShowMobileFilters(false);
+                handleSearch();
+              }}
+              className="bg-rose-500 w-full text-white py-2 rounded font-semibold"
+            >
+              {t("search.search_btn")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
