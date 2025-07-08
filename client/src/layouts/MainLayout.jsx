@@ -59,7 +59,7 @@ const MainLayout = () => {
 
       {/* Floating Trust Badge */}
       <TrustBadge />
-      <TawkToWidget />
+      {/* <TawkToWidget /> */}
     </div>
   );
 };
