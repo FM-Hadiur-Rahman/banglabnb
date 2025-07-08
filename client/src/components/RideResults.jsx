@@ -46,7 +46,8 @@ const RideResults = ({
           );
           const faded = isCancelled || isExpired;
 
-          if (faded) return null; // Hide expired or cancelled trips
+          const isFullyBooked = seatsLeft === 0;
+          const isDisabled = isCancelled || isExpired || isFullyBooked;
 
           const getTripStatus = () => {
             if (isCancelled)
@@ -62,8 +63,13 @@ const RideResults = ({
           return (
             <Link
               key={trip._id}
-              to={`/trips/${trip._id}`}
-              className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative hover:shadow-lg hover:border-green-500`}
+              to={
+                onSelectTrip && !isDisabled ? undefined : `/trips/${trip._id}`
+              }
+              className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative hover:shadow-lg hover:border-green-500
+    ${selectedTrip?._id === trip._id ? "border-blue-500 bg-blue-50" : ""}
+    ${isDisabled ? "opacity-50 pointer-events-none" : ""}
+  `}
             >
               {trip.location?.coordinates && (
                 <iframe
