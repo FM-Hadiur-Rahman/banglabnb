@@ -129,7 +129,7 @@ const generateTripInvoice = async (
       `https://banglabnb.com/my-rides?reservation=${reservation._id}`,
       { width: 100 }
     );
-    doc.image(qrImage, 450, doc.y + 20, { width: 80 });
+    doc.image(qrPath, 450, doc.y + 20, { width: 80 });
 
     // Signatures
     doc.moveDown(6).fontSize(12).fillColor("black");

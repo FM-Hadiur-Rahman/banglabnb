@@ -192,7 +192,11 @@ const ListingDetailPage = () => {
               <RideResults
                 trips={suggestedTrips}
                 selectedTrip={selectedTrip}
-                onSelectTrip={setSelectedTrip}
+                onSelectTrip={(trip) =>
+                  setSelectedTrip((prev) =>
+                    prev?._id === trip._id ? null : trip
+                  )
+                }
               />
             </>
           ) : (

@@ -162,7 +162,7 @@ exports.combinedPaymentSuccess = async (req, res) => {
     // Step 6: Create Driver Payout (for Ride)
     if (trip?.driverId) {
       const seats = booking.seats || 1; // fallback to 1
-      const subtotal = trip.price * seats;
+      const subtotal = trip.farePerSeat * seats;
 
       const serviceFee = Math.round(subtotal * 0.1); // 10% platform fee
       const vat = Math.round(serviceFee * 0.15); // 15% VAT on fee

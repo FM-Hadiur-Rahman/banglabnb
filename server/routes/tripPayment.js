@@ -22,8 +22,9 @@ router.post("/trip-initiate", protect, async (req, res) => {
     const farePerSeat = trip.farePerSeat;
     const subtotal = seats * farePerSeat;
     const serviceFee = Math.round(subtotal * 0.1); // 10%
-    const vat = Math.round((subtotal + serviceFee) * 0.075); // 7.5%
-    const totalAmount = subtotal + serviceFee + vat;
+    const vat = Math.round(serviceFee * 0.15); // 15%
+    const totalAmount = subtotal + serviceFee;
+    const driverPayout = subtotal - serviceFee;
 
     const tran_id = `TRIP_${tripId}_${Date.now()}`;
 
@@ -37,6 +38,7 @@ router.post("/trip-initiate", protect, async (req, res) => {
       serviceFee,
       vat,
       totalAmount,
+      driverPayout,
       status: "pending",
     });
 
@@ -100,8 +102,8 @@ router.post("/trip-success", async (req, res) => {
     const subtotal = reservation.farePerSeat * reservation.numberOfSeats;
     const serviceFee = subtotal * 0.1;
     const vat = serviceFee * 0.15;
-    const totalAmount = subtotal + serviceFee + vat;
-    const driverPayout = subtotal;
+    const totalAmount = subtotal + serviceFee;
+    const driverPayout = subtotal - serviceFee;
 
     // Update reservation
     reservation.status = "paid";
