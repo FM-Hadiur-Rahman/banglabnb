@@ -83,7 +83,7 @@
     "summary": {
       "subtotal": "৳{{price}} × {{nights}} night(s)",
       "service_fee": "Service fee",
-      "tax": "Tax",
+      "tax_note": "VAT (Paid by Platform)",
       "promo_discount": "Promo Discount",
       "total": "Total",
       "combined_total": "Total (Stay + Ride)"

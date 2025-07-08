@@ -83,7 +83,7 @@
     "summary": {
       "subtotal": "৳{{price}} × {{nights}} রাত",
       "service_fee": "সেবা ফি",
-      "tax": "কর",
+      "tax_note": "মূল্য সংযোজন কর (প্ল্যাটফর্মের মাধ্যমে পরিশোধ)",
       "promo_discount": "প্রোমো ছাড়",
       "total": "মোট",
       "combined_total": "মোট (আবাসন + যাতায়াত)"

@@ -66,8 +66,7 @@ const generateTripInvoice = async (
       reservation.subtotal ||
       reservation.farePerSeat * reservation.numberOfSeats;
     const serviceFee = reservation.serviceFee || subtotal * 0.1;
-    const vat = reservation.vat || (subtotal + serviceFee) * 0.075;
-    const total = reservation.totalAmount || subtotal + serviceFee + vat;
+    const total = reservation.totalAmount || subtotal + serviceFee;
 
     const formatCurrency = (v) =>
       `BDT${Number(v || 0).toLocaleString("en-BD", {
@@ -110,7 +109,6 @@ const generateTripInvoice = async (
         formatCurrency(subtotal),
       ],
       ["Service Fee (10%):", formatCurrency(serviceFee)],
-      ["VAT (7.5%):", formatCurrency(vat)],
       ["Total Paid:", formatCurrency(total)],
     ];
 

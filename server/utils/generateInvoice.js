@@ -71,9 +71,9 @@ const generateInvoice = async (
     );
     const baseRate = listing.price || 0;
     const baseTotal = baseRate * nights;
-    const serviceFee = baseTotal * 0.1;
-    const tax = (baseTotal + serviceFee) * 0.15;
-    const total = baseTotal + serviceFee + tax;
+    const serviceFee = Math.round(baseTotal * 0.1);
+    const vat = Math.round(serviceFee * 0.15); // 15% VAT on service fee
+    const total = baseTotal + serviceFee; // Guest pays only base + service fee
 
     const formatCurrency = (v) =>
       `BDT${Number(v || 0).toLocaleString("en-BD", {
@@ -126,9 +126,9 @@ const generateInvoice = async (
         `Nightly Rate (BDT ${baseRate} x ${nights} nights):`,
         formatCurrency(baseTotal),
       ],
-      ["Service Fee (10%):", formatCurrency(serviceFee)],
-      ["VAT (15%):", formatCurrency(tax)],
-      ["Total Amount Paid:", formatCurrency(total)],
+      ["Service Fee (15%):", formatCurrency(serviceFee)],
+
+      ["Total Amount Paid by Guest:", formatCurrency(total)],
     ];
 
     summaryLines.forEach(([label, value]) => {

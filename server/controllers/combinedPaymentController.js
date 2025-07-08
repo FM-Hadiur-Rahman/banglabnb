@@ -7,6 +7,8 @@ const generateInvoice = require("../utils/generateInvoice");
 const sendEmail = require("../utils/sendEmail");
 const qs = require("qs");
 const axios = require("axios");
+const Payout = require("../models/Payout");
+const DriverPayout = require("../models/DriverPayout");
 
 exports.initiateCombinedPayment = async (req, res) => {
   const { bookingId, amount, customer } = req.body;
@@ -71,6 +73,7 @@ exports.combinedPaymentSuccess = async (req, res) => {
     const booking = await Booking.findOne({ transactionId: tran_id });
     if (!booking) return res.status(404).send("Booking not found");
 
+    // Step 1: Update booking payment
     booking.paymentStatus = "paid";
     booking.status = "confirmed";
     booking.valId = val_id;
@@ -78,11 +81,12 @@ exports.combinedPaymentSuccess = async (req, res) => {
     booking.paidAt = new Date();
     await booking.save();
 
-    // Fetch related info
+    // Step 2: Get related models
     const guest = await User.findById(booking.guestId);
     const listing = await Listing.findById(booking.listingId);
     const trip = booking.tripId ? await Trip.findById(booking.tripId) : null;
 
+    // Step 3: Generate Invoice
     const invoicePath = await generateInvoice(
       booking,
       listing,
@@ -91,6 +95,7 @@ exports.combinedPaymentSuccess = async (req, res) => {
       trip
     );
 
+    // Step 4: Send Email to Guest
     await sendEmail({
       to: guest.email,
       subject: "🧾 Your Combined BanglaBnB Invoice",
@@ -107,6 +112,90 @@ exports.combinedPaymentSuccess = async (req, res) => {
       ],
     });
 
+    // Step 5: Create Host Payout (for Stay)
+    if (listing?.hostId) {
+      const nights = dayjs(booking.dateTo).diff(dayjs(booking.dateFrom), "day");
+      const staySubtotal = listing.price * nights;
+      const guestFee = (staySubtotal * 10) / 115;
+      const hostFee = ((staySubtotal - guestFee) * 5) / 100;
+      const platformRevenue = guestFee + hostFee;
+      const vat = platformRevenue * 0.15;
+      const hostPayout = staySubtotal - hostFee;
+
+      await Payout.create({
+        bookingId: booking._id,
+        hostId: listing.hostId,
+        amount: hostPayout,
+        guestFee,
+        hostFee,
+        vat,
+        method: "manual",
+        status: "pending",
+      });
+
+      const host = await User.findById(listing.hostId);
+      if (host?.email) {
+        await sendEmail({
+          to: host.email,
+          subject: "📢 You Have a New Paid Booking!",
+          html: `
+            <p>Hi ${host.name},</p>
+            <p>${guest.name} just booked your stay from ${dayjs(
+            booking.dateFrom
+          ).format("DD MMM")} to ${dayjs(booking.dateTo).format(
+            "DD MMM YYYY"
+          )}.</p>
+            <p>📎 Invoice is attached. Please prepare your listing.</p>
+          `,
+          attachments: [
+            {
+              filename: `invoice-${booking._id}.pdf`,
+              path: invoicePath,
+            },
+          ],
+        });
+      }
+    }
+
+    // Step 6: Create Driver Payout (for Ride)
+    if (trip?.driverId) {
+      const seats = booking.seats || 1; // optional fallback
+      const subtotal = trip.price * seats;
+      const serviceFee = subtotal * 0.1;
+      const vat = serviceFee * 0.15;
+      const driverPayout = subtotal - serviceFee;
+
+      await DriverPayout.create({
+        tripId: trip._id,
+        driverId: trip.driverId,
+        amount: driverPayout,
+        serviceFee,
+        vat,
+        method: "manual",
+        status: "pending",
+      });
+
+      const driver = await User.findById(trip.driverId);
+      if (driver?.email) {
+        await sendEmail({
+          to: driver.email,
+          subject: "🛺 A New Passenger Has Booked Your Trip",
+          html: `
+            <p>Hi ${driver.name},</p>
+            <p>${guest.name} has reserved seat(s) for your trip from <strong>${trip.from}</strong> to <strong>${trip.to}</strong> on ${trip.date} at ${trip.time}.</p>
+            <p>📎 Booking invoice is attached for your record.</p>
+          `,
+          attachments: [
+            {
+              filename: `invoice-${booking._id}.pdf`,
+              path: invoicePath,
+            },
+          ],
+        });
+      }
+    }
+
+    // Step 7: Redirect
     res.redirect(
       `${process.env.CLIENT_URL}/payment-success?tran_id=${tran_id}`
     );

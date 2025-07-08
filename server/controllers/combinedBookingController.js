@@ -19,6 +19,7 @@ exports.createCombinedBooking = async (req, res) => {
       });
     }
 
+    // ✅ Fetch listing
     const listing = await Listing.findById(listingId);
     if (!listing) return res.status(404).json({ message: "Listing not found" });
 
@@ -36,7 +37,7 @@ exports.createCombinedBooking = async (req, res) => {
     // ❌ Prevent overlapping bookings
     const overlapping = await Booking.findOne({
       listingId,
-      status: { $ne: "cancelled" },
+      status: { $nin: ["cancelled", "rejected"] },
       $or: [{ dateFrom: { $lte: to }, dateTo: { $gte: from } }],
     });
 
@@ -50,10 +51,10 @@ exports.createCombinedBooking = async (req, res) => {
     const booking = new Booking({
       listingId,
       guestId: req.user._id,
-      dateFrom,
-      dateTo,
+      dateFrom: from,
+      dateTo: to,
       guests,
-      price: 0,
+      price: 0, // updated later
       paymentStatus: "pending",
       status: "pending",
       tripId: tripId || null,
@@ -65,7 +66,7 @@ exports.createCombinedBooking = async (req, res) => {
     let trip = null;
     let tripFare = 0;
 
-    // ✅ Trip logic
+    // ✅ Trip logic (if selected)
     if (tripId) {
       trip = await Trip.findById(tripId);
       if (!trip) return res.status(404).json({ message: "Trip not found" });
@@ -94,14 +95,20 @@ exports.createCombinedBooking = async (req, res) => {
     const nights =
       (new Date(dateTo) - new Date(dateFrom)) / (1000 * 60 * 60 * 24);
     const staySubtotal = nights * listing.price;
-    const serviceFee = Math.round(staySubtotal * 0.15);
-    const tax = Math.round(staySubtotal * 0.1);
+    const serviceFee = Math.round((staySubtotal + tripFare) * 0.1); // combined fee
+    const tax = Math.round(serviceFee * 0.15); // 15% VAT on platform fee
 
-    // ✅ Optional: Promo code logic (customize later)
+    // ✅ Apply promo logic (optional)
     let discount = 0;
-    // TODO: apply promo logic if needed
+    if (promoCode) {
+      // TODO: Validate & calculate discount
+    }
 
-    const totalAmount = staySubtotal + serviceFee + tax + tripFare - discount;
+    const totalAmount = staySubtotal + tripFare + serviceFee - discount;
+
+    // ✅ Update price in booking (optional)
+    booking.price = totalAmount;
+    await booking.save();
 
     // ✅ Final response
     res.status(201).json({
@@ -112,10 +119,11 @@ exports.createCombinedBooking = async (req, res) => {
         nights,
         pricePerNight: listing.price,
         staySubtotal,
+        tripFare,
         serviceFee,
         tax,
-        tripFare,
         discount,
+        total: totalAmount,
       },
     });
   } catch (err) {

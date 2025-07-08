@@ -8,14 +8,13 @@ const Notification = require("../models/Notification");
 // ✅ Create a new booking (guest)
 
 exports.createBooking = async (req, res) => {
-  const { listingId, dateFrom, dateTo } = req.body;
+  const { listingId, dateFrom, dateTo, guests = 1 } = req.body;
 
   try {
     const today = new Date();
     const from = new Date(dateFrom);
     const to = new Date(dateTo);
 
-    // ❌ Prevent past or invalid date ranges
     if (from < today || to <= from) {
       return res
         .status(400)
@@ -27,7 +26,12 @@ exports.createBooking = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // ❌ Check against blocked date ranges
+    if (guests > listing.maxGuests) {
+      return res
+        .status(400)
+        .json({ message: "Too many guests for this listing." });
+    }
+
     const isBlocked = listing.blockedDates?.some(
       (range) => new Date(range.from) <= to && new Date(range.to) >= from
     );
@@ -38,7 +42,6 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    // ❌ Prevent overlapping bookings
     const overlapping = await Booking.findOne({
       listingId,
       status: { $ne: "cancelled" },
@@ -51,12 +54,18 @@ exports.createBooking = async (req, res) => {
         .json({ message: "This listing is already booked for those dates." });
     }
 
-    // ✅ Create the booking
+    const nights =
+      (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+      (1000 * 60 * 60 * 24);
+
     const newBooking = await Booking.create({
       guestId: req.user._id,
       listingId,
       dateFrom,
       dateTo,
+      guests,
+      nights,
+      pricePerNight: listing.price,
     });
 
     res.status(201).json(newBooking);

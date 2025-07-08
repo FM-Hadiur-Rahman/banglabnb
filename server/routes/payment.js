@@ -174,12 +174,18 @@ router.post("/success", async (req, res) => {
         <div style="font-family: Arial, sans-serif; color: #1a202c; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px;">
           <h2 style="color: #2563eb; text-align: center;">📢 New Booking Received!</h2>
           <p>Dear <strong>${listing.hostId.name}</strong>,</p>
-          <p>🎉 A guest has paid and confirmed a booking on your listing <strong>${listing.title}</strong>.</p>
+          <p>🎉 A guest has paid and confirmed a booking on your listing <strong>${
+            listing.title
+          }</strong>.</p>
           <p>📍 ${listing.location?.address}</p>
           <p>📅 ${from} → ${to}</p>
           <p>👤 ${guest.name} (${guest.email})</p>
           <p>💵 ৳${booking.paidAmount} — Paid</p>
+          <p>💰 Guest Paid: ৳${booking.paidAmount}</p>
+          <p>📉 Platform Fee (5%): ৳${Math.round(hostFee)}</p>
+          <p>✅ Payout to You: ৳${Math.round(hostPayout)}</p>
           <p style="font-size: 14px; color: #4a5568;">ইনভয়েস মেইলের সাথে সংযুক্ত রয়েছে।</p>
+
         </div>
       `,
           attachments: [
@@ -233,15 +239,25 @@ router.post("/success", async (req, res) => {
     }
 
     try {
-      const gross = booking.paidAmount;
-      const tax = (gross * 5) / 100;
-      const fee = (gross * 10) / 100;
-      const hostPayout = gross - tax - fee;
+      // const gross = booking.paidAmount;
+      // const tax = (gross * 5) / 100;
+      // const fee = (gross * 10) / 100;
+      // const hostPayout = gross - tax - fee;
+      const gross = booking.paidAmount; // e.g., 2300
+      const guestFee = (gross * 10) / 115; // = 200
+      const hostFee = (gross - guestFee) * 0.05; // = 105
+      const totalRevenue = guestFee + hostFee; // = 305
+      const tax = totalRevenue * 0.15; // = 45.75 (your responsibility)
+
+      const hostPayout = gross - hostFee; // ✅ = 2195
 
       await Payout.create({
         bookingId: booking._id,
-        hostId: listing.hostId?._id || listing.ownerId,
+        hostId: listing.hostId._id,
         amount: hostPayout,
+        hostFee: Math.round(hostFee),
+        guestFee: Math.round(guestFee),
+        vat: Math.round(tax),
         method: "manual",
         status: "pending",
         notes: `Auto-created after payment of ৳${gross}`,

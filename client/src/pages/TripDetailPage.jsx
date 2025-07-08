@@ -365,8 +365,8 @@ const TripDetailPage = () => {
 
   const subtotal = trip.farePerSeat * seatsToReserve;
   const serviceFee = Math.round(subtotal * 0.1); // 10%
-  const vat = Math.round((subtotal + serviceFee) * 0.075); // 7.5%
-  const total = subtotal + serviceFee + vat;
+  const vat = Math.round(serviceFee * 0.15); // ✅ 15% VAT on the service fee
+  const total = subtotal + serviceFee; // ✅ Guest pays only subtotal + platform fee
 
   const reservedSeats =
     trip.passengers
@@ -556,8 +556,8 @@ const TripDetailPage = () => {
                   <p>
                     <strong>Service Fee (10%):</strong> ৳{serviceFee}
                   </p>
-                  <p>
-                    <strong>VAT (7.5%):</strong> ৳{vat}
+                  <p className="text-gray-500 text-xs">
+                    VAT (15%) is paid by BanglaBnB, not added to your total.
                   </p>
                   <hr />
                   <p className="text-lg font-semibold text-green-700">

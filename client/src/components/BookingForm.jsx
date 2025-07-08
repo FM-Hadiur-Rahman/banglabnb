@@ -51,12 +51,12 @@ const BookingForm = ({
     const validNights = diff > 0 ? diff : 0;
     const subtotal = price * validNights;
     const sFee = Math.round(subtotal * 0.1);
-    const t = Math.round(subtotal * 0.15);
+    const t = Math.round(sFee * 0.15);
 
     setNights(validNights);
     setServiceFee(sFee);
     setTax(t);
-    setTotal(subtotal + sFee + t);
+    setTotal(subtotal + sFee);
   }, [range, price]);
 
   useEffect(() => {
@@ -328,10 +328,11 @@ const BookingForm = ({
             <span>{t("booking_form.summary.service_fee")}</span>
             <span>৳{format(serviceFee)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>{t("booking_form.summary.tax")}</span>
+          <div className="flex justify-between text-gray-500">
+            <span>{t("booking_form.summary.tax_note")}</span>
             <span>৳{format(tax)}</span>
           </div>
+
           {promoDiscount > 0 && (
             <div className="flex justify-between text-green-600">
               <span>{t("booking_form.summary.promo_discount")}</span>

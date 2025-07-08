@@ -96,10 +96,23 @@ router.post("/trip-success", async (req, res) => {
         .json({ message: "Missing reservation, trip, or user" });
     }
 
+    // Calculate values
+    const subtotal = reservation.farePerSeat * reservation.numberOfSeats;
+    const serviceFee = subtotal * 0.1;
+    const vat = serviceFee * 0.15;
+    const totalAmount = subtotal + serviceFee + vat;
+    const driverPayout = subtotal;
+
     // Update reservation
     reservation.status = "paid";
     reservation.valId = val_id;
     reservation.paidAt = new Date();
+    reservation.subtotal = subtotal;
+    reservation.serviceFee = serviceFee;
+    reservation.vat = vat;
+    reservation.totalAmount = totalAmount;
+    reservation.driverPayout = driverPayout;
+
     await reservation.save();
 
     // Push to passengers
@@ -127,7 +140,10 @@ router.post("/trip-success", async (req, res) => {
           <p>Hi <strong>${user.name}</strong>,</p>
           <p>Your seat(s) for the ride from <strong>${trip.from}</strong> to <strong>${trip.to}</strong> on ${trip.date} at ${trip.time} has been confirmed.</p>
           <p><strong>Seats:</strong> ${reservation.numberOfSeats}</p>
-          <p><strong>Total Paid:</strong> ৳${reservation.totalAmount}</p>
+          <p><strong>Subtotal:</strong> ৳${reservation.subtotal}</p>
+          <p><strong>Service Fee (10%):</strong> ৳${reservation.serviceFee}</p>
+          <p><strong>VAT (15%):</strong> ৳${reservation.vat}</p>
+          <p><strong>Total Paid:</strong> <strong>৳${reservation.totalAmount}</strong></p>
           <p>Attached is your booking invoice. Thank you for using BanglaBnB!</p>
         </div>
       `,
@@ -151,8 +167,13 @@ router.post("/trip-success", async (req, res) => {
           <h2 style="color: #16a34a;">🚘 New Trip Reservation</h2>
           <p>Dear <strong>${driver.name}</strong>,</p>
           <p><strong>${user.name}</strong> has reserved <strong>${reservation.numberOfSeats}</strong> seat(s) for your trip.</p>
-          <p>Trip Date: ${trip.date} at ${trip.time}</p>
-          <p>Check attached invoice for full details.</p>
+         <p>Trip Date: <strong>${trip.date}</strong> at <strong>${trip.time}</strong></p>
+          <p><strong>Total Fare Paid by Passenger:</strong> ৳${reservation.totalAmount}</p>
+          <p><strong>Platform Service Fee (10%):</strong> ৳${reservation.serviceFee}</p>
+          <p><strong>Your Earnings:</strong> ৳${reservation.driverPayout}</p>
+          <p><strong>Seats Reserved:</strong> ${reservation.numberOfSeats}</p>
+          <p style="font-size: 14px; color: #4a5568;">ইনভয়েস সংযুক্ত রয়েছে।</p>
+
         </div>
       `,
         attachments: [
