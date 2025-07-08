@@ -239,10 +239,6 @@ router.post("/success", async (req, res) => {
     }
 
     try {
-      // const gross = booking.paidAmount;
-      // const tax = (gross * 5) / 100;
-      // const fee = (gross * 10) / 100;
-      // const hostPayout = gross - tax - fee;
       const gross = booking.paidAmount; // e.g., 2300
       const guestFee = (gross * 10) / 115; // = 200
       const hostFee = (gross - guestFee) * 0.05; // = 105
