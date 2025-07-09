@@ -1,7 +1,8 @@
 // === controllers/tripController.js ===
 const Trip = require("../models/Trip");
 const cloudinary = require("../middleware/cloudinaryUpload");
-
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
   try {
@@ -11,16 +12,38 @@ exports.createTrip = async (req, res) => {
       totalSeats: Number(req.body.totalSeats),
       farePerSeat: Number(req.body.farePerSeat),
     };
-    // ✅ Parse location from JSON string
+
+    // ✅ Parse pickup location
     if (req.body.location) {
       try {
-        tripData.location = JSON.parse(req.body.location); // Must be GeoJSON: { type: "Point", coordinates: [lng, lat], address: "..." }
+        tripData.location = JSON.parse(req.body.location);
       } catch (error) {
         console.warn("⚠️ Invalid location JSON:", req.body.location);
         return res.status(400).json({ message: "Invalid location format" });
       }
     }
 
+    // ✅ Parse fromLocation
+    if (req.body.fromLocation) {
+      try {
+        tripData.fromLocation = JSON.parse(req.body.fromLocation);
+      } catch (error) {
+        console.warn("⚠️ Invalid fromLocation JSON:", req.body.fromLocation);
+        return res.status(400).json({ message: "Invalid fromLocation format" });
+      }
+    }
+
+    // ✅ Parse toLocation
+    if (req.body.toLocation) {
+      try {
+        tripData.toLocation = JSON.parse(req.body.toLocation);
+      } catch (error) {
+        console.warn("⚠️ Invalid toLocation JSON:", req.body.toLocation);
+        return res.status(400).json({ message: "Invalid toLocation format" });
+      }
+    }
+
+    // ✅ Handle image (optional)
     if (req.file && req.file.path) {
       tripData.image = req.file.path;
     }
@@ -33,14 +56,61 @@ exports.createTrip = async (req, res) => {
   }
 };
 
+// GET /api/trips?fromLat=...&fromLng=...&toLat=...&toLng=...&date=...
 exports.getTrips = async (req, res) => {
   try {
-    const trips = await Trip.find({ status: "available" }).populate("driverId");
+    const { fromLat, fromLng, toLat, toLng, date, radius = 30000 } = req.query;
+
+    const query = { status: "available" };
+
+    // 🌍 Geo-based FROM location
+    if (fromLat && fromLng) {
+      query["fromLocation.coordinates"] = {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [parseFloat(fromLng), parseFloat(fromLat)],
+          },
+          $maxDistance: parseFloat(radius),
+        },
+      };
+    }
+
+    // 🌍 Geo-based TO location
+    if (toLat && toLng) {
+      query["toLocation.coordinates"] = {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [parseFloat(toLng), parseFloat(toLat)],
+          },
+          $maxDistance: parseFloat(radius),
+        },
+      };
+    }
+
+    // 🔍 Fuzzy fallback for text-based search
+    if (!fromLat && req.query.from) {
+      query.from = new RegExp(req.query.from, "i"); // case-insensitive
+    }
+
+    if (!toLat && req.query.to) {
+      query.to = new RegExp(req.query.to, "i");
+    }
+
+    // 📅 Optional date filter
+    if (date) {
+      query.date = date;
+    }
+
+    const trips = await Trip.find(query).populate("driverId");
     res.json(trips);
   } catch (err) {
+    console.error("❌ Trip search failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // Get all trips for the logged-in driver
 exports.getMyTrips = async (req, res) => {
   try {
@@ -72,8 +142,6 @@ exports.getTripById = async (req, res) => {
   }
 };
 // controllers/tripController.js
-const User = require("../models/User");
-const sendEmail = require("../utils/sendEmail");
 
 exports.reserveSeat = async (req, res) => {
   try {
@@ -148,22 +216,24 @@ exports.updateTrip = async (req, res) => {
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
-    // 🚫 Check if trip belongs to user
+    // 🚫 Only owner can update
     if (trip.driverId.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ message: "Unauthorized to edit this trip" });
     }
+
+    // 🚫 Prevent editing if already booked
     if (trip.passengers?.some((p) => p.status !== "cancelled")) {
       return res
         .status(400)
         .json({ message: "Cannot edit trip with active reservations." });
     }
 
-    // 🚫 Block editing if trip already started
+    // 🚫 Prevent editing past trips
     const now = new Date();
-    const tripStart = new Date(`${trip.date}T${trip.time}`);
-    if (tripStart < now) {
+    const originalStart = new Date(`${trip.date}T${trip.time}`);
+    if (originalStart < now) {
       return res
         .status(400)
         .json({ message: "Trip already departed. Editing not allowed." });
@@ -181,6 +251,7 @@ exports.updateTrip = async (req, res) => {
       licensePlate,
     } = req.body;
 
+    // 🕓 Ensure new start time is in the future
     const newStart = new Date(`${date}T${time}`);
     if (newStart < now) {
       return res
@@ -198,6 +269,7 @@ exports.updateTrip = async (req, res) => {
     trip.vehicleModel = vehicleModel;
     trip.licensePlate = licensePlate;
 
+    // ✅ Parse pickup point
     if (req.body.location) {
       try {
         trip.location = JSON.parse(req.body.location);
@@ -206,6 +278,25 @@ exports.updateTrip = async (req, res) => {
       }
     }
 
+    // ✅ Parse fromLocation
+    if (req.body.fromLocation) {
+      try {
+        trip.fromLocation = JSON.parse(req.body.fromLocation);
+      } catch {
+        return res.status(400).json({ message: "Invalid fromLocation format" });
+      }
+    }
+
+    // ✅ Parse toLocation
+    if (req.body.toLocation) {
+      try {
+        trip.toLocation = JSON.parse(req.body.toLocation);
+      } catch {
+        return res.status(400).json({ message: "Invalid toLocation format" });
+      }
+    }
+
+    // ✅ Upload new image if provided
     if (req.file && req.file.path) {
       const uploaded = await cloudinary.uploader.upload(req.file.path, {
         folder: "trip_vehicles",
@@ -220,6 +311,7 @@ exports.updateTrip = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 exports.cancelTrip = async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);

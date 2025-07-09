@@ -10,6 +10,7 @@ import {
 } from "recharts";
 
 const EarningsChart = ({ data }) => {
+  console.log(data);
   return (
     <div className="bg-white p-4 rounded shadow">
       <h3 className="text-lg font-semibold mb-2">📈 Monthly Earnings</h3>

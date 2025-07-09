@@ -328,6 +328,14 @@ router.put(
         { status: "paid", date: new Date() },
         { new: true }
       );
+
+      // 🛠 Also update the booking record
+      if (payout?.bookingId) {
+        await Booking.findByIdAndUpdate(payout.bookingId, {
+          payoutIssued: true,
+        });
+      }
+
       res.json({ message: "✅ Payout marked as paid", payout });
     } catch (err) {
       console.error("❌ Failed to update payout:", err);
@@ -335,8 +343,6 @@ router.put(
     }
   }
 );
-
-module.exports = router;
 
 // === Payout Management ===
 
@@ -887,3 +893,4 @@ router.get("/trips/:id", protect, authorize("admin"), async (req, res) => {
   if (!trip) return res.status(404).json({ message: "Trip not found" });
   res.json(trip);
 });
+module.exports = router;

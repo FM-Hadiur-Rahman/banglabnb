@@ -29,6 +29,8 @@ const HostCharts = () => {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
+        console.log("📊 Earnings Response:", earningsRes.data);
+        console.log("🌟 Reviews Response:", reviewsRes.data);
 
         // ✅ Add a check here: Ensure res.data is an array for earnings
         setEarnings(Array.isArray(earningsRes.data) ? earningsRes.data : []);

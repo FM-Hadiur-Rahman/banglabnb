@@ -4,6 +4,25 @@ const tripSchema = new mongoose.Schema(
   {
     from: { type: String, required: true },
     to: { type: String, required: true },
+
+    fromLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: { type: [Number], required: true }, // [lng, lat]
+      address: { type: String }, // Optional full address
+    },
+    toLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: { type: [Number], required: true },
+      address: { type: String },
+    },
     date: { type: String, required: true },
     time: { type: String, required: true },
 
@@ -61,7 +80,8 @@ const tripSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+tripSchema.index({ "fromLocation.coordinates": "2dsphere" });
+tripSchema.index({ "toLocation.coordinates": "2dsphere" });
 tripSchema.index({ "location.coordinates": "2dsphere" });
 
 tripSchema.virtual("seatsAvailable").get(function () {

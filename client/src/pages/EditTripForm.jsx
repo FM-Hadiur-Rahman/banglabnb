@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import LocationAutocomplete from "../components/LocationAutocomplete";
+import MapboxAutocomplete from "../components/MapboxAutocomplete";
 
 const EditTripForm = () => {
   const { id } = useParams();
@@ -10,6 +12,9 @@ const EditTripForm = () => {
   const [formData, setFormData] = useState({
     from: "",
     to: "",
+    fromLocation: null,
+    toLocation: null,
+    location: null,
     date: "",
     time: "",
     totalSeats: 1,
@@ -33,29 +38,21 @@ const EditTripForm = () => {
             },
           }
         );
-        const {
-          from,
-          to,
-          date,
-          time,
-          totalSeats,
-          farePerSeat,
-          vehicleType,
-          vehicleModel,
-          licensePlate,
-          image,
-        } = res.data;
+        const trip = res.data;
         setFormData({
-          from,
-          to,
-          date,
-          time,
-          totalSeats,
-          farePerSeat,
-          vehicleType,
-          vehicleModel,
-          licensePlate,
-          image,
+          from: trip.from,
+          to: trip.to,
+          fromLocation: trip.fromLocation || null,
+          toLocation: trip.toLocation || null,
+          location: trip.location || null,
+          date: trip.date,
+          time: trip.time,
+          totalSeats: trip.totalSeats,
+          farePerSeat: trip.farePerSeat,
+          vehicleType: trip.vehicleType,
+          vehicleModel: trip.vehicleModel,
+          licensePlate: trip.licensePlate,
+          image: trip.image,
         });
       } catch (err) {
         if (err.response?.status === 404) {
@@ -92,7 +89,11 @@ const EditTripForm = () => {
       setLoading(true);
       const form = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
+        if (["fromLocation", "toLocation", "location"].includes(key) && value) {
+          form.append(key, JSON.stringify(value));
+        } else {
+          form.append(key, value);
+        }
       });
       if (imageFile) form.append("image", imageFile);
 
@@ -117,24 +118,49 @@ const EditTripForm = () => {
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">✏️ Edit Trip</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="from"
-          value={formData.from}
-          onChange={handleChange}
+        <LocationAutocomplete
           placeholder="From"
-          className="input"
-          required
+          onSelect={({ name, coordinates }) =>
+            setFormData((prev) => ({
+              ...prev,
+              from: name,
+              fromLocation: {
+                type: "Point",
+                coordinates,
+                address: name,
+              },
+            }))
+          }
         />
-        <input
-          type="text"
-          name="to"
-          value={formData.to}
-          onChange={handleChange}
+
+        <LocationAutocomplete
           placeholder="To"
-          className="input"
-          required
+          onSelect={({ name, coordinates }) =>
+            setFormData((prev) => ({
+              ...prev,
+              to: name,
+              toLocation: {
+                type: "Point",
+                coordinates,
+                address: name,
+              },
+            }))
+          }
         />
+
+        <MapboxAutocomplete
+          onSelectLocation={({ coordinates, address }) =>
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                type: "Point",
+                coordinates,
+                address,
+              },
+            }))
+          }
+        />
+
         <input
           type="date"
           name="date"
@@ -218,8 +244,8 @@ const EditTripForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded ${
-            loading && "opacity-50 cursor-not-allowed"
+          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full text-lg ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
           {loading ? "Saving..." : "💾 Save Changes"}

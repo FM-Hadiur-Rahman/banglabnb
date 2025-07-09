@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
-import MapboxAutocomplete from "../components/MapboxAutocomplete"; // ✅ adjust path if needed
+import MapboxAutocomplete from "../components/MapboxAutocomplete";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 
 const DriverTripForm = () => {
   const [form, setForm] = useState({
     from: "",
     to: "",
+    fromLocation: null,
+    toLocation: null,
     date: "",
     time: "",
     vehicleType: "car",
@@ -36,10 +39,9 @@ const DriverTripForm = () => {
       const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
 
       if (!allowedTypes.includes(file.type)) {
-        // Try converting to JPG
         try {
           const compressedFile = await imageCompression(file, {
-            fileType: "image/jpeg", // force JPG output
+            fileType: "image/jpeg",
             maxWidthOrHeight: 1024,
             maxSizeMB: 1,
           });
@@ -69,8 +71,11 @@ const DriverTripForm = () => {
 
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      if (key === "location" && typeof value === "object") {
-        formData.append(key, JSON.stringify(value)); // ✅ Send as JSON string
+      if (
+        ["location", "fromLocation", "toLocation"].includes(key) &&
+        typeof value === "object"
+      ) {
+        formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
       }
@@ -98,26 +103,41 @@ const DriverTripForm = () => {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Trip Info */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🧭 Trip Information
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              name="from"
-              placeholder="From (e.g. Dhaka)"
-              onChange={handleChange}
-              required
-              className="input border px-4 py-2 rounded w-full"
+            <LocationAutocomplete
+              placeholder="From (e.g. Sylhet)"
+              onSelect={({ name, coordinates }) => {
+                setForm((prev) => ({
+                  ...prev,
+                  from: name,
+                  fromLocation: {
+                    type: "Point",
+                    coordinates,
+                    address: name,
+                  },
+                }));
+              }}
             />
-            <input
-              name="to"
-              placeholder="To (e.g. Cox’s Bazar)"
-              onChange={handleChange}
-              required
-              className="input border px-4 py-2 rounded w-full"
+
+            <LocationAutocomplete
+              placeholder="To (e.g. Dhaka Airport)"
+              onSelect={({ name, coordinates }) => {
+                setForm((prev) => ({
+                  ...prev,
+                  to: name,
+                  toLocation: {
+                    type: "Point",
+                    coordinates,
+                    address: name,
+                  },
+                }));
+              }}
             />
+
             <input
               type="date"
               name="date"
@@ -134,6 +154,7 @@ const DriverTripForm = () => {
             />
           </div>
         </div>
+
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             📍 Pickup Location on Map
@@ -152,7 +173,6 @@ const DriverTripForm = () => {
           />
         </div>
 
-        {/* Vehicle Type */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🚘 Vehicle Type
@@ -176,7 +196,6 @@ const DriverTripForm = () => {
           </div>
         </div>
 
-        {/* Vehicle Details */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🚙 Vehicle Details
@@ -197,7 +216,6 @@ const DriverTripForm = () => {
           </div>
         </div>
 
-        {/* Fare & Seats */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             💸 Fare & Total Seats
@@ -223,7 +241,6 @@ const DriverTripForm = () => {
           </div>
         </div>
 
-        {/* Upload Image */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🖼 Vehicle Image (optional)
@@ -244,7 +261,6 @@ const DriverTripForm = () => {
           )}
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded font-medium text-lg"
