@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import MapboxAutocomplete from "../components/MapboxAutocomplete";
 import LocationAutocomplete from "../components/LocationAutocomplete";
+import MapboxRouteMap from "../components/MapboxRouteMap";
 
 const DriverTripForm = () => {
   const [form, setForm] = useState({
@@ -110,6 +111,7 @@ const DriverTripForm = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <LocationAutocomplete
               placeholder="From (e.g. Sylhet)"
+              showCurrent={true} // ✅ This enables "📍 Use Current Location"
               onSelect={({ name, coordinates }) => {
                 setForm((prev) => ({
                   ...prev,
@@ -125,6 +127,7 @@ const DriverTripForm = () => {
 
             <LocationAutocomplete
               placeholder="To (e.g. Dhaka Airport)"
+              showCurrent={false} // ❌ Disable current location for destination
               onSelect={({ name, coordinates }) => {
                 setForm((prev) => ({
                   ...prev,
@@ -157,19 +160,11 @@ const DriverTripForm = () => {
 
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
-            📍 Pickup Location on Map
+            🗺️ Trip Route on Map
           </h3>
-          <MapboxAutocomplete
-            onSelectLocation={(loc) =>
-              setForm((prev) => ({
-                ...prev,
-                location: {
-                  type: "Point",
-                  coordinates: loc.coordinates,
-                  address: loc.address,
-                },
-              }))
-            }
+          <MapboxRouteMap
+            fromLocation={form.fromLocation}
+            toLocation={form.toLocation}
           />
         </div>
 
