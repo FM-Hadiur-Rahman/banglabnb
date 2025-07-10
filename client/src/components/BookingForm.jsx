@@ -6,6 +6,8 @@ import { addDays } from "date-fns";
 import { toast, ToastContainer } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { formatBanglaNumber } from "../utils/formatBanglaNumber";
+import CalendarModal from "./CalendarModal"; // Adjust path
+import { useMediaQuery } from "react-responsive";
 
 import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
@@ -39,6 +41,9 @@ const BookingForm = ({
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState("");
+
+  const isMobile = useMediaQuery({ maxWidth: 640 });
+  const [modalOpen, setModalOpen] = useState(false);
 
   const format = (num) => (isBn ? formatBanglaNumber(num) : num);
 
@@ -244,22 +249,47 @@ const BookingForm = ({
         disabledDay={isDateBooked}
         editableDateInputs={true}
         months={1}
-        direction="vertical"
+        direction="horizontal"
         locale={i18n.language === "bn" ? bn : enUS}
       /> */}
-      <div className="w-full sm:max-w-md">
-        <DateRange
-          ranges={range}
-          onChange={(item) => setRange([item.selection])}
-          minDate={new Date()}
-          rangeColors={["#f43f5e"]}
-          disabledDay={isDateBooked}
-          editableDateInputs={true}
-          months={1}
-          direction="vertical"
-          locale={isBn ? bn : enUS}
-        />
-      </div>
+
+      {/* 👇 Trigger modal on mobile */}
+      {isMobile ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="w-full bg-gray-100 text-left px-3 py-2 rounded"
+          >
+            📅 {range[0].startDate?.toDateString()} →{" "}
+            {range[0].endDate?.toDateString()}
+          </button>
+
+          <CalendarModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            range={range}
+            setRange={setRange}
+            isDateBooked={isDateBooked}
+            isBn={isBn}
+          />
+        </>
+      ) : (
+        // 🖥 Desktop calendar (inline)
+        <div className="w-full sm:max-w-md">
+          <DateRange
+            ranges={range}
+            onChange={(item) => setRange([item.selection])}
+            minDate={new Date()}
+            rangeColors={["#f43f5e"]}
+            disabledDay={isDateBooked}
+            editableDateInputs={true}
+            months={1}
+            direction="vertical"
+            locale={isBn ? bn : enUS}
+          />
+        </div>
+      )}
 
       <div className="flex gap-4 text-sm mt-2">
         <div className="flex items-center gap-1">
