@@ -507,6 +507,9 @@ const DriverTripForm = () => {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            📅 Trip Date
+          </label>
           <input
             type="date"
             name="date"
@@ -514,6 +517,12 @@ const DriverTripForm = () => {
             required
             className="border px-4 py-2 rounded w-full"
           />
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            🕒 Trip Time
+          </label>
           <input
             type="time"
             name="time"
