@@ -235,7 +235,7 @@ const BookingForm = ({
           {t("booking_form.price_per_night", { price: format(price) })}
         </span>
       </div>
-
+      {/* 
       <DateRange
         ranges={range}
         onChange={(item) => setRange([item.selection])}
@@ -246,7 +246,20 @@ const BookingForm = ({
         months={1}
         direction="vertical"
         locale={i18n.language === "bn" ? bn : enUS}
-      />
+      /> */}
+      <div className="w-full sm:max-w-md">
+        <DateRange
+          ranges={range}
+          onChange={(item) => setRange([item.selection])}
+          minDate={new Date()}
+          rangeColors={["#f43f5e"]}
+          disabledDay={isDateBooked}
+          editableDateInputs={true}
+          months={1}
+          direction="vertical"
+          locale={isBn ? bn : enUS}
+        />
+      </div>
 
       <div className="flex gap-4 text-sm mt-2">
         <div className="flex items-center gap-1">
