@@ -138,28 +138,76 @@ const DriverTripForm = () => {
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🧭 Trip Information
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <LocationAutocomplete
-              placeholder="From (e.g. Sylhet)"
-              value={form.from}
-              showCurrent={true}
-              onSelect={({ name, coordinates }) => {
-                setForm((prev) => ({
-                  ...prev,
-                  from: name,
-                  fromLocation: {
-                    type: "Point",
-                    coordinates,
-                    address: name,
-                  },
-                }));
-              }}
-            />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="relative flex-1">
+              <LocationAutocomplete
+                placeholder="From (e.g. Sylhet)"
+                value={form.from}
+                showCurrent={true}
+                onClear={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    from: "",
+                    fromLocation: null,
+                  }))
+                }
+                onSelect={({ name, coordinates }) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    from: name,
+                    fromLocation: {
+                      type: "Point",
+                      coordinates,
+                      address: name,
+                    },
+                  }));
+                }}
+              />
+            </div>
 
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const coords = [pos.coords.longitude, pos.coords.latitude];
+                    const res = await fetchSuggestions(coords.join(","), true);
+                    const place = res?.[0];
+                    if (place) {
+                      setForm((prev) => ({
+                        ...prev,
+                        from: place.place_name,
+                        fromLocation: {
+                          type: "Point",
+                          coordinates: place.center,
+                          address: place.place_name,
+                        },
+                      }));
+                    }
+                  });
+                } catch (err) {
+                  console.error("❌ GPS detect failed:", err);
+                }
+              }}
+              className="px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 rounded text-blue-800"
+            >
+              📍 Use GPS
+            </button>
+          </div>
+
+          {/* To field below */}
+          <div className="mt-3 relative">
             <LocationAutocomplete
               placeholder="To (e.g. Dhaka Airport)"
               value={form.to}
               showCurrent={false}
+              onClear={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  to: "",
+                  toLocation: null,
+                }))
+              }
               onSelect={({ name, coordinates }) => {
                 setForm((prev) => ({
                   ...prev,

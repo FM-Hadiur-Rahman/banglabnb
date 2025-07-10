@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { debounce } from "lodash";
 import { fetchSuggestions } from "../utils/mapboxUtils";
 
 const LocationAutocomplete = ({
   placeholder,
   onSelect,
-  showCurrent = false,
   value = "",
+  onClear = () => {},
 }) => {
   const [input, setInput] = useState(value);
   const [suggestions, setSuggestions] = useState([]);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setInput(value);
@@ -32,44 +33,43 @@ const LocationAutocomplete = ({
 
   const handleSelect = (place) => {
     setSuggestions([]);
+    setInput(place.place_name);
     onSelect({
       name: place.place_name,
-      coordinates: place.center, // [lng, lat]
+      coordinates: place.center,
     });
   };
 
-  const handleUseCurrent = () => {
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const coords = [pos.coords.longitude, pos.coords.latitude];
-      const res = await fetchSuggestions(coords.join(","), true);
-      const place = res?.[0];
-      if (place) handleSelect(place);
-    });
+  const handleClear = () => {
+    setInput("");
+    setSuggestions([]);
+    onClear();
+    inputRef.current?.focus();
   };
 
   return (
-    <div className="space-y-1">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          className="border px-4 py-2 rounded w-full"
-          placeholder={placeholder}
-          value={input}
-          onChange={handleInputChange}
-        />
-        {showCurrent && (
-          <button
-            type="button"
-            onClick={handleUseCurrent}
-            className="text-sm bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 whitespace-nowrap"
-          >
-            📍 Use GPS
-          </button>
-        )}
-      </div>
+    <div className="relative w-full">
+      <input
+        ref={inputRef}
+        type="text"
+        value={input}
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        className="border px-4 py-2 pr-10 rounded w-full"
+      />
+
+      {input && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-2 top-2 text-gray-400 hover:text-red-500"
+        >
+          ✖
+        </button>
+      )}
 
       {suggestions.length > 0 && (
-        <ul className="z-10 bg-white border w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+        <ul className="absolute z-10 bg-white border w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
           {suggestions.map((s) => (
             <li
               key={s.id}
