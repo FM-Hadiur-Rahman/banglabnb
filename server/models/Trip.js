@@ -74,8 +74,13 @@ const tripSchema = new mongoose.Schema(
         enum: ["Point"],
         default: "Point",
       },
-      coordinates: { type: [Number], required: true },
-      address: { type: String },
+      coordinates: {
+        type: [Number],
+        required: false, // ✅ make optional
+      },
+      address: {
+        type: String,
+      },
     },
   },
   { timestamps: true }

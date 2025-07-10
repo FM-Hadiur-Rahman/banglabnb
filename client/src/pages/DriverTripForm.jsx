@@ -38,7 +38,6 @@ const DriverTripForm = () => {
       if (!file) return;
 
       const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-
       if (!allowedTypes.includes(file.type)) {
         try {
           const compressedFile = await imageCompression(file, {
@@ -71,15 +70,20 @@ const DriverTripForm = () => {
     const token = localStorage.getItem("token");
 
     const formData = new FormData();
+
+    // ✅ Ensure fallback: location = form.location || form.fromLocation
+    const pickup =
+      form.location?.coordinates?.length > 0
+        ? form.location
+        : form.fromLocation;
+
+    formData.append("location", JSON.stringify(pickup));
+    formData.append("fromLocation", JSON.stringify(form.fromLocation));
+    formData.append("toLocation", JSON.stringify(form.toLocation));
+
     Object.entries(form).forEach(([key, value]) => {
-      if (
-        ["location", "fromLocation", "toLocation"].includes(key) &&
-        typeof value === "object"
-      ) {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
-      }
+      if (["location", "fromLocation", "toLocation"].includes(key)) return; // already appended
+      formData.append(key, value);
     });
 
     try {
@@ -104,6 +108,7 @@ const DriverTripForm = () => {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 🧭 FROM / TO FIELDS */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🧭 Trip Information
@@ -111,7 +116,8 @@ const DriverTripForm = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <LocationAutocomplete
               placeholder="From (e.g. Sylhet)"
-              showCurrent={true} // ✅ This enables "📍 Use Current Location"
+              value={form.from}
+              showCurrent={true}
               onSelect={({ name, coordinates }) => {
                 setForm((prev) => ({
                   ...prev,
@@ -127,7 +133,8 @@ const DriverTripForm = () => {
 
             <LocationAutocomplete
               placeholder="To (e.g. Dhaka Airport)"
-              showCurrent={false} // ❌ Disable current location for destination
+              value={form.to}
+              showCurrent={false}
               onSelect={({ name, coordinates }) => {
                 setForm((prev) => ({
                   ...prev,
@@ -158,6 +165,7 @@ const DriverTripForm = () => {
           </div>
         </div>
 
+        {/* 🗺️ ROUTE VISUALIZATION */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🗺️ Trip Route on Map
@@ -165,9 +173,46 @@ const DriverTripForm = () => {
           <MapboxRouteMap
             fromLocation={form.fromLocation}
             toLocation={form.toLocation}
+            onSetFrom={(val) =>
+              setForm((prev) => ({ ...prev, fromLocation: val }))
+            }
+            onSetTo={(val) => setForm((prev) => ({ ...prev, toLocation: val }))}
+            onSetFromText={(placeName) =>
+              setForm((prev) => ({ ...prev, from: placeName }))
+            }
+            onSetToText={(placeName) =>
+              setForm((prev) => ({ ...prev, to: placeName }))
+            }
           />
         </div>
 
+        {/* 📍 PICKUP POINT */}
+        <div>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            📍 Optional: Pin Exact Pickup Point
+          </h3>
+          <p className="text-sm text-gray-500 mb-2">
+            By default, your pickup point will be based on the "From" location.
+            You can tap the map to manually set a more accurate pickup spot.
+          </p>
+          <MapboxAutocomplete
+            fromLocation={form.fromLocation}
+            toLocation={form.toLocation}
+            initialCoordinates={form.fromLocation?.coordinates}
+            onSelectLocation={(loc) =>
+              setForm((prev) => ({
+                ...prev,
+                location: {
+                  type: "Point",
+                  coordinates: loc.coordinates,
+                  address: loc.address,
+                },
+              }))
+            }
+          />
+        </div>
+
+        {/* VEHICLE TYPE */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🚘 Vehicle Type
@@ -191,6 +236,7 @@ const DriverTripForm = () => {
           </div>
         </div>
 
+        {/* VEHICLE DETAILS */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🚙 Vehicle Details
@@ -211,6 +257,7 @@ const DriverTripForm = () => {
           </div>
         </div>
 
+        {/* PRICE & SEATS */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             💸 Fare & Total Seats
@@ -236,6 +283,7 @@ const DriverTripForm = () => {
           </div>
         </div>
 
+        {/* IMAGE UPLOAD */}
         <div>
           <h3 className="font-semibold text-lg text-gray-700 mb-2">
             🖼 Vehicle Image (optional)
@@ -256,6 +304,7 @@ const DriverTripForm = () => {
           )}
         </div>
 
+        {/* SUBMIT */}
         <button
           type="submit"
           className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded font-medium text-lg"

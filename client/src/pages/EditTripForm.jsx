@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import LocationAutocomplete from "../components/LocationAutocomplete";
 import MapboxAutocomplete from "../components/MapboxAutocomplete";
+import MapboxRouteMap from "../components/MapboxRouteMap";
 
 const EditTripForm = () => {
   const { id } = useParams();
@@ -88,7 +89,17 @@ const EditTripForm = () => {
     try {
       setLoading(true);
       const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
+
+      const pickup = formData.location?.coordinates?.length
+        ? formData.location
+        : formData.fromLocation;
+
+      const finalFormData = {
+        ...formData,
+        location: pickup,
+      };
+
+      Object.entries(finalFormData).forEach(([key, value]) => {
         if (["fromLocation", "toLocation", "location"].includes(key) && value) {
           form.append(key, JSON.stringify(value));
         } else {
@@ -120,6 +131,7 @@ const EditTripForm = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <LocationAutocomplete
           placeholder="From"
+          showCurrent={true}
           onSelect={({ name, coordinates }) =>
             setFormData((prev) => ({
               ...prev,
@@ -135,6 +147,7 @@ const EditTripForm = () => {
 
         <LocationAutocomplete
           placeholder="To"
+          showCurrent={false}
           onSelect={({ name, coordinates }) =>
             setFormData((prev) => ({
               ...prev,
@@ -148,17 +161,33 @@ const EditTripForm = () => {
           }
         />
 
-        <MapboxAutocomplete
-          onSelectLocation={({ coordinates, address }) =>
-            setFormData((prev) => ({
-              ...prev,
-              location: {
-                type: "Point",
-                coordinates,
-                address,
-              },
-            }))
-          }
+        <div>
+          <h3 className="font-semibold text-gray-700 mb-1">
+            📍 Optional: Pin Exact Pickup Point
+          </h3>
+          <p className="text-sm text-gray-500 mb-2">
+            Default pickup is your "From" location. Tap map to set exact pickup.
+          </p>
+          <MapboxAutocomplete
+            fromLocation={formData.fromLocation}
+            toLocation={formData.toLocation}
+            initialCoordinates={formData.location?.coordinates}
+            onSelectLocation={({ coordinates, address }) =>
+              setFormData((prev) => ({
+                ...prev,
+                location: {
+                  type: "Point",
+                  coordinates,
+                  address,
+                },
+              }))
+            }
+          />
+        </div>
+
+        <MapboxRouteMap
+          fromLocation={formData.fromLocation}
+          toLocation={formData.toLocation}
         />
 
         <input

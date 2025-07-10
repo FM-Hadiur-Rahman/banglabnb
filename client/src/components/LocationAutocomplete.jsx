@@ -1,102 +1,85 @@
-// === LocationAutocomplete.jsx ===
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash";
+import { fetchSuggestions } from "../utils/mapboxUtils"; // ✅ make sure this file exists
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-export default function LocationAutocomplete({
+const LocationAutocomplete = ({
   placeholder,
   onSelect,
   showCurrent = false,
-}) {
-  const [results, setResults] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
+  value = "",
+}) => {
+  const [input, setInput] = useState(value);
+  const [suggestions, setSuggestions] = useState([]);
 
-  const handleSearch = async (e) => {
-    const query = e.target.value;
-    setInputValue(query);
-    if (!query) return setResults([]);
+  useEffect(() => {
+    setInput(value);
+  }, [value]);
 
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        query
-      )}.json?access_token=${MAPBOX_TOKEN}&limit=5`
-    );
-    const data = await res.json();
-    setResults(data.features);
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      const results = await fetchSuggestions(query);
+      setSuggestions(results);
+    }, 300),
+    []
+  );
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInput(val);
+    if (val.length > 2) debouncedSearch(val);
+    else setSuggestions([]);
   };
 
   const handleSelect = (place) => {
-    const name = place.place_name;
-    const coordinates = place.geometry.coordinates;
-    onSelect({ name, coordinates });
-    setInputValue(name);
-    setResults([]);
+    setSuggestions([]);
+    onSelect({
+      name: place.place_name,
+      coordinates: place.center, // [lng, lat]
+    });
   };
 
   const handleUseCurrent = () => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}`
-      );
-      const data = await res.json();
-      const place = data.features[0];
-      onSelect({ name: place.place_name, coordinates: [longitude, latitude] });
-      setInputValue(place.place_name);
-      setResults([]);
+      const coords = [pos.coords.longitude, pos.coords.latitude];
+      const res = await fetchSuggestions(coords.join(","), true);
+      const place = res?.[0];
+      if (place) handleSelect(place);
     });
   };
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
-        !inputRef.current.contains(e.target)
-      ) {
-        setResults([]);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div className="relative">
       <input
-        ref={inputRef}
         type="text"
-        value={inputValue}
+        className="border px-4 py-2 rounded w-full"
         placeholder={placeholder}
-        className="w-full border px-2 py-1 rounded"
-        onChange={handleSearch}
+        value={input}
+        onChange={handleInputChange}
       />
-      {results.length > 0 && (
-        <ul
-          ref={dropdownRef}
-          className="absolute bg-white border w-full z-10 max-h-60 overflow-y-auto shadow-md rounded"
+      {showCurrent && (
+        <button
+          type="button"
+          onClick={handleUseCurrent}
+          className="absolute right-3 top-2 text-xs text-blue-600"
         >
-          {showCurrent && (
+          📍 Use GPS
+        </button>
+      )}
+      {suggestions.length > 0 && (
+        <ul className="absolute z-10 bg-white border w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+          {suggestions.map((s) => (
             <li
-              className="p-2 text-blue-600 font-medium cursor-pointer hover:bg-gray-100"
-              onClick={handleUseCurrent}
+              key={s.id}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleSelect(s)}
             >
-              📍 Use Current Location
-            </li>
-          )}
-          {results.map((place) => (
-            <li
-              key={place.id}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleSelect(place)}
-            >
-              {place.place_name}
+              {s.place_name}
             </li>
           ))}
         </ul>
       )}
     </div>
   );
-}
+};
+
+export default LocationAutocomplete;
