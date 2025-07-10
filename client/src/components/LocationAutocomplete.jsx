@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
-import { fetchSuggestions } from "../utils/mapboxUtils"; // ✅ make sure this file exists
+import { fetchSuggestions } from "../utils/mapboxUtils";
 
 const LocationAutocomplete = ({
   placeholder,
@@ -48,25 +48,28 @@ const LocationAutocomplete = ({
   };
 
   return (
-    <div className="relative">
-      <input
-        type="text"
-        className="border px-4 py-2 rounded w-full"
-        placeholder={placeholder}
-        value={input}
-        onChange={handleInputChange}
-      />
-      {showCurrent && (
-        <button
-          type="button"
-          onClick={handleUseCurrent}
-          className="absolute right-3 top-2 text-xs text-blue-600"
-        >
-          📍 Use GPS
-        </button>
-      )}
+    <div className="space-y-1">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          className="border px-4 py-2 rounded w-full"
+          placeholder={placeholder}
+          value={input}
+          onChange={handleInputChange}
+        />
+        {showCurrent && (
+          <button
+            type="button"
+            onClick={handleUseCurrent}
+            className="text-sm bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 whitespace-nowrap"
+          >
+            📍 Use GPS
+          </button>
+        )}
+      </div>
+
       {suggestions.length > 0 && (
-        <ul className="absolute z-10 bg-white border w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+        <ul className="z-10 bg-white border w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
           {suggestions.map((s) => (
             <li
               key={s.id}

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import LocationAutocomplete from "./LocationAutocomplete";
-
+import { useEffect } from "react";
 const RideSearchForm = ({ onResults }) => {
   const [fromInput, setFromInput] = useState("");
   const [toInput, setToInput] = useState("");
@@ -11,7 +11,28 @@ const RideSearchForm = ({ onResults }) => {
 
   const [fromCoords, setFromCoords] = useState(null); // [lng, lat]
   const [toCoords, setToCoords] = useState(null); // [lng, lat]
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const coords = [longitude, latitude];
+        setFromCoords(coords);
 
+        // Reverse geocode for readable address
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${
+            import.meta.env.VITE_MAPBOX_TOKEN
+          }`
+        );
+        const data = await res.json();
+        const place = data?.features?.[0]?.place_name || "Your Location";
+        setFromInput(place);
+      },
+      (err) => {
+        console.warn("📍 GPS error", err);
+      }
+    );
+  }, []);
   const handleSearch = async (e) => {
     e.preventDefault();
 
