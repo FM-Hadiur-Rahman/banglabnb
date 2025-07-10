@@ -20,13 +20,23 @@ const RideResults = ({
     return subtotal + serviceFee + vat;
   };
 
-  if (!trips.length)
+  const validTrips = trips.filter(
+    (trip) =>
+      Array.isArray(trip.fromLocation?.coordinates) &&
+      trip.fromLocation.coordinates.length === 2 &&
+      Array.isArray(trip.toLocation?.coordinates) &&
+      trip.toLocation.coordinates.length === 2 &&
+      Array.isArray(trip.location?.coordinates) &&
+      trip.location.coordinates.length === 2
+  );
+
+  if (!validTrips.length)
     return <p className="text-center text-gray-600 py-6">❌ No rides found.</p>;
 
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {trips.map((trip) => {
+        {validTrips.map((trip) => {
           const isUrgent = dayjs(trip.date).diff(dayjs(), "hour") < 24;
           const isVerified = trip.driverId?.verified;
           const vehicleEmoji = trip.vehicleType === "car" ? "🚗" : "🏍️";
@@ -45,7 +55,6 @@ const RideResults = ({
           const isExpired = dayjs(`${trip.date} ${trip.time}`).isBefore(
             dayjs()
           );
-
           const isFullyBooked = seatsLeft === 0;
           const isDisabled = isCancelled || isExpired || isFullyBooked;
 
@@ -67,26 +76,19 @@ const RideResults = ({
                 onSelectTrip && !isDisabled ? undefined : `/trips/${trip._id}`
               }
               className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative hover:shadow-lg hover:border-green-500
-    ${selectedTrip?._id === trip._id ? "border-blue-500 bg-blue-50" : ""}
-    ${isDisabled ? "opacity-50 pointer-events-none" : ""}
-  `}
+                ${
+                  selectedTrip?._id === trip._id
+                    ? "border-blue-500 bg-blue-50"
+                    : ""
+                }
+                ${isDisabled ? "opacity-50 pointer-events-none" : ""}`}
             >
-              {/* {trip.location?.coordinates && (
-                <iframe
-                  title="Mini Map"
-                  className="w-full h-32 object-cover"
-                  src={`https://maps.google.com/maps?q=${trip.location.coordinates[1]},${trip.location.coordinates[0]}&z=12&output=embed`}
-                ></iframe>
-              )} */}
               <MiniRouteMap
                 from={{
                   name: trip.from,
                   coordinates: trip.fromLocation.coordinates,
                 }}
-                to={{
-                  name: trip.to,
-                  coordinates: trip.toLocation.coordinates,
-                }}
+                to={{ name: trip.to, coordinates: trip.toLocation.coordinates }}
                 pickup={{
                   name: trip.location.address,
                   coordinates: trip.location.coordinates,
@@ -152,7 +154,6 @@ const RideResults = ({
                   <strong>Estimated Total (1 seat):</strong> ৳
                   {calculateTotal(trip.farePerSeat, 1)}
                 </p>
-
                 <p className="text-sm text-gray-600">
                   <strong>Status:</strong>{" "}
                   <span className={`font-medium ${color}`}>{label}</span>

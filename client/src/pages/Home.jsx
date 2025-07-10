@@ -153,12 +153,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Ride Results */}
-      {activeTab === "ride" && (
-        <RideResults trips={rideResults} onReserve={handleReserveSeat} />
-      )}
-
       {/* Map */}
       {(filtered.length > 0 || rideResults.length > 0) && (
         <MapSection
@@ -167,6 +161,10 @@ const Home = () => {
           hoveredId={hoveredId}
           listingRefs={listingRefs}
         />
+      )}
+      {/* Ride Results */}
+      {activeTab === "ride" && (
+        <RideResults trips={rideResults} onReserve={handleReserveSeat} />
       )}
 
       {/* Listings */}
