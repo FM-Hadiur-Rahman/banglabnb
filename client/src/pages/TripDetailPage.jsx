@@ -289,6 +289,7 @@ import { toast } from "react-toastify";
 import { initiateTripPayment } from "../utils/initiateTripPayment";
 import dayjs from "dayjs";
 import getTimeLeft from "../utils/getTimeLeft";
+import MiniRouteMap from "../components/MiniRouteMap";
 
 const TripDetailPage = () => {
   const { id } = useParams();
@@ -460,22 +461,34 @@ const TripDetailPage = () => {
         )}
 
         {/* Location Map */}
-        {trip.location?.coordinates && (
+        {trip.fromLocation?.coordinates && trip.toLocation?.coordinates && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2 text-gray-700">
-              📍 Pickup Location
+              🗺️ Trip Route
             </h3>
-            <iframe
-              title="Trip Map"
-              width="100%"
-              height="300"
-              loading="lazy"
-              className="rounded border"
-              src={`https://maps.google.com/maps?q=${trip.location.coordinates[1]},${trip.location.coordinates[0]}&z=14&output=embed`}
-            ></iframe>
-            <p className="text-sm mt-2 text-gray-500">
-              {trip.location.address}
-            </p>
+            <MiniRouteMap
+              from={{
+                coordinates: trip.fromLocation.coordinates,
+                name: trip.fromLocation.address,
+              }}
+              to={{
+                coordinates: trip.toLocation.coordinates,
+                name: trip.toLocation.address,
+              }}
+              pickup={
+                trip.location?.coordinates
+                  ? {
+                      coordinates: trip.location.coordinates,
+                      name: trip.location.address,
+                    }
+                  : null
+              }
+            />
+            {trip.location?.address && (
+              <p className="text-sm mt-2 text-gray-500">
+                📍 Pickup: {trip.location.address}
+              </p>
+            )}
           </div>
         )}
 

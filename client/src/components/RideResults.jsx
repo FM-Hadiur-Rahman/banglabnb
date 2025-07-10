@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import getTimeLeft from "../utils/getTimeLeft";
+import MiniRouteMap from "./MiniRouteMap";
 
 const RideResults = ({
   trips = [],
@@ -44,7 +45,6 @@ const RideResults = ({
           const isExpired = dayjs(`${trip.date} ${trip.time}`).isBefore(
             dayjs()
           );
-          const faded = isCancelled || isExpired;
 
           const isFullyBooked = seatsLeft === 0;
           const isDisabled = isCancelled || isExpired || isFullyBooked;
@@ -71,13 +71,27 @@ const RideResults = ({
     ${isDisabled ? "opacity-50 pointer-events-none" : ""}
   `}
             >
-              {trip.location?.coordinates && (
+              {/* {trip.location?.coordinates && (
                 <iframe
                   title="Mini Map"
                   className="w-full h-32 object-cover"
                   src={`https://maps.google.com/maps?q=${trip.location.coordinates[1]},${trip.location.coordinates[0]}&z=12&output=embed`}
                 ></iframe>
-              )}
+              )} */}
+              <MiniRouteMap
+                from={{
+                  name: trip.from,
+                  coordinates: trip.fromLocation.coordinates,
+                }}
+                to={{
+                  name: trip.to,
+                  coordinates: trip.toLocation.coordinates,
+                }}
+                pickup={{
+                  name: trip.location.address,
+                  coordinates: trip.location.coordinates,
+                }}
+              />
 
               <div className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
