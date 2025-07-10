@@ -112,7 +112,6 @@ const RideSearchForm = ({ onResults }) => {
         value={tripDate}
         onChange={(e) => setTripDate(e.target.value)}
         className="w-full border px-3 py-2 rounded"
-        required
       />
 
       <select

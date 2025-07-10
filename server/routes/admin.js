@@ -9,6 +9,7 @@ const Listing = require("../models/Listing");
 const Booking = require("../models/Booking");
 const sendEmail = require("../utils/sendEmail"); // make sure you have this
 const Payout = require("../models/Payout"); // 👈 import the model
+const DriverPayout = require("../models/DriverPayout");
 const Review = require("../models/Review");
 const PromoCode = require("../models/PromoCode");
 const GlobalConfig = require("../models/GlobalConfig"); // ✅ this must be present
@@ -344,7 +345,53 @@ router.put(
   }
 );
 
-// === Payout Management ===
+// ===Driver Payout Management ===
+// GET: Fetch all pending driver payouts
+router.get(
+  "/driver-payouts/pending",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const payouts = await DriverPayout.find({ status: "pending" })
+        .populate("tripId", "fare createdAt")
+        .populate("driverId", "name email phone");
+
+      res.json(payouts);
+    } catch (err) {
+      console.error("❌ Failed to fetch driver payouts:", err);
+      res.status(500).json({ message: "Failed to fetch driver payouts" });
+    }
+  }
+);
+
+// PUT: Mark driver payout as paid
+router.put(
+  "/driver-payouts/:id/mark-paid",
+  protect,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const payout = await DriverPayout.findByIdAndUpdate(
+        req.params.id,
+        { status: "paid", paidAt: new Date() },
+        { new: true }
+      );
+
+      // Optional: Update Trip if needed
+      if (payout?.tripId) {
+        await Trip.findByIdAndUpdate(payout.tripId, {
+          payoutIssued: true,
+        });
+      }
+
+      res.json({ message: "✅ Driver payout marked as paid", payout });
+    } catch (err) {
+      console.error("❌ Failed to mark driver payout as paid:", err);
+      res.status(500).json({ message: "Failed to update driver payout" });
+    }
+  }
+);
 
 // === Miscellaneous Stats ===
 // /routes/admin.js
