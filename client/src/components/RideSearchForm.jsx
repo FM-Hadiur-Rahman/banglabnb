@@ -11,28 +11,46 @@ const RideSearchForm = ({ onResults }) => {
 
   const [fromCoords, setFromCoords] = useState(null); // [lng, lat]
   const [toCoords, setToCoords] = useState(null); // [lng, lat]
+  const [isUsingCurrentLocation, setIsUsingCurrentLocation] = useState(false);
+
   useEffect(() => {
+    if (!fromInput) detectCurrentLocation();
+  }, []);
+
+  useEffect(() => {
+    if (fromInput.trim() === "") {
+      setFromCoords(null);
+      setIsUsingCurrentLocation(false); // ✅ Reset flag
+    }
+  }, [fromInput]);
+
+  const detectCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         const coords = [longitude, latitude];
         setFromCoords(coords);
+        setIsUsingCurrentLocation(true); // ✅ Set flag
 
-        // Reverse geocode for readable address
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${
-            import.meta.env.VITE_MAPBOX_TOKEN
-          }`
-        );
-        const data = await res.json();
-        const place = data?.features?.[0]?.place_name || "Your Location";
-        setFromInput(place);
+        try {
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${
+              import.meta.env.VITE_MAPBOX_TOKEN
+            }`
+          );
+          const data = await res.json();
+          const place = data?.features?.[0]?.place_name || "Your Location";
+          setFromInput(place);
+        } catch (err) {
+          console.error("❌ Reverse geocoding failed", err);
+        }
       },
       (err) => {
         console.warn("📍 GPS error", err);
       }
     );
-  }, []);
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
 
@@ -88,15 +106,37 @@ const RideSearchForm = ({ onResults }) => {
       onSubmit={handleSearch}
       className="space-y-4 bg-white p-4 rounded shadow max-w-md mx-auto"
     >
-      <LocationAutocomplete
-        placeholder="From (e.g. Sylhet)"
-        showCurrent={true}
-        value={fromInput}
-        onSelect={({ name, coordinates }) => {
-          setFromInput(name);
-          setFromCoords(coordinates);
-        }}
-      />
+      <div className="space-y-1">
+        <LocationAutocomplete
+          placeholder="From (e.g. Sylhet)"
+          showCurrent={true}
+          value={fromInput}
+          onSelect={({ name, coordinates }) => {
+            setFromInput(name);
+            setFromCoords(coordinates);
+            setIsUsingCurrentLocation(true);
+          }}
+          onChange={(e) => {
+            setFromInput(e.target.value);
+            setIsUsingCurrentLocation(false); // ✅ Manual typing = not current location
+          }}
+          onClear={() => {
+            setFromInput("");
+            setFromCoords(null);
+            setIsUsingCurrentLocation(false); // ✅ Also clear GPS flag on ❌ click
+          }}
+        />
+        <button
+          type="button"
+          onClick={detectCurrentLocation}
+          disabled={isUsingCurrentLocation}
+          className="text-sm text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isUsingCurrentLocation
+            ? "✅ Using Current Location"
+            : "📍 Use Current Location"}
+        </button>
+      </div>
 
       <LocationAutocomplete
         placeholder="To (e.g. Dhaka Airport)"

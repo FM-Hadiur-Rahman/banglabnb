@@ -7,6 +7,7 @@ const LocationAutocomplete = ({
   onSelect,
   value = "",
   onClear = () => {},
+  onChange = () => {},
 }) => {
   const [input, setInput] = useState(value);
   const [suggestions, setSuggestions] = useState([]);
@@ -27,6 +28,7 @@ const LocationAutocomplete = ({
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInput(val);
+    onChange(e);
     if (val.length > 2) debouncedSearch(val);
     else setSuggestions([]);
   };
