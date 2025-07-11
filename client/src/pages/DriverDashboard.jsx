@@ -1,13 +1,25 @@
+// ✅ FULLY COMPLETE DriverDashboard.jsx with all modals working
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import getTimeLeft from "../utils/getTimeLeft";
+import ConfirmCancelModal from "../components/modals/ConfirmCancelModal";
+import ConfirmTripDeleteModal from "../components/modals/ConfirmTripDeleteModal";
+import CompletionSuccessModal from "../components/modals/CompletionSuccessModal";
+import PassengerListModal from "../components/modals/PassengerListModal";
+import { toast } from "react-toastify";
 
 const DriverDashboard = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [earnings, setEarnings] = useState([]);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showPassengerModal, setShowPassengerModal] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,8 +50,48 @@ const DriverDashboard = () => {
     fetchData();
   }, []);
 
+  const handleDeleteTrip = async (tripId) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setTrips((prev) => prev.filter((trip) => trip._id !== tripId));
+      toast.success("Trip deleted successfully");
+    } catch (err) {
+      console.error("❌ Failed to delete trip:", err);
+      toast.error("Failed to delete trip");
+    }
+  };
+
+  const handleCompleteTrip = async (tripId) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setTrips((prev) =>
+        prev.map((trip) =>
+          trip._id === tripId ? { ...trip, status: "completed" } : trip
+        )
+      );
+      toast.success("Trip marked as completed");
+    } catch (err) {
+      console.error("❌ Completion failed:", err);
+      toast.error("Failed to mark trip as completed");
+    }
+  };
+
   const handleCancelTrip = async (tripId) => {
-    if (!confirm("Are you sure you want to cancel this trip?")) return;
     try {
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/cancel`,
@@ -55,10 +107,10 @@ const DriverDashboard = () => {
           trip._id === tripId ? { ...trip, status: "cancelled" } : trip
         )
       );
-      alert("✅ Trip cancelled successfully");
+      toast.success("Trip cancelled successfully");
     } catch (err) {
       console.error("❌ Cancel trip failed:", err);
-      alert("❌ Failed to cancel trip");
+      toast.error("Failed to cancel trip");
     }
   };
 
@@ -66,7 +118,6 @@ const DriverDashboard = () => {
     <div className="max-w-6xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">🚘 My Posted Rides</h2>
 
-      {/* STATS */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-white">
           <div className="bg-blue-600 p-4 rounded shadow">
@@ -88,7 +139,6 @@ const DriverDashboard = () => {
         </div>
       )}
 
-      {/* CREATE BUTTON */}
       <Link
         to="/dashboard/driver/trips/new"
         className="inline-block bg-green-600 text-white px-4 py-2 rounded mb-6"
@@ -96,7 +146,6 @@ const DriverDashboard = () => {
         ➕ Create New Trip
       </Link>
 
-      {/* EARNINGS TABLE */}
       {earnings?.length > 0 && (
         <div className="bg-white rounded shadow p-4 mb-6 overflow-x-auto">
           <h3 className="text-lg font-semibold mb-2">💰 Trip Earnings</h3>
@@ -125,7 +174,6 @@ const DriverDashboard = () => {
         </div>
       )}
 
-      {/* TRIP LIST */}
       {loading ? (
         <p className="text-gray-500">Loading your trips...</p>
       ) : trips.length === 0 ? (
@@ -179,7 +227,6 @@ const DriverDashboard = () => {
                   {trip.status}
                 </span>
               </p>
-
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   to={`/trips/${trip._id}`}
@@ -188,25 +235,96 @@ const DriverDashboard = () => {
                   View Details
                 </Link>
                 {!isExpired && trip.status !== "cancelled" && (
-                  <Link
-                    to={`/dashboard/driver/trips/edit/${trip._id}`}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edit
-                  </Link>
-                )}
-                {!isExpired && trip.status !== "cancelled" && (
-                  <button
-                    onClick={() => handleCancelTrip(trip._id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Cancel
-                  </button>
+                  <>
+                    <Link
+                      to={`/dashboard/driver/trips/edit/${trip._id}`}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setSelectedTrip(trip);
+                        setShowCancelModal(true);
+                      }}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedTrip(trip);
+                        setShowDeleteModal(true);
+                      }}
+                      className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedTrip(trip);
+                        setShowCompletionModal(true);
+                      }}
+                      className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-800"
+                    >
+                      Mark as Completed
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedTrip(trip);
+                        setShowPassengerModal(true);
+                      }}
+                      className="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800"
+                    >
+                      Passengers
+                    </button>
+                  </>
                 )}
               </div>
             </div>
           );
         })
+      )}
+
+      {/* MODALS */}
+      {showCancelModal && (
+        <ConfirmCancelModal
+          trip={selectedTrip}
+          onClose={() => setShowCancelModal(false)}
+          onConfirm={() => {
+            handleCancelTrip(selectedTrip._id);
+            setShowCancelModal(false);
+          }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <ConfirmTripDeleteModal
+          trip={selectedTrip}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            handleDeleteTrip(selectedTrip._id);
+            setShowDeleteModal(false);
+          }}
+        />
+      )}
+
+      {showCompletionModal && (
+        <CompletionSuccessModal
+          trip={selectedTrip}
+          onClose={() => setShowCompletionModal(false)}
+          onConfirm={() => {
+            handleCompleteTrip(selectedTrip._id);
+            setShowCompletionModal(false);
+          }}
+        />
+      )}
+
+      {showPassengerModal && (
+        <PassengerListModal
+          trip={selectedTrip}
+          onClose={() => setShowPassengerModal(false)}
+        />
       )}
     </div>
   );

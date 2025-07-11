@@ -13,11 +13,20 @@ const RideResults = ({
 }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [confirmTrip, setConfirmTrip] = useState(null);
+  const [seatSelections, setSeatSelections] = useState({});
+
+  const [selectedSeats, setSelectedSeats] = useState(1);
+
   const calculateTotal = (baseFare, seats) => {
     const subtotal = baseFare * seats;
-    const serviceFee = Math.round(subtotal * 0.1);
-    const vat = Math.round((subtotal + serviceFee) * 0.075);
-    return subtotal + serviceFee + vat;
+
+    return subtotal;
+  };
+  const handleSeatChange = (tripId, value) => {
+    setSeatSelections((prev) => ({
+      ...prev,
+      [tripId]: value,
+    }));
   };
 
   const validTrips = trips.filter(
@@ -45,6 +54,8 @@ const RideResults = ({
             0
           );
           const seatsLeft = Math.max((trip.totalSeats || 0) - reservedSeats, 0);
+          const seatsForTrip = seatSelections[trip._id] || 1;
+
           const hasReserved = trip.passengers?.some(
             (p) =>
               (p.user === user?._id || p.user?._id === user?._id) &&
@@ -70,18 +81,20 @@ const RideResults = ({
           const { label, color } = getTripStatus();
 
           return (
-            <Link
+            <div
               key={trip._id}
-              to={
-                onSelectTrip && !isDisabled ? undefined : `/trips/${trip._id}`
-              }
-              className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative hover:shadow-lg hover:border-green-500
-                ${
-                  selectedTrip?._id === trip._id
-                    ? "border-blue-500 bg-blue-50"
-                    : ""
+              onClick={(e) => {
+                if (
+                  !onSelectTrip &&
+                  !e.target.closest("input") &&
+                  !e.target.closest("button")
+                ) {
+                  window.location.href = `/trips/${trip._id}`;
                 }
-                ${isDisabled ? "opacity-50 pointer-events-none" : ""}`}
+              }}
+              className={`block border rounded-lg shadow transition-all bg-white overflow-hidden group relative hover:shadow-lg hover:border-green-500
+    ${selectedTrip?._id === trip._id ? "border-blue-500 bg-blue-50" : ""}
+    ${isDisabled ? "opacity-50 pointer-events-none" : ""}`}
             >
               <MiniRouteMap
                 from={{
@@ -170,22 +183,31 @@ const RideResults = ({
                         type="number"
                         min="1"
                         max={seatsLeft}
-                        defaultValue={1}
+                        value={seatsForTrip}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) =>
-                          (trip.selectedSeats = parseInt(e.target.value))
+                          handleSeatChange(trip._id, parseInt(e.target.value))
                         }
                         className="border mt-2 px-2 py-1 w-full rounded text-sm"
                       />
+
+                      <p className="text-sm text-gray-600">
+                        <strong>
+                          Estimated Total ({seatsForTrip} seat
+                          {seatsForTrip > 1 ? "s" : ""}):
+                        </strong>{" "}
+                        ৳{calculateTotal(trip.farePerSeat, seatsForTrip)}
+                      </p>
+
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          onReserve(trip, trip.selectedSeats || 1);
+                          onReserve(trip, seatsForTrip);
                         }}
                         className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm font-medium"
                       >
-                        📩 Reserve {trip.selectedSeats || 1} Seat
-                        {(trip.selectedSeats || 1) > 1 ? "s" : ""}
+                        📩 Reserve {seatsForTrip} Seat
+                        {seatsForTrip > 1 ? "s" : ""}
                       </button>
                     </>
                   ) : (
@@ -224,7 +246,7 @@ const RideResults = ({
                   </button>
                 )}
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>

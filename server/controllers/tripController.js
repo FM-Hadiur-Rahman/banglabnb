@@ -4,6 +4,7 @@ const cloudinary = require("../middleware/cloudinaryUpload");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const geolib = require("geolib");
+const DriverPayout = require("../models/DriverPayout");
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
   try {
@@ -325,6 +326,35 @@ exports.updateTrip = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// controllers/tripController.js
+
+exports.deleteTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    // Optional: only allow the trip owner (driver) to delete
+    if (trip.driver.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Optional: Prevent deleting if there are active reservations
+    const hasActiveReservations = trip.passengers?.some(
+      (p) => p.status !== "cancelled"
+    );
+    if (hasActiveReservations) {
+      return res.status(400).json({ message: "Trip has active reservations" });
+    }
+
+    await Trip.findByIdAndDelete(req.params.id);
+    res.json({ message: "Trip deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting trip:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.cancelTrip = async (req, res) => {
   try {
@@ -486,24 +516,22 @@ exports.getSuggestedTrips = async (req, res) => {
 // controllers/tripController.js
 exports.getTripEarnings = async (req, res) => {
   try {
-    const trips = await Trip.find({ driverId: req.user._id });
+    const payouts = await DriverPayout.find({
+      driverId: req.user._id,
+      status: "paid",
+    }).populate("tripId", "from to date time totalSeats"); // 👈 populate trip info
 
-    const detailed = trips.map((trip) => {
-      const earnings = trip.passengers
-        .filter((p) => p.status === "reserved" && p.paymentStatus === "paid")
-        .reduce((sum, p) => sum + p.seats * trip.farePerSeat, 0);
-      return {
-        tripId: trip._id,
-        from: trip.from,
-        to: trip.to,
-        date: trip.date,
-        time: trip.time,
-        totalSeats: trip.totalSeats,
-        earnings,
-      };
-    });
+    const detailed = payouts.map((p) => ({
+      tripId: p.tripId._id,
+      from: p.tripId.from,
+      to: p.tripId.to,
+      date: p.tripId.date,
+      time: p.tripId.time,
+      totalSeats: p.tripId.totalSeats,
+      earnings: p.amount,
+    }));
 
-    const totalEarnings = detailed.reduce((sum, t) => sum + t.earnings, 0);
+    const totalEarnings = detailed.reduce((sum, p) => sum + p.earnings, 0);
 
     res.json({ totalEarnings, trips: detailed });
   } catch (err) {
@@ -515,14 +543,29 @@ exports.markTripCompleted = async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
 
-    if (!trip) return res.status(404).json({ message: "Trip not found" });
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
 
-    if (trip.driverId.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: "Unauthorized" });
+    if (trip.driverId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized: Not your trip" });
+    }
 
-    const tripTime = new Date(`${trip.date}T${trip.time}`);
-    if (tripTime > new Date()) {
-      return res.status(400).json({ message: "Trip hasn't started yet" });
+    const tripDateTime = new Date(`${trip.date}T${trip.time}`);
+    const now = new Date();
+
+    if (tripDateTime > now) {
+      return res
+        .status(400)
+        .json({
+          message: "Trip hasn't started yet. Cannot mark as completed.",
+        });
+    }
+
+    if (trip.isCompleted) {
+      return res
+        .status(400)
+        .json({ message: "Trip is already marked as completed." });
     }
 
     trip.isCompleted = true;
@@ -530,10 +573,11 @@ exports.markTripCompleted = async (req, res) => {
 
     res.json({ message: "✅ Trip marked as completed", trip });
   } catch (err) {
-    console.error("❌ Mark completed failed:", err);
+    console.error("❌ Mark trip as completed failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // GET /api/trips/:id/passengers
 exports.getTripPassengers = async (req, res) => {
   try {
@@ -568,9 +612,9 @@ exports.getDriverStats = async (req, res) => {
     const cancelled = trips.filter((t) => t.status === "cancelled").length;
 
     const totalEarnings = trips.reduce((sum, trip) => {
-      const earnings = trip.passengers
-        .filter((p) => p.status === "reserved" && p.paymentStatus === "paid")
-        .reduce((s, p) => s + p.seats * trip.farePerSeat, 0);
+      const earnings = trip.passengers.reduce((s, p) => {
+        return s + (p.seats || 1) * (trip.farePerSeat || 0);
+      }, 0);
       return sum + earnings;
     }, 0);
 
