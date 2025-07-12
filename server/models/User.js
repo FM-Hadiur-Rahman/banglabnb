@@ -31,12 +31,17 @@ const userSchema = new mongoose.Schema(
     livePhotoUrl: String,
     identityVerified: { type: Boolean, default: false },
     signupStep: { type: Number, default: 1 },
-
-    role: {
+    primaryRole: {
       type: String,
       enum: ["user", "host", "driver", "admin"],
       default: "user",
     },
+    roles: {
+      type: [String],
+      enum: ["user", "host", "driver", "admin"],
+      default: ["user"],
+    },
+
     location: {
       coordinates: {
         type: [Number], // [longitude, latitude]

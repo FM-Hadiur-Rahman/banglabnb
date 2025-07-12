@@ -79,10 +79,10 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
                 {t("hero.become_host")}
               </Link>
               <Link
-                to="/login"
+                to="/register"
                 className="bg-white hover:bg-gray-100 text-green-700 px-6 py-3 rounded"
               >
-                {t("hero.find_stay")}
+                {t("hero.become_driver")}
               </Link>
             </motion.div>
 
@@ -94,7 +94,7 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
             >
               <button
                 onClick={() => setActiveTab("stay")}
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded ${
                   activeTab === "stay"
                     ? "bg-green-600 text-white"
                     : "bg-white text-gray-700"
@@ -104,7 +104,7 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
               </button>
               <button
                 onClick={() => setActiveTab("ride")}
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded ${
                   activeTab === "ride"
                     ? "bg-green-600 text-white"
                     : "bg-white text-gray-700"

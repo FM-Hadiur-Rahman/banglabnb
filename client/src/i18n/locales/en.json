@@ -45,6 +45,8 @@
   "leave_review": "Leave a Review",
   "my_referrals": "My Referrals",
   "wishlist": "My Wishlist",
+  "switch_to": "Switch to",
+
   "error": {
     "switch_role": "❌ Failed to switch role"
   },
@@ -92,12 +94,14 @@
   },
 
   "hero": {
-    "default_caption": "Experience Bangladesh like never before",
     "explore_now": "Explore Now",
     "become_host": "Become a Host",
+    "become_driver": "Become a Driver",
     "find_stay": "Find Stay",
+    "find_ride": "Find Ride",
     "stay": "Stay",
-    "ride": "Ride"
+    "ride": "Ride",
+    "default_caption": "Experience Bangladesh like never before"
   },
 
   "search": {
