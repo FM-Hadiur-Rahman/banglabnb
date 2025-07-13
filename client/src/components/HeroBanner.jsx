@@ -67,20 +67,20 @@ const HeroBanner = ({ activeTab, setActiveTab }) => {
             )}
 
             <motion.div
-              className="space-x-4 mb-4"
+              className="flex flex-wrap gap-2 justify-center mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
             >
               <Link
                 to="/register"
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded whitespace-nowrap"
               >
                 {t("hero.become_host")}
               </Link>
               <Link
                 to="/register"
-                className="bg-white hover:bg-gray-100 text-green-700 px-6 py-3 rounded"
+                className="bg-white hover:bg-gray-100 text-green-700 px-6 py-3 rounded whitespace-nowrap"
               >
                 {t("hero.become_driver")}
               </Link>
