@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const HeroBanner = ({ activeTab, setActiveTab }) => {
+const HeroBanner = () => {
   const [banners, setBanners] = useState([]);
   const navigate = useNavigate();
   const { t } = useTranslation();

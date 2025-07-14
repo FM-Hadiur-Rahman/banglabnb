@@ -1,7 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  safelist: ["bg-[#f43f5e]", "bg-[#9333ea]"],
+  safelist: ["bg-[#f43f5e]", "bg-[#9333ea]", "hamburger"],
+  darkMode: "class", // ✅ Add this line here
+
   theme: {
     extend: {
       keyframes: {
