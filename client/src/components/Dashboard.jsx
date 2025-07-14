@@ -138,7 +138,12 @@ const Dashboard = () => {
                           🗓 {new Date(b.dateFrom).toLocaleDateString()} →{" "}
                           {new Date(b.dateTo).toLocaleDateString()}
                         </div>
-                        <div className="text-sm">👤 Guest ID: {b.guestId}</div>
+                        <div className="text-sm text-gray-600">
+                          👤 Guest:{" "}
+                          {typeof b.guestId === "object"
+                            ? b.guestId.name || b.guestId._id
+                            : b.guestId}
+                        </div>
                       </li>
                     ))}
                   </ul>

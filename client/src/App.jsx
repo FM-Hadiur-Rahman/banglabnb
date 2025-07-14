@@ -90,6 +90,7 @@ import AdminBookingDetail from "./pages/AdminBookingDetails";
 import AdminListingDetails from "./pages/AdminListingDetails";
 import AdminTripDetails from "./pages/AdminTripDetails";
 import EditTripForm from "./pages/EditTripForm";
+import RideResultsPage from "./pages/RideResultsPage";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -429,6 +430,7 @@ function App() {
             }
           />
           <Route path="/trip-search" element={<TripSearchPage />} />
+          <Route path="/trips" element={<RideResultsPage />} />
           <Route
             path="/dashboard/driver/trips/new"
             element={
