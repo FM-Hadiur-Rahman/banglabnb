@@ -17,6 +17,7 @@ const {
   resendVerificationEmail,
   getMe,
   myReferral,
+  addRole,
 } = require("../controllers/authController");
 
 router.get("/me", protect, getMe);
@@ -43,6 +44,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 router.patch("/switch-role", protect, switchRole);
+router.post("/add-role", protect, addRole);
 
 router.get("/verify-token", getUserIdFromToken);
 router.post("/resend-verification", resendVerificationEmail);

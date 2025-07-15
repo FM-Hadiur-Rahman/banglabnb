@@ -46,7 +46,11 @@
   "my_referrals": "My Referrals",
   "wishlist": "My Wishlist",
   "switch_to": "Switch to",
-
+  "add_role": "Add Role",
+  "select_new_role": "Select a new role",
+  "role_tooltip.driver": "Switch to Driver",
+  "role_tooltip.host": "Switch to Host",
+  "role_tooltip.user": "Switch to Guest",
   "error": {
     "switch_role": "❌ Failed to switch role"
   },

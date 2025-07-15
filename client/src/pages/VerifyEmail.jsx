@@ -6,7 +6,7 @@ const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState("Verifying...");
   const navigate = useNavigate();
-  const role = localStorage.getItem("signupRole");
+  // const role = localStorage.getItem("signupRole");
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -21,7 +21,7 @@ const VerifyEmail = () => {
         `${import.meta.env.VITE_API_URL}/api/auth/verify-email?token=${token}`
       )
       .then((res) => {
-        const userId = res.data.userId;
+        const { userId, role } = res.data;
         if (!userId) {
           setMessage("❌ Email verified but user ID missing.");
           return;

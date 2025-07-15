@@ -41,6 +41,32 @@ const Navbar = () => {
     }
   }, [i18n]);
 
+  const handleAddRole = async (role) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/add-role`,
+        { role },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const updatedUser = {
+        ...user,
+        roles: res.data.roles,
+        primaryRole: res.data.primaryRole,
+      };
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      toast.success(`✅ ${t("added_new_role")} ➡ ${role.toUpperCase()}`);
+      navigate(getDashboardPath(role)); // Optional auto-redirect
+      setDropdownOpen(false);
+      setMobileOpen(false);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || t("error.add_role_failed", { role })
+      );
+    }
+  };
+
   const handleRoleSwitch = async (role) => {
     try {
       const res = await axios.patch(
@@ -49,7 +75,8 @@ const Navbar = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const newRole = res.data.newRole;
-      const updatedUser = { ...user, role: newRole };
+      const updatedUser = { ...user, primaryRole: newRole };
+
       localStorage.setItem("user", JSON.stringify(updatedUser));
       toast.success(`✅ ${t("switch_role")} ➡ ${newRole.toUpperCase()}`);
       navigate(getDashboardPath(newRole));
@@ -127,12 +154,15 @@ const Navbar = () => {
           <Link to="/trips" className="hover:text-green-600">
             🚗 Find a Ride
           </Link>
-          {!isLoggedIn || user.role !== "host" ? (
-            <Link to="/register?role=host" className="hover:text-green-600">
+          {!isLoggedIn || user.primaryRole !== "host" ? (
+            <Link
+              to="/register?primaryRole=host"
+              className="hover:text-green-600"
+            >
               🌟 Become a Host
             </Link>
           ) : null}
-          {!isLoggedIn || user.role !== "driver" ? (
+          {!isLoggedIn || user.primaryRole !== "driver" ? (
             <Link to="/register?role=driver" className="hover:text-green-600">
               🛵 Become a Driver
             </Link>
@@ -187,35 +217,51 @@ const Navbar = () => {
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 min-w-[13rem] bg-white border rounded shadow-lg z-50 animate-dropdown origin-top-right">
                   <div className="px-4 py-2 text-sm font-semibold text-green-700">
-                    {user.role.toUpperCase()}
+                    {user?.primaryRole?.toUpperCase()}
                   </div>
-                  {isLoggedIn && user?.roles?.length > 1 && (
-                    <div className="px-4 pt-2">
-                      <p className="text-xs text-gray-500 mb-1">
-                        {t("switch_role")}
-                      </p>
-                      {user.roles
-                        .filter((role) => role !== user.primaryRole)
-                        .map((role) => (
-                          <button
-                            key={role}
-                            onClick={() => handleRoleSwitch(role)}
-                            className="flex w-full items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded gap-2"
-                            title={t(`role_tooltip.${role}`)}
-                          >
-                            <span>
-                              {role === "host"
-                                ? "🌟"
-                                : role === "driver"
-                                ? "🛵"
-                                : role === "admin"
-                                ? "🛠"
-                                : "👤"}
-                            </span>
-                            <span className="capitalize">{role}</span>
-                          </button>
-                        ))}
-                    </div>
+                  {isLoggedIn && (
+                    <>
+                      {/* Show Add Role options if user doesn't have it */}
+                      {!user.roles.includes("host") && (
+                        <button
+                          onClick={() => handleAddRole("host")}
+                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                        >
+                          🌟 {t("become_host")}
+                        </button>
+                      )}
+                      {!user.roles.includes("driver") && (
+                        <button
+                          onClick={() => handleAddRole("driver")}
+                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                        >
+                          🛵 {t("become_driver")}
+                        </button>
+                      )}
+
+                      {/* 👇 Add this role switcher if user has multiple roles */}
+                      {/* Switch Role */}
+                      {user.roles.length > 1 && (
+                        <div className="px-4 py-2 text-sm text-gray-700">
+                          <div className="font-semibold text-gray-800">
+                            Switch Role:
+                          </div>
+                          {user.roles
+                            .filter((r) => r !== user.primaryRole) // exclude current role
+                            .map((role) => (
+                              <button
+                                key={role}
+                                onClick={() => handleRoleSwitch(role)}
+                                className="block text-green-600 hover:underline mt-1"
+                              >
+                                {role === "host" && "🌟 Host"}
+                                {role === "driver" && "🛵 Driver"}
+                                {role === "user" && "👤 User"}
+                              </button>
+                            ))}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <Link
@@ -325,16 +371,16 @@ const Navbar = () => {
             >
               🚗 Find a Ride
             </Link>
-            {!isLoggedIn || user.role !== "host" ? (
+            {!isLoggedIn || user.primaryRole !== "host" ? (
               <Link
-                to="/register?role=host"
+                to="/register?primaryRole=host"
                 onClick={() => setMobileOpen(false)}
                 className="block hover:text-green-600"
               >
                 🌟 Become a Host
               </Link>
             ) : null}
-            {!isLoggedIn || user.role !== "driver" ? (
+            {!isLoggedIn || user.primaryRole !== "driver" ? (
               <Link
                 to="/register?role=driver"
                 onClick={() => setMobileOpen(false)}
@@ -383,10 +429,55 @@ const Navbar = () => {
                       {user.name}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {user.role.toUpperCase()}
+                      {user?.primaryRole?.toUpperCase()}
                     </p>
                   </div>
                 </div>
+                {isLoggedIn && (
+                  <>
+                    {/* Show Add Role options if user doesn't have it */}
+                    {!user.roles.includes("host") && (
+                      <button
+                        onClick={() => handleAddRole("host")}
+                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                      >
+                        🌟 {t("become_host")}
+                      </button>
+                    )}
+                    {!user.roles.includes("driver") && (
+                      <button
+                        onClick={() => handleAddRole("driver")}
+                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                      >
+                        🛵 {t("become_driver")}
+                      </button>
+                    )}
+
+                    {/* 👇 Add this role switcher if user has multiple roles */}
+                    {/* Switch Role */}
+                    {user.roles.length > 1 && (
+                      <div className="px-4 py-2 text-sm text-gray-700">
+                        <div className="font-semibold text-gray-800">
+                          Switch Role:
+                        </div>
+                        {user.roles
+                          .filter((r) => r !== user.primaryRole) // exclude current role
+                          .map((role) => (
+                            <button
+                              key={role}
+                              onClick={() => handleRoleSwitch(role)}
+                              className="block text-green-600 hover:underline mt-1"
+                            >
+                              {role === "host" && "🌟 Host"}
+                              {role === "driver" && "🛵 Driver"}
+                              {role === "user" && "👤 User"}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <Link
                   to={getDashboardPath()}
                   onClick={() => setMobileOpen(false)}
@@ -427,36 +518,6 @@ const Navbar = () => {
                 >
                   🙍 {t("edit_profile")}
                 </Link>
-                {user?.roles?.length > 1 && (
-                  <div className="pt-2">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {t("switch_role")}
-                    </p>
-                    {user.roles
-                      .filter((role) => role !== user.primaryRole)
-                      .map((role) => (
-                        <button
-                          key={role}
-                          onClick={() => {
-                            handleRoleSwitch(role);
-                            setMobileOpen(false);
-                          }}
-                          className="flex w-full items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded gap-2"
-                        >
-                          <span>
-                            {role === "host"
-                              ? "🌟"
-                              : role === "driver"
-                              ? "🛵"
-                              : role === "admin"
-                              ? "🛠"
-                              : "👤"}
-                          </span>
-                          <span className="capitalize">{role}</span>
-                        </button>
-                      ))}
-                  </div>
-                )}
 
                 <button
                   onClick={() => {

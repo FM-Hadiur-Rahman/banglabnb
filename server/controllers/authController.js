@@ -177,7 +177,7 @@ exports.verifyEmail = async (req, res) => {
   res.json({
     message: "✅ Email verified successfully!",
     userId: user._id,
-    role: user.role,
+    role: user.primaryRole,
   });
 };
 // POST /api/auth/resend-verification
@@ -311,7 +311,34 @@ exports.resetPassword = async (req, res) => {
   res.json({ message: "✅ Password reset successfully!" });
 };
 
-// PATCH /api/auth/switch-role
+// PATCH /api/auth/add-role
+// POST /api/auth/add-role
+exports.addRole = async (req, res) => {
+  const { role } = req.body;
+  const user = await User.findById(req.user.id);
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const allowedRoles = ["user", "host", "driver"]; // optionally exclude "admin"
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  if (user.roles.includes(role)) {
+    return res.status(400).json({ message: "Role already exists" });
+  }
+
+  user.roles.push(role);
+  user.primaryRole = role; // optional: auto-switch to the new role
+  await user.save();
+
+  res.json({
+    message: `✅ ${role} role added successfully!`,
+    roles: user.roles,
+    primaryRole: user.primaryRole,
+  });
+};
+
 // PATCH /api/auth/switch-role
 exports.switchRole = async (req, res) => {
   const { role } = req.body;
