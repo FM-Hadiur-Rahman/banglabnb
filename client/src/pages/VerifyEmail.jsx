@@ -31,6 +31,8 @@ const VerifyEmail = () => {
         localStorage.setItem("signupUserId", userId);
 
         setTimeout(() => {
+          console.log("userId:", userId, "role:", role);
+
           navigate(`/register/step2?userId=${userId}&role=${role}`);
         }, 3000);
       })
