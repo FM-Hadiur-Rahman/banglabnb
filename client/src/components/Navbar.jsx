@@ -238,6 +238,14 @@ const Navbar = () => {
                           🛵 {t("become_driver")}
                         </button>
                       )}
+                      {!user.roles.includes("user") && (
+                        <button
+                          onClick={() => handleAddRole("user")}
+                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                        >
+                          👤 {t("become_user")}
+                        </button>
+                      )}
 
                       {/* 👇 Add this role switcher if user has multiple roles */}
                       {/* Switch Role */}
@@ -450,6 +458,14 @@ const Navbar = () => {
                         className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
                       >
                         🛵 {t("become_driver")}
+                      </button>
+                    )}
+                    {!user.roles.includes("user") && (
+                      <button
+                        onClick={() => handleAddRole("user")}
+                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                      >
+                        👤 {t("become_user")}
                       </button>
                     )}
 
