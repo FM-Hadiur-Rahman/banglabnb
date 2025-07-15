@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
     livePhotoUrl: String,
     identityVerified: { type: Boolean, default: false },
     signupStep: { type: Number, default: 1 },
+
     primaryRole: {
       type: String,
       enum: ["user", "host", "driver", "admin"],

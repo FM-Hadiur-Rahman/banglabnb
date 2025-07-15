@@ -64,7 +64,6 @@ const SignupFormStep1 = () => {
       setFormData((prev) => ({
         ...prev,
         division: division?.text || "",
-        district: district?.text || "",
       }));
     } catch (err) {
       console.warn("❌ Reverse geocoding failed", err);
@@ -97,8 +96,32 @@ const SignupFormStep1 = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLocationChange = (division, district) => {
+  const handleLocationChange = async (division, district) => {
     setFormData((prev) => ({ ...prev, division, district }));
+
+    // Fetch coordinates from Mapbox based on known district
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          district + ", " + division + ", Bangladesh"
+        )}.json?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}`
+      );
+      const data = await res.json();
+      const feature = data.features?.[0];
+      if (feature) {
+        setFormData((prev) => ({
+          ...prev,
+          location: {
+            coordinates: feature.center, // [lng, lat]
+            address: feature.place_name,
+          },
+        }));
+      } else {
+        console.warn("❌ No coordinates found for this district.");
+      }
+    } catch (err) {
+      console.error("❌ Mapbox geocoding error", err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -115,11 +138,19 @@ const SignupFormStep1 = () => {
 
     setIsLoading(true);
     try {
+      const role = formData.role;
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/signup/step1`,
         {
           ...formData,
           phone: `+${phone}`,
+          primaryRole: role,
+          roles: [role],
+          location: {
+            ...formData.location,
+            division: formData.division,
+            district: formData.district,
+          },
         }
       );
 

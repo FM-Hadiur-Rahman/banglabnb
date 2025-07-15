@@ -41,11 +41,11 @@ const Navbar = () => {
     }
   }, [i18n]);
 
-  const handleRoleSwitch = async () => {
+  const handleRoleSwitch = async (role) => {
     try {
       const res = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/auth/switch-role`,
-        {},
+        { role }, // ✅ send selected role in request body
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const newRole = res.data.newRole;
@@ -53,6 +53,8 @@ const Navbar = () => {
       localStorage.setItem("user", JSON.stringify(updatedUser));
       toast.success(`✅ ${t("switch_role")} ➡ ${newRole.toUpperCase()}`);
       navigate(getDashboardPath(newRole));
+      setDropdownOpen(false); // if inside dropdown
+      setMobileOpen(false); // if mobile menu is open
     } catch (err) {
       toast.error(t("error.switch_role"));
     }
@@ -187,14 +189,35 @@ const Navbar = () => {
                   <div className="px-4 py-2 text-sm font-semibold text-green-700">
                     {user.role.toUpperCase()}
                   </div>
-                  {user.role !== "admin" && (
-                    <button
-                      onClick={handleRoleSwitch}
-                      className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-                    >
-                      🔄 {t("switch_role")}
-                    </button>
+                  {isLoggedIn && user?.roles?.length > 1 && (
+                    <div className="px-4 pt-2">
+                      <p className="text-xs text-gray-500 mb-1">
+                        {t("switch_role")}
+                      </p>
+                      {user.roles
+                        .filter((role) => role !== user.primaryRole)
+                        .map((role) => (
+                          <button
+                            key={role}
+                            onClick={() => handleRoleSwitch(role)}
+                            className="flex w-full items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded gap-2"
+                            title={t(`role_tooltip.${role}`)}
+                          >
+                            <span>
+                              {role === "host"
+                                ? "🌟"
+                                : role === "driver"
+                                ? "🛵"
+                                : role === "admin"
+                                ? "🛠"
+                                : "👤"}
+                            </span>
+                            <span className="capitalize">{role}</span>
+                          </button>
+                        ))}
+                    </div>
                   )}
+
                   <Link
                     to={getDashboardPath()}
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -404,17 +427,37 @@ const Navbar = () => {
                 >
                   🙍 {t("edit_profile")}
                 </Link>
-                {user.role !== "admin" && (
-                  <button
-                    onClick={() => {
-                      handleRoleSwitch();
-                      setMobileOpen(false);
-                    }}
-                    className="block text-left w-full text-blue-600"
-                  >
-                    🔄 {t("switch_role")}
-                  </button>
+                {user?.roles?.length > 1 && (
+                  <div className="pt-2">
+                    <p className="text-xs text-gray-500 mb-1">
+                      {t("switch_role")}
+                    </p>
+                    {user.roles
+                      .filter((role) => role !== user.primaryRole)
+                      .map((role) => (
+                        <button
+                          key={role}
+                          onClick={() => {
+                            handleRoleSwitch(role);
+                            setMobileOpen(false);
+                          }}
+                          className="flex w-full items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded gap-2"
+                        >
+                          <span>
+                            {role === "host"
+                              ? "🌟"
+                              : role === "driver"
+                              ? "🛵"
+                              : role === "admin"
+                              ? "🛠"
+                              : "👤"}
+                          </span>
+                          <span className="capitalize">{role}</span>
+                        </button>
+                      ))}
+                  </div>
                 )}
+
                 <button
                   onClick={() => {
                     localStorage.clear();

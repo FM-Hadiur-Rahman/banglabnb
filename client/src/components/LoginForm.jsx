@@ -32,22 +32,30 @@ const LoginForm = () => {
         }
       );
 
-      if (!res.data.user?.isVerified) {
+      const user = res.data.user;
+
+      if (!user?.isVerified) {
         alert("⚠️ Please verify your email before logging in.");
         setIsLoading(false);
         return;
       }
 
-      // ✅ Save token & user only if verified
+      // ✅ Update to store primaryRole and roles[]
+      const updatedUser = {
+        ...user,
+        role: user.primaryRole, // for legacy compatibility
+        primaryRole: user.primaryRole, // current active role
+        roles: user.roles || ["user"], // all roles available
+      };
+
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success("✅ Logged in successfully!");
-
       setFormData({ email: "", password: "" });
 
-      // ✅ Redirect based on role
-      const userRole = res.data.user?.role || "user";
+      const userRole = updatedUser.primaryRole;
+
       navigate(
         userRole === "admin"
           ? "/admin/dashboard"
@@ -64,12 +72,13 @@ const LoginForm = () => {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (token && user?.isVerified) {
-      const role = user.role || "user";
+      const role = user.primaryRole || user.role || "user"; // ✅ use primaryRole
       navigate(
         role === "admin"
           ? "/admin/dashboard"
