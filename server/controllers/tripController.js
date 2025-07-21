@@ -8,6 +8,17 @@ const DriverPayout = require("../models/DriverPayout");
 // controllers/tripController.js
 exports.createTrip = async (req, res) => {
   try {
+    const user = req.user;
+
+    // 🔒 Restrict unverified drivers
+    if (!user.kyc || user.kyc.status !== "approved") {
+      return res
+        .status(403)
+        .json({
+          message: "You must complete identity verification to offer a ride.",
+        });
+    }
+
     const tripData = {
       ...req.body,
       driverId: req.user._id,
@@ -555,11 +566,9 @@ exports.markTripCompleted = async (req, res) => {
     const now = new Date();
 
     if (tripDateTime > now) {
-      return res
-        .status(400)
-        .json({
-          message: "Trip hasn't started yet. Cannot mark as completed.",
-        });
+      return res.status(400).json({
+        message: "Trip hasn't started yet. Cannot mark as completed.",
+      });
     }
 
     if (trip.isCompleted) {

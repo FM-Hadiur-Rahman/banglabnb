@@ -222,6 +222,18 @@ exports.getListingsByHost = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
+    const user = req.user;
+
+    // 🔒 Restrict unverified hosts
+    if (!user.kyc || user.kyc.status !== "approved") {
+      return res
+        .status(403)
+        .json({
+          message:
+            "You must complete identity verification to create a listing.",
+        });
+    }
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "No images uploaded" });
     }

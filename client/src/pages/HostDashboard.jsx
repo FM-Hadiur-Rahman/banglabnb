@@ -133,12 +133,19 @@ const HostDashboard = () => {
             >
               💬 Guest Chats
             </Link>
-            <Link
-              to="/host/create"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              ➕ Create New Listing
-            </Link>
+            {user.kyc?.status !== "approved" ? (
+              <div className="text-red-600 font-semibold">
+                ⚠️ Your identity is under review. You cannot post until
+                approved.
+              </div>
+            ) : (
+              <Link
+                to="/host/create"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+              >
+                ➕ Create New Listing
+              </Link>
+            )}
           </div>
         </div>
         {/* ✅ Premium Host Upgrade Card */}
