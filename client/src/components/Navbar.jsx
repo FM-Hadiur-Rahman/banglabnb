@@ -89,8 +89,8 @@ const Navbar = () => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) setUser(JSON.parse(storedUser));
       }, 50);
-      setDropdownOpen(false); // if inside dropdown
-      setMobileOpen(false); // if mobile menu is open
+      // setDropdownOpen(false); // if inside dropdown
+      // setMobileOpen(false); // if mobile menu is open
     } catch (err) {
       toast.error(t("error.switch_role"));
     }
