@@ -474,7 +474,7 @@ const Navbar = () => {
                           Switch Role:
                         </div>
                         {user.roles
-                          .filter((r) => r !== user.primaryRole) // exclude current role
+                          .filter((r) => r !== user.primaryRole) // ✅ exclude current role
                           .map((role) => (
                             <button
                               key={role}
