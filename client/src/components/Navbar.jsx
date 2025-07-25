@@ -21,8 +21,7 @@ const Navbar = () => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  const token = localStorage.getItem("token");
-  const isLoggedIn = user && token && user.isVerified;
+  const isLoggedIn = Boolean(user?.isVerified && localStorage.getItem("token"));
 
   const getDashboardPath = (role = user?.primaryRole) => {
     if (role === "admin") return "/admin/dashboard";
