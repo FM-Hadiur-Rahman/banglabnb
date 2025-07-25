@@ -319,7 +319,7 @@ exports.addRole = async (req, res) => {
 
   if (!user) return res.status(404).json({ message: "User not found" });
 
-  const allowedRoles = ["user", "host", "driver"]; // optionally exclude "admin"
+  const allowedRoles = ["user", "host", "driver"];
   if (!allowedRoles.includes(role)) {
     return res.status(400).json({ message: "Invalid role" });
   }
@@ -329,13 +329,18 @@ exports.addRole = async (req, res) => {
   }
 
   user.roles.push(role);
-  user.primaryRole = role; // optional: auto-switch to the new role
+  user.primaryRole = role; // optional auto-switch
   await user.save();
 
   res.json({
     message: `✅ ${role} role added successfully!`,
-    roles: user.roles,
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
     primaryRole: user.primaryRole,
+    roles: user.roles,
+    kyc: user.kyc, // if needed
   });
 };
 
@@ -355,7 +360,16 @@ exports.switchRole = async (req, res) => {
   user.primaryRole = role;
   await user.save({ validateBeforeSave: false });
 
-  res.json({ message: "Role switched", newRole: role });
+  res.json({
+    message: "Role switched",
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    primaryRole: user.primaryRole,
+    roles: user.roles,
+    kyc: user.kyc, // optional
+  });
 };
 
 exports.getUserIdFromToken = async (req, res) => {

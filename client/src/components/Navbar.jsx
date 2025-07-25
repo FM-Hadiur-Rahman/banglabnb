@@ -49,13 +49,9 @@ const Navbar = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const updatedUser = {
-        ...user,
-        roles: res.data.roles,
-        primaryRole: res.data.primaryRole,
-      };
-
+      const updatedUser = res.data; // full updated user from backend
       localStorage.setItem("user", JSON.stringify(updatedUser));
+
       toast.success(`✅ ${t("added_new_role")} ➡ ${role.toUpperCase()}`);
       navigate(getDashboardPath(role)); // Optional auto-redirect
       setDropdownOpen(false);
@@ -74,12 +70,13 @@ const Navbar = () => {
         { role }, // ✅ send selected role in request body
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const newRole = res.data.newRole;
-      const updatedUser = { ...user, primaryRole: newRole };
-
+      const updatedUser = res.data; // full user object with updated primaryRole
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      toast.success(`✅ ${t("switch_role")} ➡ ${newRole.toUpperCase()}`);
-      navigate(getDashboardPath(newRole));
+
+      toast.success(
+        `✅ ${t("switch_role")} ➡ ${updatedUser.primaryRole.toUpperCase()}`
+      );
+      navigate(getDashboardPath(updatedUser.primaryRole));
       setDropdownOpen(false); // if inside dropdown
       setMobileOpen(false); // if mobile menu is open
     } catch (err) {
