@@ -16,8 +16,11 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
   const token = localStorage.getItem("token");
   const isLoggedIn = user && token && user.isVerified;
 
@@ -50,6 +53,7 @@ const Navbar = () => {
       );
 
       const updatedUser = res.data; // full updated user from backend
+      setUser(updatedUser); // ⬅️ Update the state
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success(`✅ ${t("added_new_role")} ➡ ${role.toUpperCase()}`);
@@ -70,7 +74,8 @@ const Navbar = () => {
         { role }, // ✅ send selected role in request body
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const updatedUser = res.data; // full user object with updated primaryRole
+      const updatedUser = res.data;
+      setUser(updatedUser); // ✅
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success(
@@ -132,6 +137,15 @@ const Navbar = () => {
     };
     fetchUnread();
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("user");
+      setUser(stored ? JSON.parse(stored) : null);
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <header
