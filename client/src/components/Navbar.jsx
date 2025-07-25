@@ -20,6 +20,7 @@ const Navbar = () => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
+  const token = localStorage.getItem("token");
 
   const isLoggedIn = Boolean(user?.isVerified && localStorage.getItem("token"));
 
