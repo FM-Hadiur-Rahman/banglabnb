@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -22,7 +23,9 @@ const Navbar = () => {
   });
   const token = localStorage.getItem("token");
 
-  const isLoggedIn = Boolean(user?.isVerified && localStorage.getItem("token"));
+  const isLoggedIn = useMemo(() => {
+    return !!(user && user.isVerified && localStorage.getItem("token"));
+  }, [user]);
 
   const getDashboardPath = (role = user?.primaryRole) => {
     if (role === "admin") return "/admin/dashboard";
@@ -82,6 +85,10 @@ const Navbar = () => {
         `✅ ${t("switch_role")} ➡ ${updatedUser.primaryRole.toUpperCase()}`
       );
       navigate(getDashboardPath(updatedUser.primaryRole));
+      setTimeout(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) setUser(JSON.parse(storedUser));
+      }, 50);
       setDropdownOpen(false); // if inside dropdown
       setMobileOpen(false); // if mobile menu is open
     } catch (err) {
