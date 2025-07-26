@@ -574,16 +574,17 @@
 
 // export default Navbar;
 
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation(); // ⬅️ to track page change
+
   const menuRef = useRef();
   const mobileMenuRef = useRef();
   const hamburgerRef = useRef();
@@ -593,10 +594,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const { user, updateUser } = useAuth();
 
   const token = localStorage.getItem("token");
 
@@ -625,11 +623,6 @@ const Navbar = () => {
     }
   }, [i18n]);
 
-  const syncUserFromStorage = () => {
-    const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
-  };
-
   const handleAddRole = async (role) => {
     try {
       const res = await axios.post(
@@ -638,13 +631,12 @@ const Navbar = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const updatedUser = res.data;
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      updateUser(updatedUser);
+
       toast.success(`✅ ${t("added_new_role")} ➡ ${role.toUpperCase()}`);
       navigate(getDashboardPath(role));
       setDropdownOpen(false);
       setMobileOpen(false);
-      setTimeout(syncUserFromStorage, 100); // ⬅️ Sync after nav
     } catch (err) {
       toast.error(
         err.response?.data?.message || t("error.add_role_failed", { role })
@@ -660,15 +652,13 @@ const Navbar = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const updatedUser = res.data;
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      updateUser(updatedUser);
       toast.success(
         `✅ ${t("switch_role")} ➡ ${updatedUser.primaryRole.toUpperCase()}`
       );
       navigate(getDashboardPath(updatedUser.primaryRole));
       setDropdownOpen(false);
       setMobileOpen(false);
-      setTimeout(syncUserFromStorage, 100); // ⬅️ Ensure state syncs
     } catch (err) {
       toast.error(t("error.switch_role"));
     }
@@ -721,19 +711,6 @@ const Navbar = () => {
     };
     fetchUnread();
   }, [isLoggedIn]);
-
-  useEffect(() => {
-    // Sync user from storage when navigating between pages
-    syncUserFromStorage();
-  }, [location.pathname]);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      syncUserFromStorage();
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
 
   return (
     <header

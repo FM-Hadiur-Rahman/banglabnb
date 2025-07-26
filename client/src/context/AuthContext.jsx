@@ -13,6 +13,12 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true);
 
+  // ✅ Universal updater — use after login/register/role switch
+  const updateUser = (newUser) => {
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
+  };
+
   const checkSession = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -27,8 +33,7 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setUser(res.data.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      updateUser(res.data.user); // ⬅️ Use universal updater
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem("token");
@@ -53,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
+    <AuthContext.Provider value={{ user, updateUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
