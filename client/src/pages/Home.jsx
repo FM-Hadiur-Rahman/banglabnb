@@ -54,6 +54,23 @@ const Home = () => {
           </div>
         </div>
       </section>
+      <section className="overflow-hidden border-y border-green-200 bg-white">
+        <div className="whitespace-nowrap py-3">
+          <div className="inline-block animate-marquee text-green-800 font-semibold text-lg tracking-wide px-6">
+            🌾 Stay Local, Feel Bangladesh. &nbsp;&nbsp;|&nbsp;&nbsp; 🏡 Not
+            Just a Stay. A Cultural Journey. &nbsp;&nbsp;|&nbsp;&nbsp; 🌿 From
+            Clay Houses to Bamboo Huts — BanglaBnB Welcomes You.
+            &nbsp;&nbsp;|&nbsp;&nbsp; 💚 Live Rural. Travel Real. Stay with
+            BanglaBnB. &nbsp;&nbsp;|&nbsp;&nbsp; 🌊 Explore Rivers & Villages.
+            &nbsp;&nbsp;|&nbsp;&nbsp; 🛖 Wooden Walls, Warm Smiles.
+            &nbsp;&nbsp;|&nbsp;&nbsp; ✨ Rediscover Hospitality — The
+            Bangladeshi Way. &nbsp;&nbsp;|&nbsp;&nbsp; 📍 Your Home in Every
+            Village. &nbsp;&nbsp;|&nbsp;&nbsp; 🎒 Unplug from Routine. Plug into
+            Bengal. &nbsp;&nbsp;|&nbsp;&nbsp; 🌟 BanglaBnB – Not just a stay, a
+            story 🇧🇩
+          </div>
+        </div>
+      </section>
 
       {filtered.length > 0 && (
         <MapSection
