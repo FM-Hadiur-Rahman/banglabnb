@@ -226,12 +226,9 @@ exports.createListing = async (req, res) => {
 
     // 🔒 Restrict unverified hosts
     if (!user.kyc || user.kyc.status !== "approved") {
-      return res
-        .status(403)
-        .json({
-          message:
-            "You must complete identity verification to create a listing.",
-        });
+      return res.status(403).json({
+        message: "You must complete identity verification to create a listing.",
+      });
     }
 
     if (!req.files || req.files.length === 0) {
@@ -345,4 +342,20 @@ exports.unblockDates = async (req, res) => {
     message: "Blocked dates removed",
     blockedDates: listing.blockedDates,
   });
+};
+// GET featured listings (e.g., 6 popular places)
+exports.getFeaturedListings = async (req, res) => {
+  try {
+    const listings = await Listing.find({
+      isDeleted: false,
+      isFeatured: true, // ✅ Only listings marked as featured
+    })
+      .select("title district images") // only needed fields
+      .limit(6);
+
+    res.json(listings);
+  } catch (err) {
+    console.error("❌ Failed to fetch featured listings", err);
+    res.status(500).json({ message: "Failed to fetch featured listings" });
+  }
 };

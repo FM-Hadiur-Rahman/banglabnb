@@ -12,6 +12,7 @@ const upload = multer({ storage });
 router.get("/", listingCtrl.getAllListings);
 router.get("/:id", listingCtrl.getListingById);
 router.get("/host/:hostId", listingCtrl.getListingsByHost);
+router.get("/featured", listingCtrl.getFeaturedListings);
 
 // ✅ Protected CRUD routes
 

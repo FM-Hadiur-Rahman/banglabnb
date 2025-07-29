@@ -50,7 +50,7 @@ const MainLayout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow w-full px-0">
         <Outlet />
       </main>
 

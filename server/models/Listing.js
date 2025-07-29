@@ -63,7 +63,10 @@ const listingSchema = new mongoose.Schema(
       default: [],
       enum: ["AC", "Wifi", "Sea View", "Resort", "Family Friendly"],
     },
-
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
     hostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
