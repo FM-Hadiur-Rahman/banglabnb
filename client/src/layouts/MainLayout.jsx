@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import logo from "../assets/banglabnb-logo4.png";
+import logo from "../assets/banglabnb-logo3.png";
 import TrustBadge from "../components/TrustBadge";
 import TawkToWidget from "../components/TawkToWidget";
 
