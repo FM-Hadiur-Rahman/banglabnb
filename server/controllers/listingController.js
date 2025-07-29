@@ -347,15 +347,15 @@ exports.unblockDates = async (req, res) => {
 exports.getFeaturedListings = async (req, res) => {
   try {
     const listings = await Listing.find({
+      isFeatured: true,
       isDeleted: false,
-      isFeatured: true, // ✅ Only listings marked as featured
     })
-      .select("title district images") // only needed fields
+      .sort({ createdAt: -1 })
       .limit(6);
 
     res.json(listings);
   } catch (err) {
-    console.error("❌ Failed to fetch featured listings", err);
-    res.status(500).json({ message: "Failed to fetch featured listings" });
+    console.error("❌ Error in getFeaturedListings:", err);
+    res.status(500).json({ message: "Failed to load featured listings" });
   }
 };
