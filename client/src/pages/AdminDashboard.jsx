@@ -15,7 +15,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = JSON.parse(localStorage.getItem("user"))?.token;
+
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/admin/stats`,
           {
