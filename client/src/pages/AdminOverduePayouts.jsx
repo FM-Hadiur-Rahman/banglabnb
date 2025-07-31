@@ -9,7 +9,7 @@ const AdminOverduePayouts = () => {
       const token = localStorage.getItem("token");
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/payouts/overdue`,
+          `${import.meta.env.VITE_API_URL}/api/admin/payouts/overdue`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
