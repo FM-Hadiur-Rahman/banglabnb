@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    if (user.role === "host") {
+    if (user.primaryRole === "host") {
       axios
         .get(`${import.meta.env.VITE_API_URL}/api/listings/host/${user._id}`)
         .then((res) => setListings(res.data));
@@ -41,7 +41,7 @@ const Dashboard = () => {
         .then((res) => setChats(res.data));
     }
 
-    if (user.role === "user" || user.role === "guest") {
+    if (user.primaryRole === "user" || user.primaryRole === "guest") {
       axios
         .get(`${import.meta.env.VITE_API_URL}/api/bookings/my`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -96,7 +96,7 @@ const Dashboard = () => {
             >
               🎁 My Referrals
             </Link>
-            {user.role === "host" && (
+            {user.primaryRole === "host" && (
               <>
                 <Link
                   to="/host/create"
@@ -115,7 +115,7 @@ const Dashboard = () => {
           </div>
 
           {/* === Host Check-Ins & Listings === */}
-          {user.role === "host" && (
+          {user.primaryRole === "host" && (
             <>
               {/* 🗓 Upcoming Check-Ins */}
               <div className="mb-8">
@@ -167,7 +167,7 @@ const Dashboard = () => {
           )}
 
           {/* === Guest Bookings === */}
-          {(user.role === "user" || user.role === "guest") && (
+          {(user.primaryRole === "user" || user.primaryRole === "guest") && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-2">🧾 Your Bookings</h3>
               {bookings.length === 0 ? (

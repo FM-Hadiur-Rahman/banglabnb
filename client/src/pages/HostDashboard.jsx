@@ -34,9 +34,9 @@ const HostDashboard = () => {
         localStorage.setItem("user", JSON.stringify(data));
 
         if (
-          (data.role === "host" ||
-            data.role === "driver" ||
-            data.role === "user") &&
+          (data.primaryRole === "host" ||
+            data.primaryRole === "driver" ||
+            data.primaryRole === "user") &&
           !data.paymentDetails?.accountNumber &&
           sessionStorage.getItem("hidePaymentModal") !== "true"
         ) {
@@ -88,7 +88,7 @@ const HostDashboard = () => {
       }
     };
 
-    if (user?.role === "host") fetchData();
+    if (user?.primaryRole === "host") fetchData();
   }, [user]);
 
   // inside HostDashboard.jsx
@@ -149,7 +149,7 @@ const HostDashboard = () => {
           </div>
         </div>
         {/* ✅ Premium Host Upgrade Card */}
-        {user?.role === "host" && (
+        {user?.primaryRole === "host" && (
           <div className="mb-6">
             <PremiumUpgradeCard
               isPremium={user?.premium?.isActive}
