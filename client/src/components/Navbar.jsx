@@ -21,9 +21,8 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   // ✅ Make isLoggedIn reactive
-  const isLoggedIn = useMemo(() => {
-    return !!(user && user.isVerified && token);
-  }, [user, token]);
+
+  const isLoggedIn = !!user;
 
   console.log(isLoggedIn);
 
