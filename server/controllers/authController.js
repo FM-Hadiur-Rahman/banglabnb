@@ -251,6 +251,7 @@ exports.loginUser = async (req, res) => {
         referralCode: user.referralCode || "",
         primaryRole: user.primaryRole,
         roles: user.roles,
+        kyc: user.kyc || null,
       },
       token: generateToken(user),
     });

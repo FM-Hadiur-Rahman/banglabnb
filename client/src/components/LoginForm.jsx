@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logError } from "../utils/logError";
+import { useAuth } from "../context/AuthContext";
 
 import axios from "axios";
 
@@ -13,6 +14,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { updateUser, updateToken } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,13 +45,14 @@ const LoginForm = () => {
       // ✅ Update to store primaryRole and roles[]
       const updatedUser = {
         ...user,
+        token: res.data.token,
         role: user.primaryRole, // for legacy compatibility
         primaryRole: user.primaryRole, // current active role
         roles: user.roles || ["user"], // all roles available
       };
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      updateToken(res.data.token);
+      updateUser(updatedUser);
 
       toast.success("✅ Logged in successfully!");
       setFormData({ email: "", password: "" });

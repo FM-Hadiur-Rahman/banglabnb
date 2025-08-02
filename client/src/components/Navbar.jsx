@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
+  const { user, token, updateUser, logout, loading } = useAuth();
+
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
@@ -18,14 +20,12 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const { user, updateUser } = useAuth();
-
-  const token = localStorage.getItem("token");
-
   // ✅ Make isLoggedIn reactive
   const isLoggedIn = useMemo(() => {
     return !!(user && user.isVerified && token);
   }, [user, token]);
+
+  console.log(isLoggedIn);
 
   const getDashboardPath = (role = user?.primaryRole) => {
     console.log("primaryRole is :", role);
@@ -136,6 +136,8 @@ const Navbar = () => {
     };
     fetchUnread();
   }, [isLoggedIn]);
+
+  if (loading) return null;
 
   return (
     <header
@@ -299,7 +301,7 @@ const Navbar = () => {
                   </Link>
                   <button
                     onClick={() => {
-                      localStorage.clear();
+                      logout();
                       navigate("/login");
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
@@ -538,7 +540,7 @@ const Navbar = () => {
 
                 <button
                   onClick={() => {
-                    localStorage.clear();
+                    logout();
                     setMobileOpen(false);
                     navigate("/login");
                   }}

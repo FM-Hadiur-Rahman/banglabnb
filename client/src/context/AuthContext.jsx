@@ -1,26 +1,44 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  // ⏳ State
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // ✅ Universal updater — use after login/register/role switch
+  // ✅ Universal user setter (after login, register, or switch role)
   const updateUser = (newUser) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
 
+  // ✅ Universal token setter
+  const updateToken = (newToken) => {
+    setToken(newToken);
+    localStorage.setItem("token", newToken);
+  };
+
+  // ✅ Logout (safe and reactive)
+  const logout = (message = null) => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setToken(null);
+    if (message) toast.error(message);
+    window.location.href = "/login"; // or use navigate if preferred
+  };
+
+  // ✅ Check session on initial load or token change
   const checkSession = async () => {
-    const token = localStorage.getItem("token");
     if (!token) {
       setLoading(false);
       return;
@@ -30,16 +48,18 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/auth/me`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      updateUser(res.data.user); // ⬅️ Use universal updater
+      updateUser(res.data.user);
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        toast.error("🚫 Session expired or account deleted.");
-        window.location.href = "/login";
+        logout("🚫 Session expired or account deleted.");
+      } else {
+        toast.error("⚠️ Failed to validate session.");
+        console.error("Session check error:", err);
       }
     } finally {
       setLoading(false);
@@ -48,20 +68,23 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkSession();
-  }, []);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    window.location.href = "/login";
-  };
+  }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, updateUser, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        updateUser,
+        updateToken,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// ✅ Export custom hook
 export const useAuth = () => useContext(AuthContext);
