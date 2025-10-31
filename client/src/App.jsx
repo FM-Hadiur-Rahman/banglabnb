@@ -5,11 +5,15 @@ import { Navigate } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
 
+//useAuth Context
+import { useAuth } from "./context/AuthContext";
+
 import MaintenanceBanner from "./components/MaintenanceBanner";
 import MaintenancePage from "./pages/MaintenancePage";
 // Layouts
 import MainLayout from "./layouts/MainLayout";
-import ProtectedRoute from "./routes/ProtectedRoute";
+
+import ProtectedRouteWrapper from "./components/ProtectedRouteWrapper";
 
 // General Pages
 import Home from "./pages/Home";
@@ -44,7 +48,7 @@ import PaymentFailPage from "./pages/PaymentFailPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
 
 // Host Pages
-import HostDashboard from "./pages/HostDashboard";
+import HostDashboard from "./components/HostDashboard";
 import CreateListingPage from "./pages/CreateListingPage";
 import EditListingPage from "./pages/EditListingPage";
 import HostListingBookingsPage from "./pages/HostListingBookingPage";
@@ -53,13 +57,13 @@ import HostBlockedDates from "./components/HostBlockDates";
 //Driver Pages
 import DriverTripForm from "./pages/DriverTripForm";
 import TripSearchPage from "./pages/TripSearchPage";
-import DriverDashboard from "./pages/DriverDashboard";
+import DriverDashboard from "./components/DriverDashboard";
 
 // Booking Pages
 import MyBookingsPage from "./pages/MyBookingsPage";
 
 // Admin Pages
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminListings from "./pages/AdminListings";
 import AdminBookings from "./pages/AdminBookings";
@@ -72,42 +76,42 @@ import AdminRefundsPage from "./pages/AdminRefundsPage";
 import ReviewPage from "./pages/ReviewPage";
 import AdminOverduePayouts from "./pages/AdminOverduePayouts";
 import AdminPromocodes from "./pages/AdminPromocodes";
-
-import TripDetailPage from "./pages/TripDetailPage";
-import TripPaymentSuccess from "./pages/TripPaymentSuccess";
 import AdminBanners from "./pages/AdminBanners";
-import TermsPage from "./components/TermsPage";
-import PrivacyPolicy from "./components/PrivacyPolicy";
-import RefundPolicy from "./components/RefundPolicy";
 import AdminLogs from "./pages/adminLogs";
-import EmergencyInfoPage from "./pages/EmergencyInfoPage";
 import AdminReferrals from "./pages/AdminReferrals";
-import MyReferralsPage from "./pages/MyReferralPage";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminSearch from "./pages/AdminSearch";
-import AdminBookingDetail from "./pages/AdminBookingDetails";
 import AdminListingDetails from "./pages/AdminListingDetails";
 import AdminTripDetails from "./pages/AdminTripDetails";
+
+import TripDetailPage from "./pages/TripDetailPage";
+import TripPaymentSuccess from "./pages/TripPaymentSuccess";
+import TermsPage from "./components/TermsPage";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import RefundPolicy from "./components/RefundPolicy";
+import EmergencyInfoPage from "./pages/EmergencyInfoPage";
+import MyReferralsPage from "./pages/MyReferralPage";
+import AdminBookingDetail from "./pages/AdminBookingDetails";
 import EditTripForm from "./pages/EditTripForm";
 import RideResultsPage from "./pages/RideResultsPage";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  // const [user, setUser] = useState(null);
+  const { user, loading } = useAuth(); // ✅ use context
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    // const storedUser = localStorage.getItem("user");
+    // if (storedUser) setUser(JSON.parse(storedUser));
 
     fetch(`${import.meta.env.VITE_API_URL}/api/config`)
       .then((res) => res.json())
-      .then((data) => setMaintenance(data.maintenanceMode))
-      .finally(() => setLoading(false));
+      .then((data) => setMaintenance(data.maintenanceMode));
   }, []);
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.primaryRole === "admin";
 
   // Wait until loading done
   if (loading) return <FullPageSpinner message="Waking up the server..." />;
@@ -152,314 +156,339 @@ function App() {
           <Route path="payment-cancel" element={<PaymentCancelPage />} />
           {/* Guest/User Protected Routes */}
           <Route
-            path="dashboard"
+            path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <DashboardPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="dashboard/bookings"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <DashboardBookings />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="my-bookings"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <MyBookingsPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/dashboard/reviews"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <ReviewPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="profile"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <EditProfilePage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="my-account"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <MyAccountPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/notifications"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <Notifications />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="dashboard/chats"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <GuestChatsRoute />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/dashboard/host/chats"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <HostChatsRoute />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="wishlist"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <MyWishlistPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
+          {/* Host Protected Routes */}
           {/* Host Protected Routes */}
           <Route
             path="host/dashboard"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <HostDashboard />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="host/create"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <CreateListingPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="host/edit/:id"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <EditListingPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="host/listings/:id/bookings"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <HostListingBookingsPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/host/listings/:id/blocked-dates"
             element={
-              <ProtectedRoute requiredRole="host">
+              <ProtectedRouteWrapper role="host">
                 <HostBlockedDates />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/my-referrals"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper>
                 <MyReferralsPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           {/* Admin Protected Routes */}
           <Route
             path="/admin/setting"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminSettings />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/dashboard"
+            path="/admin/dashboard"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminDashboard />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/search"
+            path="/admin/search"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminSearch />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/bookings/:id"
+            path="/admin/bookings/:id"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminBookingDetail />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/listings/:id"
+            path="/admin/listings/:id"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminListingDetails />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/trips/:id"
+            path="/admin/trips/:id"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminTripDetails />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/users"
+            path="/admin/banners"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
+                <AdminBanners />
+              </ProtectedRouteWrapper>
+            }
+          />
+
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRouteWrapper role="admin">
                 <AdminUsers />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
-          <Route path="/admin/users/:id" element={<AdminUserDetail />} />
           <Route
-            path="admin/listings"
+            path="/admin/users/:id"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
+                <AdminUserDetail />
+              </ProtectedRouteWrapper>
+            }
+          />
+          <Route
+            path="/admin/listings"
+            element={
+              <ProtectedRouteWrapper role="admin">
                 <AdminListings />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/bookings"
+            path="/admin/bookings"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminBookings />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/kyc"
+            path="/admin/kyc"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminKYC />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/user-breakdown"
+            path="/admin/user-breakdown"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminUserBreakdown />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/flagged"
+            path="/admin/flagged"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminFlagged />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
-            path="admin/revenue"
+            path="/admin/revenue"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminRevenue />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/admin/payouts"
             element={
-              <ProtectedRoute requiredRoleedRoles="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminPayouts />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/admin/refunds"
             element={
-              <ProtectedRoute requiredRoleedRoles="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminRefundsPage />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/admin/payouts/overdue"
             element={
-              <ProtectedRoute requiredRoleedRoles="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminOverduePayouts />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
-          //Drivers Route
           <Route
-            path="/dashboard/driver"
+            path="/admin/logs"
             element={
-              <ProtectedRoute>
-                <DriverDashboard />
-              </ProtectedRoute>
+              <ProtectedRouteWrapper role="admin">
+                <AdminLogs />
+              </ProtectedRouteWrapper>
             }
           />
-          <Route path="/admin/logs" element={<AdminLogs />} />
-          <Route path="/admin/promocodes" element={<AdminPromocodes />} />
+          <Route
+            path="/admin/promocodes"
+            element={
+              <ProtectedRouteWrapper role="admin">
+                <AdminPromocodes />
+              </ProtectedRouteWrapper>
+            }
+          />
           <Route
             path="/admin/referrals"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRouteWrapper role="admin">
                 <AdminReferrals />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
-          <Route path="/trip-search" element={<TripSearchPage />} />
-          <Route path="/trips" element={<RideResultsPage />} />
+          {/* Driver Protected Routes */}
+          <Route
+            path="/dashboard/driver"
+            element={
+              <ProtectedRouteWrapper role="driver">
+                <DriverDashboard />
+              </ProtectedRouteWrapper>
+            }
+          />
           <Route
             path="/dashboard/driver/trips/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper role="driver">
                 <DriverTripForm />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
           <Route
             path="/dashboard/driver/trips/edit/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRouteWrapper role="driver">
                 <EditTripForm />
-              </ProtectedRoute>
+              </ProtectedRouteWrapper>
             }
           />
+
+          <Route path="/trip-search" element={<TripSearchPage />} />
+          <Route path="/trips" element={<RideResultsPage />} />
           <Route path="/trips/:id" element={<TripDetailPage />} />
           <Route
             path="/trip-payment-success"
             element={<TripPaymentSuccess />}
           />
-          <Route
-            path="/admin/banners"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminBanners />
-              </ProtectedRoute>
-            }
-          />
+
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />

@@ -24,10 +24,7 @@ const Navbar = () => {
 
   const isLoggedIn = !!user;
 
-  console.log(isLoggedIn);
-
   const getDashboardPath = (role = user?.primaryRole) => {
-    console.log("primaryRole is :", role);
     if (role === "admin") return "/admin/dashboard";
     if (role === "host") return "/host/dashboard";
     if (role === "driver") return "/dashboard/driver";

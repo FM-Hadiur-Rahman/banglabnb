@@ -1,20 +1,16 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // ✅ use context
 import FullPageSpinner from "../components/FullPageSpinner"; // ✅ optional loading UI
-
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = (props) => {
+  const { children, requiredRole } = props;
   const { user, token, loading } = useAuth();
 
-  if (loading) return <FullPageSpinner />; // or null if no spinner
+  if (loading) return <FullPageSpinner />;
 
-  // 🔒 No login
   if (!user || !token) return <Navigate to="/login" replace />;
-
-  // 🔒 Not verified (optional)
   if (user.isVerified === false) return <Navigate to="/login" replace />;
 
-  // 🔒 Role-based protection
-  if (requiredRole && user.primaryRole !== requiredRole) {
+  if (requiredRole && !user.roles.includes(requiredRole)) {
     return <Navigate to="/" replace />;
   }
 

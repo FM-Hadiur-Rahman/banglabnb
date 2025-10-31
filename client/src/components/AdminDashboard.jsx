@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
+import { useAuth } from "../context/AuthContext"; // ✅
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -11,11 +12,11 @@ const AdminDashboard = () => {
     bookings: 0,
     revenue: 0,
   });
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
         // const token = JSON.parse(localStorage.getItem("user"))?.token;
 
         const res = await axios.get(

@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import getTimeLeft from "../utils/getTimeLeft";
-import ConfirmCancelModal from "../components/modals/ConfirmCancelModal";
-import ConfirmTripDeleteModal from "../components/modals/ConfirmTripDeleteModal";
-import CompletionSuccessModal from "../components/modals/CompletionSuccessModal";
-import PassengerListModal from "../components/modals/PassengerListModal";
+import ConfirmCancelModal from "./modals/ConfirmCancelModal";
+import ConfirmTripDeleteModal from "./modals/ConfirmTripDeleteModal";
+import CompletionSuccessModal from "./modals/CompletionSuccessModal";
+import PassengerListModal from "./modals/PassengerListModal";
 import { toast } from "react-toastify";
 
 const DriverDashboard = () => {
