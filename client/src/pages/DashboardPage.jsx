@@ -1,9 +1,8 @@
+// src/pages/DashboardPage.jsx
 import { useAuth } from "../context/AuthContext";
 import FullPageSpinner from "../components/FullPageSpinner";
 import GuestDashboard from "../components/GuestDashboard";
-import HostDashboard from "../components/HostDashboard";
-import DriverDashboard from "../components/DriverDashboard";
-import AdminDashboard from "../components/AdminDashboard";
+import { Navigate } from "react-router-dom";
 
 const DashboardPage = () => {
   const { user, loading } = useAuth();
@@ -11,18 +10,22 @@ const DashboardPage = () => {
   if (loading) return <FullPageSpinner message="Loading dashboard..." />;
   if (!user) return null;
 
-  switch (user.primaryRole) {
-    case "host":
-      return <HostDashboard />;
-    case "driver":
-      return <DriverDashboard />;
-    case "admin":
-      return <AdminDashboard />;
-    case "user":
-    case "guest":
-    default:
-      return <GuestDashboard />;
+  // Route admins to the admin section (which is admin-guarded)
+  if (user.primaryRole === "admin") {
+    return <Navigate to="/admin/dashboard" replace />;
   }
+
+  // Optionally do the same for other roles,
+  // so each role stays in its own section:
+  if (user.primaryRole === "host") {
+    return <Navigate to="/host/dashboard" replace />;
+  }
+  if (user.primaryRole === "driver") {
+    return <Navigate to="/dashboard/driver" replace />;
+  }
+
+  // Default user/guest dashboard
+  return <GuestDashboard />;
 };
 
 export default DashboardPage;

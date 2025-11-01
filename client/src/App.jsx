@@ -35,6 +35,7 @@ import FullPageSpinner from "./components/FullPageSpinner";
 
 // User Dashboard
 import DashboardPage from "./pages/DashboardPage";
+import Forbidden from "./pages/Forbidden";
 import DashboardBookings from "./pages/DashboardBookings";
 import EditProfilePage from "./pages/EditProfilePage";
 import MyAccountPage from "./pages/MyAccoountPage";
@@ -163,6 +164,8 @@ function App() {
               </ProtectedRouteWrapper>
             }
           />
+          <Route path="/forbidden" element={<Forbidden />} />
+
           <Route
             path="dashboard/bookings"
             element={
