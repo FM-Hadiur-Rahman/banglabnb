@@ -158,9 +158,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRouteWrapper
-                allowedRoles={["user", "host", "driver", "admin"]}
-              >
+              <ProtectedRouteWrapper role={["user", "host", "driver", "admin"]}>
                 <DashboardPage />
               </ProtectedRouteWrapper>
             }
