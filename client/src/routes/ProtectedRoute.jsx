@@ -8,17 +8,16 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   if (loading) return <FullPageSpinner />;
 
-  // Not authenticated → go login (keep "from" for nice return)
   if (!user || !token) {
+    console.warn("[Guard] ➡️ to /login (no user/token)", { user, token });
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Optional gate: unverified users back to login/verify
   if (user.isVerified === false) {
+    console.warn("[Guard] ➡️ to /login (isVerified === false)");
     return <Navigate to="/login" replace />;
   }
 
-  // Normalize to array: supports role="admin" OR role={["user","host",...]}
   const allowed = Array.isArray(requiredRole)
     ? requiredRole
     : requiredRole
@@ -26,7 +25,10 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     : null;
 
   if (allowed && !user.roles?.some((r) => allowed.includes(r))) {
-    // Forbidden (don’t send to /login; that looks like an auth loop)
+    console.warn("[Guard] ➡️ to /forbidden (role mismatch)", {
+      requiredRole: allowed,
+      roles: user.roles,
+    });
     return <Navigate to="/forbidden" replace />;
   }
 
