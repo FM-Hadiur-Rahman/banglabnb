@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import FullPageSpinner from "../components/FullPageSpinner";
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
+  const { loading } = useAuth();
+  if (loading) return <FullPageSpinner />;
+  if (!user) return <Navigate to="/login" replace />;
 
-  if (!user || user.role !== "admin") {
-    window.location.href = "/login";
-    return null;
+  // ✅ rely on roles array (not user.role)
+  if (!user.roles?.includes("admin")) {
+    return <Navigate to="/forbidden" replace />;
   }
 
   return (
