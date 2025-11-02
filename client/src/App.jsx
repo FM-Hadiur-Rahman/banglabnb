@@ -96,6 +96,7 @@ import MyReferralsPage from "./pages/MyReferralPage";
 import AdminBookingDetail from "./pages/AdminBookingDetails";
 import EditTripForm from "./pages/EditTripForm";
 import RideResultsPage from "./pages/RideResultsPage";
+import AuthDebug from "./pages/AuthDebug";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -165,6 +166,7 @@ function App() {
             }
           />
           <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="/debug/auth" element={<AuthDebug />} />
 
           <Route
             path="dashboard/bookings"
