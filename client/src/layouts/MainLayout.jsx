@@ -37,14 +37,14 @@ const MainLayout = () => {
               isScrolled ? "w-10 h-10" : "w-18 h-16"
             }`}
           />
-          <span
+          {/* <span
             className={`font-bold transition-all duration-300 ${
               isScrolled ? "text-base" : "text-xl"
             } hidden sm:inline-block`}
           >
-            <span className="text-green-600">Bangla</span>
-            <span className="text-red-600">BnB</span>
-          </span>
+            <span className="text-green-600">Route</span>
+            <span className="text-red-600">Roof</span>
+          </span> */}
         </Link>
         <Navbar />
       </header>
