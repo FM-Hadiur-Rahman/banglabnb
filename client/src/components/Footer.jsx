@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
-          <h2 className="text-xl font-bold mb-2">BanglaBnB</h2>
+          <h2 className="text-xl font-bold mb-2">RouteRoof</h2>
           <p className="text-sm text-gray-200">{t("footer.description")}</p>
           <div className="mt-3 text-xs bg-green-800 px-3 py-1 inline-block rounded-full font-semibold">
             🔒 {t("footer.verified_badge")}

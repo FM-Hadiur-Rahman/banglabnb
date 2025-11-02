@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import logo from "../assets/banglabnb-logo3.png";
+import logo from "../assets/routeroof.png";
 import TrustBadge from "../components/TrustBadge";
 import TawkToWidget from "../components/TawkToWidget";
 
@@ -32,7 +32,7 @@ const MainLayout = () => {
         >
           <img
             src={logo}
-            alt="BanglaBnB Logo"
+            alt="RouteRoof Logo"
             className={`object-contain transition-all duration-300 ${
               isScrolled ? "w-10 h-10" : "w-18 h-16"
             }`}
