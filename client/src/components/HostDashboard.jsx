@@ -15,6 +15,10 @@ const HostDashboard = () => {
       return null;
     }
   });
+  // ---- derived flags from user ----
+  const kycStatus = (user?.kyc?.status || "").toLowerCase();
+  const isApproved = kycStatus === "approved";
+  const knowsKyc = user?.kyc?.status != null; // only true once /me has populated
 
   const [showModal, setShowModal] = useState(false);
   const [listings, setListings] = useState([]);
@@ -29,28 +33,29 @@ const HostDashboard = () => {
   };
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
-
+    const stored = JSON.parse(localStorage.getItem("user"));
+    const token = stored?.token;
     if (!token) return;
 
-    // Fetch fresh user profile (with paymentDetails)
     fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedUser = { ...data.user, token: data.token };
+        // keep the old token
+        const updatedUser = { ...data.user, token };
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
         if (
-          ["host", "driver", "user"].includes(data.user.primaryRole) &&
-          !data.user.paymentDetails?.accountNumber &&
+          ["host", "driver", "user"].includes(updatedUser.primaryRole) &&
+          !updatedUser.paymentDetails?.accountNumber &&
           sessionStorage.getItem("hidePaymentModal") !== "true"
         ) {
           setShowModal(true);
         }
-      });
+      })
+      .catch((e) => console.error("refresh /me failed:", e));
   }, []);
 
   useEffect(() => {
@@ -151,7 +156,8 @@ const HostDashboard = () => {
             >
               💬 Guest Chats
             </Link>
-            {user?.kyc?.status !== "approved" ? (
+
+            {knowsKyc && !isApproved ? (
               <div className="text-red-600 font-semibold">
                 ⚠️ Your identity is under review. You cannot post until
                 approved.
