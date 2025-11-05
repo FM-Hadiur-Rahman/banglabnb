@@ -97,6 +97,7 @@ import AdminBookingDetail from "./pages/AdminBookingDetails";
 import EditTripForm from "./pages/EditTripForm";
 import RideResultsPage from "./pages/RideResultsPage";
 import AuthDebug from "./pages/AuthDebug";
+import PaymentDetailsForm from "./components/PaymentDetailsForm";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -205,6 +206,14 @@ function App() {
             element={
               <ProtectedRouteWrapper>
                 <MyAccountPage />
+              </ProtectedRouteWrapper>
+            }
+          />
+          <Route
+            path="payment-details"
+            element={
+              <ProtectedRouteWrapper>
+                <PaymentDetailsForm />
               </ProtectedRouteWrapper>
             }
           />

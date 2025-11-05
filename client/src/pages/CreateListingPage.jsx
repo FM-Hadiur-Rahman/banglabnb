@@ -536,7 +536,7 @@ const CreateListingPage = () => {
               {user?.paymentDetails?.verified ? "verified" : "not verified"}{" "}
               {!user?.paymentDetails?.verified && (
                 <Link
-                  to="/payout-setup"
+                  to="/payment-details"
                   className="text-blue-600 underline ml-1"
                 >
                   Add

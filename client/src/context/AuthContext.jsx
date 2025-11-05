@@ -92,7 +92,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { api } from "../services/api";
+import { api } from "../services/api"; // must add auth header (see below)
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -105,7 +105,9 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
   const [loading, setLoading] = useState(true);
 
   const updateUser = (u) => {
@@ -126,16 +128,29 @@ export const AuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
+  const fetchMe = async (tkn = token) => {
+    const res = await api.get("/api/auth/me", {
+      headers: { Authorization: `Bearer ${tkn}` },
+    });
+    // Normalize nested flags to avoid undefined in UI
+    const u = res.data?.user || null;
+    if (u) {
+      u.phoneVerified = !!u.phoneVerified;
+      u.identityVerified = !!u.identityVerified || u.kyc?.status === "approved";
+      u.paymentDetails = { verified: !!u.paymentDetails?.verified };
+    }
+    updateUser(u);
+    return u;
+  };
+
   const checkSession = async () => {
     if (!token) {
       setLoading(false);
       return;
     }
     try {
-      const res = await api.get("/api/auth/me");
-      // Debug:
-      console.debug("🔐 /auth/me OK", res.status, res.data);
-      updateUser(res.data.user);
+      await fetchMe(token);
+      console.debug("🔐 session ok");
     } catch (err) {
       console.debug(
         "❌ /auth/me failed",
@@ -152,13 +167,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Call on mount and whenever token changes
   useEffect(() => {
     checkSession();
   }, [token]);
 
+  // Login helper (use this in your LoginForm)
+  const login = async (email, password) => {
+    const res = await api.post("/api/auth/login", { email, password });
+    const { token: tkn, user: initialUser } = res.data || {};
+    updateToken(tkn);
+    // Save initial (for immediate UI), then fetch fresh snapshot
+    if (initialUser) updateUser(initialUser);
+    await fetchMe(tkn);
+    return true;
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, token, updateUser, updateToken, logout, loading }}
+      value={{ user, token, loading, updateUser, updateToken, login, logout }}
     >
       {children}
     </AuthContext.Provider>
