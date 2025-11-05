@@ -1,191 +1,213 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// src/pages/AdminUsers.jsx
+import React, { useEffect, useState, useMemo } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { Link } from "react-router-dom";
+import { api } from "../services/api";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+  const [busyId, setBusyId] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   const fetchUsers = async () => {
-    const token = localStorage.getItem("token");
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/users`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log("📦 Fetched users:", res.data);
-
-      if (Array.isArray(res.data)) {
-        setUsers(res.data);
-      } else {
-        console.warn("⚠️ Unexpected user response:", res.data);
-        setUsers([]);
-      }
-    } catch (err) {
-      console.error("❌ Failed to load users:", err);
+      setLoading(true);
+      setErr("");
+      const res = await api.get("/api/admin/users"); // token auto-attached
+      setUsers(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error("❌ Failed to load users:", e);
+      setErr("Failed to load users.");
       setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteUser = async (id) => {
-    if (!confirm("Are you sure?")) return;
-    const token = localStorage.getItem("token");
-    try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}/soft-delete`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchUsers(); // refresh list
-    } catch (err) {
-      console.error("❌ Failed to delete user:", err);
-    }
-  };
-  const restoreUser = async (id) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}/restore`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchUsers(); // refresh after restore
-    } catch (err) {
-      console.error("❌ Failed to restore user:", err);
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
-  const handleExportCSV = async () => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/admin/export/users`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "users.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+
+  const doSoftDelete = async (id) => {
+    if (!confirm("Are you sure you want to soft delete this user?")) return;
+    try {
+      setBusyId(id);
+      await api.patch(`/api/admin/users/${id}/soft-delete`);
+      // optimistic update
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isDeleted: true } : u))
+      );
+    } catch (e) {
+      console.error("❌ Failed to delete user:", e);
+      alert("Failed to delete user.");
+    } finally {
+      setBusyId(null);
+    }
   };
 
-  const handleExportExcel = async () => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/admin/export/users-xlsx`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "users.xlsx";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  const doRestore = async (id) => {
+    try {
+      setBusyId(id);
+      await api.patch(`/api/admin/users/${id}/restore`);
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isDeleted: false } : u))
+      );
+    } catch (e) {
+      console.error("❌ Failed to restore user:", e);
+      alert("Failed to restore user.");
+    } finally {
+      setBusyId(null);
+    }
   };
+
+  const download = async (path, filename, mime) => {
+    try {
+      setExporting(true);
+      const res = await api.get(path, { responseType: "blob" });
+      const blob = new Blob([res.data], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Export failed", e);
+      alert("Export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportCSV = () =>
+    download("/api/admin/export/users", "users.csv", "text/csv;charset=utf-8");
+
+  const handleExportExcel = () =>
+    download(
+      "/api/admin/export/users-xlsx",
+      "users.xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+  const rows = useMemo(() => (Array.isArray(users) ? users : []), [users]);
 
   return (
     <AdminLayout>
-      <h2 className="text-2xl font-bold mb-4">All Users</h2>
-      <button
-        onClick={handleExportCSV}
-        className="px-4 py-2 border rounded text-sm hover:bg-gray-100"
-      >
-        ⬇ Export CSV
-      </button>
-      <button
-        onClick={handleExportExcel}
-        className="px-4 py-2 border rounded text-sm hover:bg-gray-100"
-      >
-        📊 Export Excel
-      </button>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">All Users</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportCSV}
+            disabled={exporting || loading}
+            className="px-3 py-1.5 border rounded text-sm hover:bg-gray-100 disabled:opacity-60"
+          >
+            ⬇ {exporting ? "Exporting…" : "Export CSV"}
+          </button>
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting || loading}
+            className="px-3 py-1.5 border rounded text-sm hover:bg-gray-100 disabled:opacity-60"
+          >
+            📊 {exporting ? "Exporting…" : "Export Excel"}
+          </button>
+          <button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="px-3 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-60"
+          >
+            {loading ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
+      </div>
+
+      {err && <p className="text-red-600 mb-3">{err}</p>}
 
       {loading ? (
-        <p>Loading users...</p>
-      ) : Array.isArray(users) && users.length === 0 ? (
+        <p>Loading users…</p>
+      ) : rows.length === 0 ? (
         <p className="text-gray-500">No users found.</p>
       ) : (
-        <table className="w-full table-auto border">
-          <thead>
-            <tr className="bg-gray-200">
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Verified</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(users) &&
-              users.map((u) => (
-                <tr
-                  key={u._id}
-                  className={`border-t ${
-                    u.isDeleted ? "bg-red-100 text-gray-500 line-through" : ""
-                  }`}
-                >
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>{u.isVerified ? "✅" : "❌"}</td>
-                  <td>
-                    <button
-                      onClick={() => deleteUser(u._id)}
-                      className="text-red-500 hover:underline"
+        <div className="overflow-x-auto bg-white rounded shadow">
+          <table className="w-full table-auto">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Email</th>
+                <th className="px-3 py-2">Roles</th>
+                <th className="px-3 py-2">Verified</th>
+                <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((u) => {
+                const roles =
+                  Array.isArray(u.roles) && u.roles.length
+                    ? u.roles.join(", ")
+                    : u.role || u.primaryRole || "—";
+                return (
+                  <tr
+                    key={u._id}
+                    className={`border-t ${
+                      u.isDeleted ? "bg-red-50 text-gray-500" : ""
+                    }`}
+                  >
+                    <td
+                      className={`px-3 py-2 ${
+                        u.isDeleted ? "line-through" : ""
+                      }`}
                     >
-                      Delete
-                    </button>
-                    <Link
-                      to={`/admin/users/${u._id}`}
-                      className="text-blue-600 hover:underline mr-2"
-                    >
-                      View
-                    </Link>
-                  </td>
-                  <td>
-                    {!u.isDeleted ? (
-                      <button
-                        onClick={() => deleteUser(u._id)}
-                        className="text-red-500 hover:underline"
+                      {u.name || "—"}
+                    </td>
+                    <td className="px-3 py-2">{u.email || "—"}</td>
+                    <td className="px-3 py-2">{roles}</td>
+                    <td className="px-3 py-2">{u.isVerified ? "✅" : "❌"}</td>
+                    <td className="px-3 py-2">
+                      {u.isDeleted ? (
+                        <span className="text-red-700 font-medium">
+                          Deleted
+                        </span>
+                      ) : (
+                        <span className="text-green-700 font-medium">
+                          Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 space-x-3 whitespace-nowrap">
+                      <Link
+                        to={`/admin/users/${u._id}`}
+                        className="text-blue-600 hover:underline"
                       >
-                        Soft Delete
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => restoreUser(u._id)}
-                        className="text-green-600 hover:underline"
-                      >
-                        Restore
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+                        View
+                      </Link>
+                      {!u.isDeleted ? (
+                        <button
+                          onClick={() => doSoftDelete(u._id)}
+                          className="text-red-600 hover:underline disabled:opacity-60"
+                          disabled={busyId === u._id}
+                        >
+                          {busyId === u._id ? "Deleting…" : "Soft Delete"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => doRestore(u._id)}
+                          className="text-green-700 hover:underline disabled:opacity-60"
+                          disabled={busyId === u._id}
+                        >
+                          {busyId === u._id ? "Restoring…" : "Restore"}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </AdminLayout>
   );

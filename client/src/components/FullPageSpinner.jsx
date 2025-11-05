@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/banglabnb-logo2.png";
+import logo from "../assets/routeroof.png";
 
 const FullPageSpinner = ({ message = "Loading BanglaBnB..." }) => {
   return (

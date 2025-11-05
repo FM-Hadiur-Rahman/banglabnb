@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { api } from "../services/api"; // ✅ central axios instance
 
 export default function AdminBanners() {
   const [banners, setBanners] = useState([]);
@@ -8,9 +8,7 @@ export default function AdminBanners() {
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/banners`
-      );
+      const res = await api.get("/api/banners");
       setBanners(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch banners:", err);
@@ -23,23 +21,16 @@ export default function AdminBanners() {
   }, []);
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/upload/banner`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const res = await api.post("/api/upload/banner", formData, {
+        headers: { "Content-Type": "multipart/form-data" }, // Auth header auto via interceptor
+      });
       setForm((prev) => ({ ...prev, imageUrl: res.data.imageUrl }));
       toast.success("✅ Image uploaded");
     } catch (err) {
@@ -50,25 +41,23 @@ export default function AdminBanners() {
 
   const handleAdd = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/banners`, form, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await api.post("/api/banners", form); // auth auto
       toast.success("✅ Banner added");
       setForm({ imageUrl: "", caption: "", link: "" });
       fetchBanners();
     } catch (err) {
+      console.error(err);
       toast.error("❌ Failed to add");
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/banners/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await api.delete(`/api/banners/${id}`); // auth auto
       toast.success("🗑 Deleted");
       fetchBanners();
     } catch (err) {
+      console.error(err);
       toast.error("❌ Failed to delete");
     }
   };
