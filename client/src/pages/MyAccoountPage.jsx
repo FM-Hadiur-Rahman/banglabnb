@@ -1,23 +1,35 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import { api } from "../services/api"; // use your central axios
 import PaymentDetailsForm from "../components/PaymentDetailsForm";
 
 const MyAccountPage = () => {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  const fetchMe = async () => {
+    try {
+      const res = await api.get("/api/users/me");
+      // handle both shapes: {user} or raw user
+      const u = res?.data?.user ?? res?.data;
+      setUser(u);
+      // keep cache fresh for other pages
+      if (u) localStorage.setItem("user", JSON.stringify(u));
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+    }
+  };
 
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setUser(res.data))
-      .catch((err) => console.error("Failed to fetch user profile:", err));
+  useEffect(() => {
+    fetchMe();
   }, []);
 
   if (!user) return <p className="text-center mt-10">Loading profile...</p>;
+
+  // show role robustly (role | primaryRole | roles[0])
+  const role =
+    user.role ||
+    user.primaryRole ||
+    (Array.isArray(user.roles) ? user.roles[0] : "user");
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow mt-10">
@@ -26,7 +38,7 @@ const MyAccountPage = () => {
       </h1>
 
       <div className="md:flex md:justify-between gap-10">
-        {/* LEFT SIDE – Account Info */}
+        {/* LEFT */}
         <div className="md:w-1/2 space-y-5 bg-gray-50 p-6 rounded border">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">
             📋 Account Information
@@ -45,7 +57,7 @@ const MyAccountPage = () => {
           </div>
           <div>
             <span className="font-medium text-gray-600">Role:</span>{" "}
-            <span className="capitalize">{user.role}</span>
+            <span className="capitalize">{role}</span>
           </div>
 
           <div>
@@ -118,13 +130,14 @@ const MyAccountPage = () => {
           )}
         </div>
 
-        {/* RIGHT SIDE – Payment Form */}
-        {(user.role === "host" || user.role === "driver") && (
+        {/* RIGHT */}
+        {(role === "host" || role === "driver") && (
           <div className="md:w-1/2 mt-10 md:mt-0">
             <h2 className="text-xl font-bold mb-4 text-gray-700">
               💳 Payout Account Details
             </h2>
-            <PaymentDetailsForm />
+            {/* Let child refetch parent after save */}
+            <PaymentDetailsForm onSaved={fetchMe} />
           </div>
         )}
       </div>

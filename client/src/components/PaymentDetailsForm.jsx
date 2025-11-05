@@ -47,7 +47,7 @@ const maskAccountNumber = (number = "") => {
   return `${visibleStart}${"*".repeat(number.length - 9)}${visibleEnd}`;
 };
 
-export default function PaymentDetailsForm() {
+export default function PaymentDetailsForm({ onSaved }) {
   const [form, setForm] = useState({
     accountType: "bkash",
     accountNumber: "",
@@ -102,7 +102,8 @@ export default function PaymentDetailsForm() {
         localStorage.setItem("user", JSON.stringify(me.data.user));
         setVerified(Boolean(me.data.user.paymentDetails?.verified));
       }
-
+      // 🔔 notify parent page that save completed
+      onSaved?.();
       toast.success("✅ Payment details saved");
       setIsEditing(false);
 
