@@ -76,8 +76,8 @@ const Footer = () => {
           </div>
 
           <div className="flex gap-2 mt-4">
-            <img src="/reivio_icon.png" alt="Google Play" className="h-10" />
-            <img src="/reivio_icon.png" alt="App Store" className="h-10" />
+            <img src="/reivio_icon.PNG" alt="Google Play" className="h-10" />
+            <img src="/reivio_icon.PNG" alt="App Store" className="h-10" />
           </div>
         </div>
       </div>
