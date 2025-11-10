@@ -37,6 +37,7 @@ const AdminLayout = ({ children }) => {
             <Link to="/admin/bookings">📅 Bookings</Link>
             <Link to="/admin/user-breakdown">👥 User Breakdown</Link>
             <Link to="/admin/kyc">🪪 KYC Verifications</Link>
+            <Link to="/admin/payment-accounts"> 💳 Payment Accounts</Link>
             <Link to="/admin/flagged">🚩 Flagged Content</Link>
             <Link to="/admin/revenue">💰 Revenue Analytics</Link>
             <Link to="/admin/payouts">💸 Payouts</Link>

@@ -98,6 +98,7 @@ import EditTripForm from "./pages/EditTripForm";
 import RideResultsPage from "./pages/RideResultsPage";
 import AuthDebug from "./pages/AuthDebug";
 import PaymentDetailsForm from "./components/PaymentDetailsForm";
+import AdminPaymentAccounts from "./pages/AdminPaymentAccounts";
 
 function App() {
   const [maintenance, setMaintenance] = useState(false);
@@ -394,6 +395,14 @@ function App() {
             element={
               <ProtectedRouteWrapper role="admin">
                 <AdminKYC />
+              </ProtectedRouteWrapper>
+            }
+          />
+          <Route
+            path="/admin/payment-accounts"
+            element={
+              <ProtectedRouteWrapper role="admin">
+                <AdminPaymentAccounts />
               </ProtectedRouteWrapper>
             }
           />
