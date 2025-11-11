@@ -1,8 +1,8 @@
 // src/pages/PaymentDetailsForm.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Select from "react-select";
 import { toast } from "react-toastify";
-import { api } from "../services/api"; // ✅ centralized axios
+import { api } from "../services/api";
 import "react-toastify/dist/ReactToastify.css";
 
 const BANK_OPTIONS = [
@@ -58,30 +58,46 @@ export default function PaymentDetailsForm({ onSaved }) {
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [reviewedAt, setReviewedAt] = useState(null);
 
-  // Load existing payment details + verification status
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const pd = await api.get("/api/users/payment-details");
-        if (pd.data) {
-          setForm((prev) => ({ ...prev, ...pd.data }));
-          setVerified(Boolean(pd.data.verified));
-        }
-        // also get user snapshot so verified is always current if backend returns it there
-        const me = await api.get("/api/auth/me");
-        const v = Boolean(me?.data?.user?.paymentDetails?.verified);
-        setVerified(v);
-        // keep local cache fresh
-        if (me?.data?.user) {
-          localStorage.setItem("user", JSON.stringify(me.data.user));
-        }
-      } catch (e) {
-        // keep defaults
-      }
-    };
-    load();
+  const computeVerified = (pd) =>
+    Boolean(pd?.verified || (pd?.status || "").toLowerCase() === "approved");
+
+  const pullMe = useCallback(async () => {
+    // canonical profile endpoint used elsewhere in your app
+    const res = await api.get("/api/users/me");
+    const u = res?.data?.user ?? res?.data ?? {};
+    if (u) {
+      localStorage.setItem("user", JSON.stringify(u));
+      const pd = u.paymentDetails || {};
+      setVerified(computeVerified(pd));
+      if (pd.reviewedAt) setReviewedAt(pd.reviewedAt);
+    }
   }, []);
+
+  const load = useCallback(async () => {
+    try {
+      // payment details (may not include 'verified', but include status)
+      const pdRes = await api.get("/api/users/payment-details");
+      if (pdRes?.data) {
+        const pd = pdRes.data;
+        setForm((prev) => ({ ...prev, ...pd }));
+        setVerified(computeVerified(pd));
+        if (pd.reviewedAt) setReviewedAt(pd.reviewedAt);
+      }
+      // profile fallback / cache refresh
+      await pullMe();
+    } catch {
+      // keep defaults
+    }
+  }, [pullMe]);
+
+  useEffect(() => {
+    load();
+    const onFocus = () => pullMe(); // reflect admin approvals when user returns
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [load, pullMe]);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -93,24 +109,20 @@ export default function PaymentDetailsForm({ onSaved }) {
     e.preventDefault();
     try {
       setLoading(true);
-      // 1) Save
       await api.put("/api/users/payment-details", form);
+      // refresh profile → updates verified/status + localStorage
+      await pullMe();
+      // re-read payment details for reviewedAt
+      const pdRes = await api.get("/api/users/payment-details");
+      if (pdRes?.data?.reviewedAt) setReviewedAt(pdRes.data.reviewedAt);
 
-      // 2) Refresh the user cache **HERE**
-      const me = await api.get("/api/auth/me");
-      if (me?.data?.user) {
-        localStorage.setItem("user", JSON.stringify(me.data.user));
-        setVerified(Boolean(me.data.user.paymentDetails?.verified));
-      }
-      // 🔔 notify parent page that save completed
       onSaved?.();
       toast.success("✅ Payment details saved");
       setIsEditing(false);
 
-      // Heads-up if backend resets verified=false after sensitive edits
-      if (!me?.data?.user?.paymentDetails?.verified) {
+      if (!verified) {
         toast.info(
-          "ℹ️ Your payout needs verification. We’ll notify you when it’s approved."
+          "ℹ️ Your payout is pending admin verification. We’ll notify you when it’s approved."
         );
       }
     } catch (error) {
@@ -133,17 +145,26 @@ export default function PaymentDetailsForm({ onSaved }) {
         <h2 className="text-xl font-semibold text-gray-800">
           💳 Payout Account Details
         </h2>
-        {!isEditing && (
+        <div className="flex items-center gap-3">
           <button
-            className="text-blue-600 hover:underline"
-            onClick={() => setIsEditing(true)}
+            className="text-gray-600 hover:underline"
+            onClick={load}
+            type="button"
           >
-            ✏️ Edit
+            ⟳ Refresh
           </button>
-        )}
+          {!isEditing && (
+            <button
+              className="text-blue-600 hover:underline"
+              onClick={() => setIsEditing(true)}
+              type="button"
+            >
+              ✏️ Edit
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Verification badge */}
       <p className="mb-4 text-sm">
         Status:{" "}
         <span
@@ -157,7 +178,6 @@ export default function PaymentDetailsForm({ onSaved }) {
         </span>
       </p>
 
-      {/* Optional hint that editing sensitive fields resets verification */}
       <p className="text-xs text-gray-500 mb-4">
         Note: Changing account number, holder name, bank or routing may reset
         verification until approved.
@@ -193,7 +213,7 @@ export default function PaymentDetailsForm({ onSaved }) {
           {isEditing ? (
             <input
               name="accountName"
-              value={form.accountName}
+              value={form.accountName || ""}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               disabled={loading}
@@ -213,7 +233,7 @@ export default function PaymentDetailsForm({ onSaved }) {
           {isEditing ? (
             <input
               name="accountNumber"
-              value={form.accountNumber}
+              value={form.accountNumber || ""}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               disabled={loading}
@@ -247,7 +267,7 @@ export default function PaymentDetailsForm({ onSaved }) {
               {isEditing ? (
                 <input
                   name="routingNumber"
-                  value={form.routingNumber}
+                  value={form.routingNumber || ""}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2"
                   disabled={loading}
@@ -259,6 +279,13 @@ export default function PaymentDetailsForm({ onSaved }) {
               )}
             </div>
           </>
+        )}
+
+        {/* Reviewed time (if any) */}
+        {reviewedAt && !isEditing && (
+          <p className="text-xs text-gray-500">
+            Reviewed: {new Date(reviewedAt).toLocaleString()}
+          </p>
         )}
 
         {/* Actions */}
